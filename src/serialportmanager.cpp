@@ -1,0 +1,300 @@
+#include "serialportmanager.h"
+#include <QDebug>
+#include <QFile>
+#include <QTextStream>
+#include <QMetaObject>
+
+SerialPortManager::SerialPortManager(QObject *parent)
+    : QObject(parent)
+    , m_workerThread(new QThread(this))
+    , m_worker(new SerialWorker())
+{
+    m_worker->moveToThread(m_workerThread);
+
+    // Worker signals forwarded to QML
+    connect(m_worker, &SerialWorker::isOpenChanged, this, [this](bool open) {
+        if (m_isOpen != open) {
+            m_isOpen = open;
+            emit isOpenChanged();
+        }
+    });
+    connect(m_worker, &SerialWorker::bytesSent, this, &SerialPortManager::bytesSent);
+    connect(m_worker, &SerialWorker::bytesReceived, this, &SerialPortManager::bytesReceived);
+    connect(m_worker, &SerialWorker::errorOccurred, this, &SerialPortManager::errorOccurred);
+    connect(m_worker, &SerialWorker::batchDataReady, this, &SerialPortManager::batchDataReady);
+    connect(m_worker, &SerialWorker::recordingChanged, this, [this](bool recording) {
+        if (m_recordingEnabled != recording) {
+            m_recordingEnabled = recording;
+            emit recordingEnabledChanged();
+        }
+    });
+
+    m_workerThread->start();
+
+    // Initialize worker objects on the worker thread
+    QMetaObject::invokeMethod(m_worker, &SerialWorker::init, Qt::QueuedConnection);
+}
+
+SerialPortManager::~SerialPortManager()
+{
+    QMetaObject::invokeMethod(m_worker, &SerialWorker::closePort, Qt::QueuedConnection);
+    QMetaObject::invokeMethod(m_worker, &SerialWorker::stopRecording, Qt::QueuedConnection);
+    QMetaObject::invokeMethod(m_worker, [this]() {
+        m_worker->setAutoLog(QString(), false);
+    }, Qt::QueuedConnection);
+
+    m_workerThread->quit();
+    m_workerThread->wait(3000);
+
+    if (m_workerThread->isRunning()) {
+        m_workerThread->terminate();
+        m_workerThread->wait(1000);
+    }
+
+    delete m_worker;
+    delete m_workerThread;
+}
+
+bool SerialPortManager::isOpen() const
+{
+    return m_isOpen;
+}
+
+QString SerialPortManager::portName() const { return m_portName; }
+int SerialPortManager::baudRate() const { return m_baudRate; }
+int SerialPortManager::dataBits() const { return m_dataBits; }
+int SerialPortManager::stopBits() const { return m_stopBits; }
+int SerialPortManager::parity() const { return m_parity; }
+int SerialPortManager::flowControl() const { return m_flowControl; }
+bool SerialPortManager::autoLogEnabled() const { return m_autoLogEnabled; }
+QString SerialPortManager::autoLogPath() const { return m_autoLogPath; }
+bool SerialPortManager::recordingEnabled() const { return m_recordingEnabled; }
+QString SerialPortManager::recordingPath() const { return m_recordingPath; }
+
+void SerialPortManager::setPortName(const QString &name)
+{
+    if (m_portName == name) return;
+    m_portName = name;
+    emit portNameChanged();
+}
+
+void SerialPortManager::setBaudRate(int rate)
+{
+    if (m_baudRate == rate) return;
+    m_baudRate = rate;
+    emit baudRateChanged();
+}
+
+void SerialPortManager::setDataBits(int bits)
+{
+    if (m_dataBits == bits) return;
+    m_dataBits = bits;
+    emit dataBitsChanged();
+}
+
+void SerialPortManager::setStopBits(int bits)
+{
+    if (m_stopBits == bits) return;
+    m_stopBits = bits;
+    emit stopBitsChanged();
+}
+
+void SerialPortManager::setParity(int parity)
+{
+    if (m_parity == parity) return;
+    m_parity = parity;
+    emit parityChanged();
+}
+
+void SerialPortManager::setFlowControl(int flow)
+{
+    if (m_flowControl == flow) return;
+    m_flowControl = flow;
+    emit flowControlChanged();
+}
+
+void SerialPortManager::setAutoLogEnabled(bool enabled)
+{
+    if (m_autoLogEnabled == enabled) return;
+    m_autoLogEnabled = enabled;
+    emit autoLogEnabledChanged();
+    syncAutoLogToWorker();
+}
+
+void SerialPortManager::setAutoLogPath(const QString &path)
+{
+    if (m_autoLogPath == path) return;
+    m_autoLogPath = path;
+    emit autoLogPathChanged();
+    syncAutoLogToWorker();
+}
+
+void SerialPortManager::setRecordingEnabled(bool enabled)
+{
+    if (m_recordingEnabled == enabled) return;
+    m_recordingEnabled = enabled;
+    emit recordingEnabledChanged();
+    syncRecordingToWorker();
+}
+
+void SerialPortManager::setRecordingPath(const QString &path)
+{
+    if (m_recordingPath == path) return;
+    m_recordingPath = path;
+    emit recordingPathChanged();
+}
+
+QVariantList SerialPortManager::availablePorts() const
+{
+    QVariantList ports;
+    for (const QSerialPortInfo &info : QSerialPortInfo::availablePorts()) {
+        QVariantMap port;
+        port["name"] = info.portName();
+        port["description"] = info.description();
+        port["systemLocation"] = info.systemLocation();
+        port["manufacturer"] = info.manufacturer();
+        ports.append(port);
+    }
+    return ports;
+}
+
+bool SerialPortManager::openPort()
+{
+    QString name = m_portName;
+    int baud = m_baudRate;
+    int data = m_dataBits;
+    int stop = m_stopBits;
+    int par = m_parity;
+    int flow = m_flowControl;
+    QMetaObject::invokeMethod(m_worker, [this, name, baud, data, stop, par, flow]() {
+        m_worker->openPort(name, baud, data, stop, par, flow);
+    }, Qt::QueuedConnection);
+    return true;
+}
+
+void SerialPortManager::closePort()
+{
+    QMetaObject::invokeMethod(m_worker, &SerialWorker::closePort, Qt::QueuedConnection);
+}
+
+bool SerialPortManager::sendText(const QString &text)
+{
+    QByteArray data = text.toUtf8();
+    QMetaObject::invokeMethod(m_worker, [this, data]() {
+        m_worker->sendData(data);
+    }, Qt::QueuedConnection);
+    return true;
+}
+
+bool SerialPortManager::sendHex(const QString &hexString)
+{
+    QByteArray data = hexStringToBytes(hexString);
+    if (data.isEmpty() && !hexString.trimmed().isEmpty()) {
+        emit errorOccurred(tr("Invalid HEX format"));
+        return false;
+    }
+    QMetaObject::invokeMethod(m_worker, [this, data]() {
+        m_worker->sendData(data);
+    }, Qt::QueuedConnection);
+    return true;
+}
+
+void SerialPortManager::startRecording(const QString &filePath)
+{
+    setRecordingPath(filePath);
+    setRecordingEnabled(true);
+}
+
+void SerialPortManager::stopRecording()
+{
+    setRecordingEnabled(false);
+}
+
+void SerialPortManager::syncAutoLogToWorker()
+{
+    QString path = m_autoLogPath;
+    bool enabled = m_autoLogEnabled;
+    QMetaObject::invokeMethod(m_worker, [this, path, enabled]() {
+        m_worker->setAutoLog(path, enabled);
+    }, Qt::QueuedConnection);
+}
+
+void SerialPortManager::syncRecordingToWorker()
+{
+    QString path = m_recordingPath;
+    bool enabled = m_recordingEnabled;
+    if (enabled && !path.isEmpty()) {
+        QMetaObject::invokeMethod(m_worker, [this, path]() {
+            m_worker->startRecording(path);
+        }, Qt::QueuedConnection);
+    } else {
+        QMetaObject::invokeMethod(m_worker, &SerialWorker::stopRecording, Qt::QueuedConnection);
+    }
+}
+
+QByteArray SerialPortManager::hexStringToBytes(const QString &hexString)
+{
+    QString cleaned = hexString;
+    cleaned.remove(' ');
+    cleaned.remove('\t');
+    cleaned.remove('\n');
+    cleaned.remove('\r');
+
+    if (cleaned.isEmpty())
+        return QByteArray();
+
+    if (cleaned.length() % 2 != 0)
+        return QByteArray();
+
+    bool ok = false;
+    QByteArray result;
+    for (int i = 0; i < cleaned.length(); i += 2) {
+        uint8_t byte = static_cast<uint8_t>(cleaned.mid(i, 2).toUInt(&ok, 16));
+        if (!ok)
+            return QByteArray();
+        result.append(static_cast<char>(byte));
+    }
+    return result;
+}
+
+QString SerialPortManager::bytesToHexString(const QByteArray &bytes)
+{
+    QString result;
+    result.reserve(bytes.size() * 3 + bytes.size() / 16);
+    for (int i = 0; i < bytes.size(); ++i) {
+        result.append(QString("%1 ").arg(static_cast<uchar>(bytes.at(i)), 2, 16, QChar('0')));
+        if ((i + 1) % 16 == 0)
+            result.append('\n');
+    }
+    if (!result.endsWith('\n') && !result.isEmpty())
+        result.append('\n');
+    return result;
+}
+
+QString SerialPortManager::readFile(const QString &filePath)
+{
+    QFile file(filePath);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+        return QString();
+    QTextStream stream(&file);
+    QString content = stream.readAll();
+    file.close();
+    return content;
+}
+
+QString SerialPortManager::readFileAsHex(const QString &filePath)
+{
+    QFile file(filePath);
+    if (!file.open(QIODevice::ReadOnly))
+        return QString();
+    QByteArray data = file.readAll();
+    file.close();
+    return bytesToHexString(data);
+}
+
+bool SerialPortManager::saveReceiveBuffer(const QString &filePath)
+{
+    Q_UNUSED(filePath)
+    // Receive buffer is no longer centrally stored; this function is deprecated.
+    return false;
+}

@@ -1,0 +1,48 @@
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
+import CWY.Serial
+
+ColumnLayout {
+    id: root
+    Layout.fillWidth: true
+    spacing: 4
+
+    property string label
+    property var model
+    property int currentValue
+    property var themePalette
+    signal valueChanged(int value)
+
+    Label {
+        text: root.label
+        color: themePalette.text
+        font.pixelSize: 12
+    }
+
+    ComboBox {
+        id: combo
+        Layout.fillWidth: true
+        enabled: !SerialPort.isOpen
+        model: root.model
+        textRole: "text"
+        valueRole: "value"
+        popup.y: combo.height + 4
+
+        Component.onCompleted: syncIndex()
+        onModelChanged: syncIndex()
+
+        onActivated: {
+            if (root.currentValue !== currentValue)
+                root.valueChanged(currentValue)
+        }
+    }
+
+    onCurrentValueChanged: syncIndex()
+
+    function syncIndex() {
+        var idx = combo.indexOfValue(root.currentValue)
+        if (idx !== -1 && combo.currentIndex !== idx)
+            combo.currentIndex = idx
+    }
+}
