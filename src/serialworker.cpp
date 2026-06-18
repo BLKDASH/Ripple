@@ -194,25 +194,23 @@ void SerialWorker::readData()
     if (m_inWarmup)
         return;
 
-    QString textData = QString::fromUtf8(data);
-    QString hexData = bytesToHexString(data);
-
     // Synchronous file append for recording
     if (m_recordingEnabled)
-        writeRecord(data, textData);
+        writeRecord(data);
 
     // Asynchronous auto-log (still synchronous in worker thread, but off GUI thread)
     if (m_autoLogEnabled)
-        writeAutoLog(data, textData);
+        writeAutoLog(data);
 
     // Accumulate for batched UI update
     QVariantMap record;
-    record["text"] = textData;
-    record["hex"] = hexData;
+    record["raw"] = data;
     record["length"] = data.size();
     m_pendingBatch.append(record);
+    m_pendingBatchBytes += data.size();
 
-    if (m_pendingBatch.size() >= BatchSizeThreshold) {
+    if (m_pendingBatch.size() >= BatchRecordThreshold ||
+        m_pendingBatchBytes >= BatchByteThreshold) {
         flushBatch();
     } else if (!m_batchTimer->isActive()) {
         m_batchTimer->start(BatchTimeoutMs);
@@ -221,7 +219,7 @@ void SerialWorker::readData()
     emit bytesReceived(data.size());
 }
 
-void SerialWorker::writeRecord(const QByteArray &data, const QString &textData)
+void SerialWorker::writeRecord(const QByteArray &data)
 {
     if (!m_recordFile || !m_recordFile->isOpen())
         return;
@@ -230,18 +228,19 @@ void SerialWorker::writeRecord(const QByteArray &data, const QString &textData)
         m_recordFile->write(data);
         m_recordFile->flush();
     } else if (m_recordStream) {
+        const QString textData = QString::fromUtf8(data);
         *m_recordStream << "[" << QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss.zzz") << "] ";
         *m_recordStream << normalizeLogLine(textData) << "\n";
         m_recordStream->flush();
     }
 }
 
-void SerialWorker::writeAutoLog(const QByteArray &data, const QString &textData)
+void SerialWorker::writeAutoLog(const QByteArray &data)
 {
-    Q_UNUSED(data)
     if (!m_autoLogFile || !m_autoLogFile->isOpen() || !m_autoLogStream)
         return;
 
+    const QString textData = QString::fromUtf8(data);
     *m_autoLogStream << "[" << QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss.zzz") << "] ";
     *m_autoLogStream << normalizeLogLine(textData) << "\n";
     m_autoLogStream->flush();
@@ -255,6 +254,7 @@ void SerialWorker::flushBatch()
     m_batchTimer->stop();
     QVariantList batch;
     batch.swap(m_pendingBatch);
+    m_pendingBatchBytes = 0;
     emit batchDataReady(batch);
 }
 
@@ -277,16 +277,3 @@ void SerialWorker::endWarmup()
         m_serialPort->readAll();
 }
 
-QString SerialWorker::bytesToHexString(const QByteArray &bytes)
-{
-    QString result;
-    result.reserve(bytes.size() * 3 + bytes.size() / 16);
-    for (int i = 0; i < bytes.size(); ++i) {
-        result.append(QString("%1 ").arg(static_cast<uchar>(bytes.at(i)), 2, 16, QChar('0')));
-        if ((i + 1) % 16 == 0)
-            result.append('\n');
-    }
-    if (!result.endsWith('\n') && !result.isEmpty())
-        result.append('\n');
-    return result;
-}

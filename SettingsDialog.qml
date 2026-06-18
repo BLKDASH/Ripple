@@ -24,8 +24,6 @@ Dialog {
         showQuickSendCheck.checked = appWindow ? appWindow.showQuickSend : false
         autoLogCheck.checked = appSettings ? appSettings.autoLogEnabled : false
         logPathField.text = appSettings ? appSettings.autoLogPath : ""
-        autoClearRecordsField.text = appSettings ? appSettings.autoClearRecords : ReceiveModel.autoClearRecords
-        autoClearBytesField.text = appSettings ? appSettings.autoClearBytes : ReceiveModel.autoClearBytes
     }
 
     width: 420
@@ -114,44 +112,6 @@ Dialog {
                     text: qsTr("Show quick send panel")
                     checked: appWindow ? appWindow.showQuickSend : false
                 }
-                RowLayout {
-                    Label {
-                        text: qsTr("Auto clear records")
-                        color: root.themePalette.text
-                    }
-                    TextField {
-                        id: autoClearRecordsField
-                        Layout.fillWidth: true
-                        text: "0"
-                        validator: IntValidator { bottom: 0; top: 99999999 }
-                        placeholderText: qsTr("0 = disable")
-                        color: root.themePalette.text
-                        background: Rectangle {
-                            color: root.themePalette.background
-                            border.color: root.themePalette.border
-                            radius: 4
-                        }
-                    }
-                }
-                RowLayout {
-                    Label {
-                        text: qsTr("Auto clear MB")
-                        color: root.themePalette.text
-                    }
-                    TextField {
-                        id: autoClearBytesField
-                        Layout.fillWidth: true
-                        text: "0"
-                        validator: IntValidator { bottom: 0; top: 99999999 }
-                        placeholderText: qsTr("0 = disable")
-                        color: root.themePalette.text
-                        background: Rectangle {
-                            color: root.themePalette.background
-                            border.color: root.themePalette.border
-                            radius: 4
-                        }
-                    }
-                }
             }
         }
 
@@ -218,11 +178,6 @@ Dialog {
         SerialPort.autoLogEnabled = autoLogCheck.checked
         SerialPort.autoLogPath = logPathField.text
 
-        var records = parseInt(autoClearRecordsField.text, 10)
-        var bytes = parseInt(autoClearBytesField.text, 10)
-        ReceiveModel.autoClearRecords = isNaN(records) || records < 0 ? 0 : records
-        ReceiveModel.autoClearBytes = isNaN(bytes) || bytes < 0 ? 0 : bytes
-
         if (appSettings) {
             var lang = languageCombo.currentValue
             if (lang !== appSettings.language) {
@@ -231,8 +186,6 @@ Dialog {
             }
             appSettings.autoLogEnabled = SerialPort.autoLogEnabled
             appSettings.autoLogPath = SerialPort.autoLogPath
-            appSettings.autoClearRecords = ReceiveModel.autoClearRecords
-            appSettings.autoClearBytes = ReceiveModel.autoClearBytes
         }
     }
 }

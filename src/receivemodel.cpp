@@ -1,196 +1,294 @@
 #include "receivemodel.h"
-#include <QTextCursor>
 #include <QDateTime>
 #include <QDebug>
 
 ReceiveModel::ReceiveModel(QObject *parent)
-    : QObject(parent)
+    : QAbstractListModel(parent)
 {
 }
 
-bool ReceiveModel::showTimestamp() const
+int ReceiveModel::rowCount(const QModelIndex &parent) const
 {
-    return m_showTimestamp;
+    if (parent.isValid())
+        return 0;
+    return static_cast<int>(m_lines.size());
 }
 
+QVariant ReceiveModel::data(const QModelIndex &index, int role) const
+{
+    if (!index.isValid() || index.row() < 0 || index.row() >= m_lines.size())
+        return {};
+
+    if (role == Qt::DisplayRole)
+        return m_lines.at(index.row());
+
+    return {};
+}
+
+QHash<int, QByteArray> ReceiveModel::roleNames() const
+{
+    return {{Qt::DisplayRole, "display"}};
+}
+
+// ── Properties ──────────────────────────────────────────────
+
+bool ReceiveModel::showTimestamp() const { return m_showTimestamp; }
 void ReceiveModel::setShowTimestamp(bool value)
 {
-    if (m_showTimestamp == value)
-        return;
+    if (m_showTimestamp == value) return;
     m_showTimestamp = value;
     emit showTimestampChanged();
-    rebuild();
+    regenerateAllLines();
 }
 
-bool ReceiveModel::hexMode() const
-{
-    return m_hexMode;
-}
-
+bool ReceiveModel::hexMode() const { return m_hexMode; }
 void ReceiveModel::setHexMode(bool value)
 {
-    if (m_hexMode == value)
-        return;
+    if (m_hexMode == value) return;
     m_hexMode = value;
     emit hexModeChanged();
-    rebuild();
+    regenerateAllLines();
 }
 
-int ReceiveModel::autoClearRecords() const
+int ReceiveModel::maxRecords() const { return m_maxRecords; }
+void ReceiveModel::setMaxRecords(int value)
 {
-    return m_autoClearRecords;
+    if (value < 100) value = 100;
+    if (m_maxRecords == value) return;
+    m_maxRecords = value;
+    emit maxRecordsChanged();
+    enforceBufferLimits();
 }
 
-void ReceiveModel::setAutoClearRecords(int value)
+int ReceiveModel::maxBufferMb() const { return m_maxBufferMb; }
+void ReceiveModel::setMaxBufferMb(int value)
 {
-    if (value < 0) value = 0;
-    if (m_autoClearRecords == value)
-        return;
-    m_autoClearRecords = value;
-    emit autoClearRecordsChanged();
+    if (value < 1) value = 1;
+    if (m_maxBufferMb == value) return;
+    m_maxBufferMb = value;
+    emit maxBufferMbChanged();
+    enforceBufferLimits();
 }
 
-int ReceiveModel::autoClearBytes() const
+// ── Data ingestion ──────────────────────────────────────────
+
+void ReceiveModel::append(const QByteArray &rawData, int length)
 {
-    return m_autoClearBytes;
-}
-
-void ReceiveModel::setAutoClearBytes(int value)
-{
-    if (value < 0) value = 0;
-    if (m_autoClearBytes == value)
-        return;
-    m_autoClearBytes = value;
-    emit autoClearBytesChanged();
-}
-
-void ReceiveModel::setTextDocument(QQuickTextDocument *doc)
-{
-    m_quickDoc = doc;
-    if (doc)
-        m_doc = doc->textDocument();
-}
-
-void ReceiveModel::append(const QString &textData, const QString &hexData, int length)
-{
-    if (!m_doc)
-        return;
-
-    m_receivedBytes += length;
-
+    Q_UNUSED(length)
+    QVariantList batch;
     QVariantMap record;
-    record["time"] = currentTimeString();
-    record["text"] = textData;
-    record["hex"] = hexData;
-    record["length"] = length;
-    m_records.append(record);
-
-    QString text = formatRecord(textData, hexData);
-    if (text.isEmpty())
-        return;
-
-    QTextCursor cursor(m_doc);
-    cursor.movePosition(QTextCursor::End);
-    cursor.insertText(text);
-
-    checkAutoClear();
-    emit appended(length);
+    record["raw"] = rawData;
+    record["length"] = rawData.size();
+    batch.append(record);
+    appendBatch(batch);
 }
 
 void ReceiveModel::appendBatch(const QVariantList &batch)
 {
-    if (!m_doc || batch.isEmpty())
+    if (batch.isEmpty())
         return;
 
     int totalLength = 0;
-    QString textBlock;
-    textBlock.reserve(batch.size() * 80);
+    int firstNewRow = static_cast<int>(m_lines.size());
+    int newRowCount = 0;
 
     for (const QVariant &item : batch) {
         QVariantMap record = item.toMap();
-        record["time"] = currentTimeString();
-        m_records.append(record);
+        QByteArray rawData = record.value("raw").toByteArray();
+        int length = rawData.size();
+        if (length <= 0)
+            length = record.value("length").toInt();
+        if (length <= 0)
+            continue;
 
-        QString text = formatRecord(record["text"].toString(), record["hex"].toString());
-        if (!text.isEmpty())
-            textBlock += text;
+        totalLength += length;
+        m_totalBytes += length;
 
-        totalLength += record["length"].toInt();
+        QStringList lines = formatRecordLines(rawData);
+        if (lines.isEmpty())
+            continue;
+
+        int lineCount = static_cast<int>(lines.size());
+        m_lines.append(lines);
+        m_records.push_back({rawData, lineCount});
+        newRowCount += lineCount;
     }
 
-    m_receivedBytes += totalLength;
-
-    if (!textBlock.isEmpty()) {
-        QTextCursor cursor(m_doc);
-        cursor.movePosition(QTextCursor::End);
-        cursor.insertText(textBlock);
+    if (newRowCount > 0) {
+        beginInsertRows(QModelIndex(), firstNewRow, firstNewRow + newRowCount - 1);
+        enforceBufferLimits();
+        endInsertRows();
+    } else {
+        // Still enforce limits — records may have been added without
+        // generating display lines (e.g., empty raw data).
+        enforceBufferLimits();
     }
 
-    checkAutoClear();
     emit appended(totalLength);
 }
 
 void ReceiveModel::clear()
 {
-    m_records.clear();
-    m_receivedBytes = 0;
-    if (m_doc)
-        m_doc->clear();
-}
-
-QString ReceiveModel::toPlainText() const
-{
-    if (!m_doc)
-        return QString();
-    return m_doc->toPlainText();
-}
-
-void ReceiveModel::rebuild()
-{
-    if (!m_doc)
+    if (m_lines.isEmpty())
         return;
 
-    m_doc->clear();
-    for (const QVariantMap &record : m_records) {
-        QString text = formatRecord(record["text"].toString(), record["hex"].toString());
-        if (!text.isEmpty()) {
-            QTextCursor cursor(m_doc);
-            cursor.movePosition(QTextCursor::End);
-            cursor.insertText(text);
-        }
-    }
+    beginRemoveRows(QModelIndex(), 0, static_cast<int>(m_lines.size()) - 1);
+    m_lines.clear();
+    m_records.clear();
+    m_totalBytes = 0;
+    endRemoveRows();
 }
 
-QString ReceiveModel::formatRecord(const QString &textData, const QString &hexData) const
+QString ReceiveModel::allText() const
 {
-    QString content = m_hexMode ? hexData : textData;
+    return m_lines.join('\n');
+}
+
+QString ReceiveModel::lineAt(int row) const
+{
+    if (row < 0 || row >= m_lines.size())
+        return {};
+    return m_lines.at(row);
+}
+
+int ReceiveModel::lineCount() const
+{
+    return static_cast<int>(m_lines.size());
+}
+
+// ── Buffer enforcement ──────────────────────────────────────
+
+void ReceiveModel::enforceBufferLimits()
+{
+    if (m_maxRecords <= 0 && m_maxBufferMb <= 0)
+        return;
+
+    qint64 maxBytes = static_cast<qint64>(m_maxBufferMb) * 1024 * 1024;
+    int recordCount = static_cast<int>(m_records.size());
+
+    // Decide how many records to trim.  Remove down to ~75 % of the limit
+    // so we batch deletions instead of trimming one record per append.
+    int targetRecords = m_maxRecords;
+    if (m_maxRecords > 0 && recordCount > m_maxRecords)
+        targetRecords = qMax(100, m_maxRecords - m_maxRecords / 4);
+
+    qint64 targetBytes = maxBytes;
+    if (m_maxBufferMb > 0 && m_totalBytes > maxBytes)
+        targetBytes = qMax(qint64(1024 * 1024), maxBytes - maxBytes / 4);
+
+    // Count how many records (and their display lines) to remove.
+    int removeRecs = 0;
+    int removeLines = 0;
+    for (auto it = m_records.begin(); it != m_records.end(); ++it) {
+        bool overRecords = (m_maxRecords > 0
+                            && recordCount - removeRecs > targetRecords);
+        bool overBytes   = (m_maxBufferMb > 0
+                            && m_totalBytes   > targetBytes);
+        if (!overRecords && !overBytes)
+            break;
+        m_totalBytes -= it->raw.size();
+        removeLines  += it->lineCount;
+        removeRecs++;
+    }
+
+    if (removeRecs <= 0)
+        return;
+
+    // Remove from the model in one batch.
+    beginRemoveRows(QModelIndex(), 0, removeLines - 1);
+    m_lines.erase(m_lines.begin(), m_lines.begin() + removeLines);
+    m_records.erase(m_records.begin(), m_records.begin() + removeRecs);
+    endRemoveRows();
+}
+
+// ── Rebuild on mode switch ──────────────────────────────────
+
+void ReceiveModel::regenerateAllLines()
+{
+    if (m_records.empty())
+        return;
+
+    QStringList newLines;
+    newLines.reserve(static_cast<int>(m_lines.size())); // rough estimate
+
+    for (const Record &rec : m_records) {
+        QStringList lines = formatRecordLines(rec.raw);
+        if (!lines.isEmpty())
+            newLines.append(lines);
+    }
+
+    // Replace atomically through the model API
+    beginResetModel();
+    m_lines = std::move(newLines);
+    endResetModel();
+}
+
+// ── Formatting helpers ──────────────────────────────────────
+
+QStringList ReceiveModel::formatRecordLines(const QByteArray &rawData) const
+{
+    QString text = formatRecordText(rawData);
+    if (text.isEmpty())
+        return {};
+
+    // Split into individual display lines, dropping trailing empty.
+    QStringList lines = text.split('\n', Qt::SkipEmptyParts);
+    return lines;
+}
+
+QString ReceiveModel::formatRecordText(const QByteArray &rawData) const
+{
+    if (rawData.isEmpty())
+        return {};
+
+    QString content = m_hexMode ? bytesToHexString(rawData)
+                                : bytesToTextString(rawData);
     if (content.isEmpty())
-        return QString();
+        return {};
 
     QString prefix;
     if (m_showTimestamp)
-        prefix = "[" + currentTimeString() + "] ";
+        prefix = QStringLiteral("[%1] ").arg(currentTimeString());
 
-    QString suffix = "\n";
+    QString suffix;
+    // In hex mode every formatted line already ends with \n.
+    // In text mode append \n only if the content doesn't already end with one.
     if (!m_hexMode) {
-        if (content.endsWith("\r\n") || content.endsWith("\n") || content.endsWith("\r"))
-            suffix = QString();
+        if (!content.endsWith('\n') && !content.endsWith('\r'))
+            suffix = QStringLiteral("\n");
     }
 
     return prefix + content + suffix;
 }
 
-void ReceiveModel::checkAutoClear()
-{
-    bool clearByRecords = (m_autoClearRecords > 0 && m_records.size() >= m_autoClearRecords);
-    bool clearByBytes = (m_autoClearBytes > 0 && m_receivedBytes >= (qint64)m_autoClearBytes * 1024 * 1024);
-
-    if (clearByRecords || clearByBytes) {
-        clear();
-    }
-}
-
 QString ReceiveModel::currentTimeString() const
 {
-    return QDateTime::currentDateTime().toString("hh:mm:ss.zzz");
+    return QDateTime::currentDateTime().toString(QStringLiteral("hh:mm:ss.zzz"));
+}
+
+QString ReceiveModel::bytesToHexString(const QByteArray &bytes)
+{
+    if (bytes.isEmpty())
+        return {};
+
+    static const char hexDigits[] = "0123456789abcdef";
+    QString result;
+    result.reserve(bytes.size() * 3 + bytes.size() / 16 + 1);
+
+    for (int i = 0; i < bytes.size(); ++i) {
+        uchar uc = static_cast<uchar>(bytes.at(i));
+        result.append(hexDigits[uc >> 4]);
+        result.append(hexDigits[uc & 0x0F]);
+        result.append(' ');
+        if ((i + 1) % 16 == 0)
+            result.append('\n');
+    }
+    if (!result.endsWith('\n'))
+        result.append('\n');
+    return result;
+}
+
+QString ReceiveModel::bytesToTextString(const QByteArray &bytes)
+{
+    return QString::fromUtf8(bytes);
 }

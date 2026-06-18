@@ -36,8 +36,6 @@ ApplicationWindow {
         property string language: "zh_CN"
         property bool autoLogEnabled: false
         property string autoLogPath: ""
-        property int autoClearRecords: 0
-        property int autoClearBytes: 0
     }
 
     property bool showQuickSend: false
@@ -78,8 +76,6 @@ ApplicationWindow {
         Translator.setCurrentLanguage(appSettings.language)
         SerialPort.autoLogEnabled = appSettings.autoLogEnabled
         SerialPort.autoLogPath = appSettings.autoLogPath
-        ReceiveModel.autoClearRecords = appSettings.autoClearRecords
-        ReceiveModel.autoClearBytes = appSettings.autoClearBytes
     }
 
     // Top toolbar placeholder

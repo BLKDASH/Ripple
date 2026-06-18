@@ -15,17 +15,13 @@ Rectangle {
     signal saveRequested()
     signal clearRequested()
 
-    function append(textData, hexData, length) {
-        ReceiveModel.append(textData, hexData, length)
+    function append(rawData, length) {
+        ReceiveModel.append(rawData, length)
     }
 
     function clear() {
         ReceiveModel.clear()
         root.clearRequested()
-    }
-
-    Component.onCompleted: {
-        ReceiveModel.setTextDocument(receiveEdit.textDocument)
     }
 
     ColumnLayout {
@@ -57,7 +53,11 @@ Rectangle {
                     text: ReceiveModel.hexMode ? qsTr("HEX") : qsTr("Text")
                     flat: true
                     implicitWidth: Math.min(implicitContentWidth + 16, 70)
-                    onClicked: ReceiveModel.hexMode = !ReceiveModel.hexMode
+                    onClicked: {
+                        receiveList.pendingAutoScroll = true
+                        uiUpdateTimer.restart()
+                        ReceiveModel.hexMode = !ReceiveModel.hexMode
+                    }
                 }
 
                 Button {
@@ -65,7 +65,11 @@ Rectangle {
                     flat: true
                     highlighted: ReceiveModel.showTimestamp
                     implicitWidth: Math.min(implicitContentWidth + 16, 50)
-                    onClicked: ReceiveModel.showTimestamp = !ReceiveModel.showTimestamp
+                    onClicked: {
+                        receiveList.pendingAutoScroll = true
+                        uiUpdateTimer.restart()
+                        ReceiveModel.showTimestamp = !ReceiveModel.showTimestamp
+                    }
                 }
 
                 Button {
@@ -94,60 +98,100 @@ Rectangle {
             radius: 4
             clip: true
 
-            Flickable {
-                id: receiveFlickable
+            ListView {
+                id: receiveList
                 anchors.fill: parent
-                anchors.margins: 4
-                contentWidth: root.autoWrap ? width : Math.max(width, receiveEdit.contentWidth)
-                contentHeight: receiveEdit.contentHeight
-                flickableDirection: Flickable.VerticalFlick
+                anchors.leftMargin: 4
+                anchors.rightMargin: 4
+                anchors.topMargin: 4
+                anchors.bottomMargin: 9   // leave room for flash bar
                 boundsBehavior: Flickable.StopAtBounds
-                clip: true
+                cacheBuffer: 800          // pre-render ~60 lines above/below viewport
+                displayMarginBeginning: 400
+                displayMarginEnd: 400
+
+                // Horizontal scroll for no-wrap mode
+                contentWidth: root.autoWrap ? -1 : Math.max(width, maxDelegateWidth)
+                property real maxDelegateWidth: 0
+
+                // Auto-scroll state
                 property bool autoScroll: true
-                property bool programmaticScroll: false
+                property bool pendingAutoScroll: false
+
+                function doAutoScroll() {
+                    if (!pendingAutoScroll || !autoScroll)
+                        return
+                    pendingAutoScroll = false
+                    if (contentHeight > height)
+                        positionViewAtEnd()
+                }
+
+                // Auto-scroll triggers
+                onContentHeightChanged: doAutoScroll()
 
                 onContentYChanged: {
-                    if (!programmaticScroll) {
-                        var maxY = Math.max(0, contentHeight - height)
-                        autoScroll = (contentY >= maxY - 30)
+                    var maxY = Math.max(0, contentHeight - height)
+                    autoScroll = (contentY >= maxY - 30)
+                    // User scrolled back to bottom after pending data
+                    if (autoScroll && pendingAutoScroll)
+                        doAutoScroll()
+                }
+
+                model: ReceiveModel
+
+                delegate: TextEdit {
+                    id: lineDelegate
+                    text: model.display
+                    font.family: "Consolas"
+                    font.pixelSize: 13
+                    color: themePalette.text
+                    readOnly: true
+                    selectByMouse: true
+                    persistentSelection: true
+                    wrapMode: root.autoWrap ? TextEdit.Wrap : TextEdit.NoWrap
+                    width: root.autoWrap ? receiveList.width
+                                         : Math.max(receiveList.width, implicitWidth)
+                    height: implicitHeight
+                    background: null
+                    padding: 0
+
+                    onImplicitWidthChanged: {
+                        if (!root.autoWrap && implicitWidth > receiveList.maxDelegateWidth) {
+                            receiveList.maxDelegateWidth = implicitWidth
+                        }
                     }
                 }
 
-                TextArea {
-                    id: receiveEdit
-                    width: receiveFlickable.width
-                    height: implicitHeight
-                    readOnly: true
-                    selectByMouse: true
-                    wrapMode: root.autoWrap ? Text.Wrap : Text.NoWrap
-                    color: themePalette.text
-                    font.family: "Consolas"
-                    font.pixelSize: 13
-                    textFormat: Text.PlainText
-                    background: null
-
-                    MouseArea {
-                        anchors.fill: parent
-                        acceptedButtons: Qt.RightButton
-                        onPressed: (mouse) => {
-                            if (mouse.button === Qt.RightButton) {
-                                var mapped = mapToItem(root, mouse.x, mouse.y)
-                                receiveContextMenu.popup(mapped.x, mapped.y)
-                            }
+                // Right-click context menu
+                MouseArea {
+                    anchors.fill: parent
+                    acceptedButtons: Qt.RightButton
+                    onClicked: (mouse) => {
+                        // indexAt expects content coordinates
+                        var idx = receiveList.indexAt(
+                            mouse.x + receiveList.contentX,
+                            mouse.y + receiveList.contentY)
+                        if (idx >= 0) {
+                            receiveList.currentIndex = idx
                         }
+                        receiveContextMenu.popup(
+                            mouse.x + receiveList.x + 8,
+                            mouse.y + receiveList.y + 8)
                     }
                 }
 
                 ScrollBar.vertical: CustomScrollBar {
                     themePalette: root.themePalette
                     orientation: Qt.Vertical
-                    policy: receiveFlickable.contentHeight > receiveFlickable.height + 5 ? ScrollBar.AsNeeded : ScrollBar.AlwaysOff
+                    policy: receiveList.contentHeight > receiveList.height + 5
+                            ? ScrollBar.AsNeeded : ScrollBar.AlwaysOff
                 }
 
                 ScrollBar.horizontal: CustomScrollBar {
                     themePalette: root.themePalette
                     orientation: Qt.Horizontal
-                    policy: receiveFlickable.contentWidth > receiveFlickable.width + 5 ? ScrollBar.AsNeeded : ScrollBar.AlwaysOff
+                    policy: receiveList.contentWidth > receiveList.width + 5
+                            ? ScrollBar.AsNeeded : ScrollBar.AlwaysOff
                 }
             }
 
@@ -157,8 +201,10 @@ Rectangle {
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.bottom: parent.bottom
-                anchors.margins: 1
-                height: 5
+                anchors.leftMargin: 4
+                anchors.rightMargin: 4
+                anchors.bottomMargin: 2
+                height: 4
                 radius: 2
                 color: themePalette.accent
                 opacity: 0
@@ -170,13 +216,24 @@ Rectangle {
     Menu {
         id: receiveContextMenu
         MenuItem {
-            text: qsTr("Copy")
-            enabled: receiveEdit.selectedText.length > 0
-            onTriggered: receiveEdit.copy()
+            text: qsTr("Copy Line")
+            enabled: receiveList.currentIndex >= 0
+            onTriggered: {
+                var text = ReceiveModel.lineAt(receiveList.currentIndex)
+                if (text) {
+                    clipboardHelper.text = text
+                    clipboardHelper.selectAll()
+                    clipboardHelper.copy()
+                }
+            }
         }
         MenuItem {
-            text: qsTr("Select All")
-            onTriggered: receiveEdit.selectAll()
+            text: qsTr("Copy All")
+            onTriggered: {
+                clipboardHelper.text = ReceiveModel.allText()
+                clipboardHelper.selectAll()
+                clipboardHelper.copy()
+            }
         }
         MenuSeparator {}
         MenuItem {
@@ -185,18 +242,33 @@ Rectangle {
         }
     }
 
+    // Hidden proxy for clipboard operations (Qt Quick has no direct Clipboard API)
+    TextEdit {
+        id: clipboardHelper
+        visible: false
+        width: 0
+        height: 0
+    }
+
     property bool autoWrap: true
+
+    // Timer acts as a fallback and drives the flash animation.
+    // Primary scroll trigger is receiveList.onContentHeightChanged.
+    Timer {
+        id: uiUpdateTimer
+        interval: 80
+        repeat: false
+        onTriggered: {
+            newDataFlashAnim.start()
+            receiveList.doAutoScroll()
+        }
+    }
 
     Connections {
         target: ReceiveModel
         function onAppended(length) {
-            newDataFlashAnim.start()
-            if (receiveFlickable.autoScroll) {
-                var maxY = Math.max(0, receiveFlickable.contentHeight - receiveFlickable.height)
-                receiveFlickable.programmaticScroll = true
-                receiveFlickable.contentY = maxY
-                receiveFlickable.programmaticScroll = false
-            }
+            receiveList.pendingAutoScroll = true
+            uiUpdateTimer.restart()
         }
     }
 

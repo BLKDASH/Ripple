@@ -3,6 +3,8 @@
 #include <QFile>
 #include <QTextStream>
 #include <QMetaObject>
+#include <QCollator>
+#include <algorithm>
 
 SerialPortManager::SerialPortManager(QObject *parent)
     : QObject(parent)
@@ -147,7 +149,15 @@ void SerialPortManager::setRecordingPath(const QString &path)
 QVariantList SerialPortManager::availablePorts() const
 {
     QVariantList ports;
-    for (const QSerialPortInfo &info : QSerialPortInfo::availablePorts()) {
+    QList<QSerialPortInfo> infos = QSerialPortInfo::availablePorts();
+
+    QCollator collator;
+    collator.setNumericMode(true);
+    std::sort(infos.begin(), infos.end(), [&collator](const QSerialPortInfo &a, const QSerialPortInfo &b) {
+        return collator.compare(a.portName(), b.portName()) < 0;
+    });
+
+    for (const QSerialPortInfo &info : std::as_const(infos)) {
         QVariantMap port;
         port["name"] = info.portName();
         port["description"] = info.description();

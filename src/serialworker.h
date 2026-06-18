@@ -40,9 +40,8 @@ private slots:
     void flushBatch();
 
 private:
-    void writeRecord(const QByteArray &data, const QString &textData);
-    void writeAutoLog(const QByteArray &data, const QString &textData);
-    static QString bytesToHexString(const QByteArray &bytes);
+    void writeRecord(const QByteArray &data);
+    void writeAutoLog(const QByteArray &data);
 
     QSerialPort *m_serialPort = nullptr;
     QTimer *m_warmupTimer = nullptr;
@@ -63,8 +62,10 @@ private:
 
     // Batch buffering for UI updates
     QVariantList m_pendingBatch;
-    static constexpr int BatchSizeThreshold = 50;
-    static constexpr int BatchTimeoutMs = 10;
+    qint64 m_pendingBatchBytes = 0;
+    static constexpr int BatchRecordThreshold = 200;
+    static constexpr int BatchByteThreshold = 4096;
+    static constexpr int BatchTimeoutMs = 50;
 };
 
 #endif // SERIALWORKER_H

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Package>
+    <!-- 包的唯一标识符，反向域名风格 -->
+    <Name>com.cwy.cwyapp</Name>
+
+    <!-- 显示名称 -->
+    <DisplayName>CWY Serial Assistant</DisplayName>
+
+    <!-- 包描述，会显示在组件选择页 -->
+    <Description>CWY 串口调试助手主程序及运行依赖。</Description>
+
+    <!-- 包版本，与 config.xml 保持一致 -->
+    <Version>0.1.0</Version>
+
+    <!-- 发布日期 -->
+    <ReleaseDate>2026-06-18</ReleaseDate>
+
+    <!-- 默认勾选安装 -->
+    <Default>true</Default>
+
+    <!-- 强制安装，不可取消 -->
+    <ForcedInstallation>true</ForcedInstallation>
+
+    <!-- 排序优先级，数值越大越靠前 -->
+    <SortingPriority>100</SortingPriority>
+
+    <!-- 安装脚本，用于创建开始菜单/桌面快捷方式 -->
+    <Script>installscript.qs</Script>
+
+    <!-- 自定义安装页面：目标目录选择 + 桌面快捷方式选项 -->
+    <UserInterfaces>targetwidget.ui,page.ui</UserInterfaces>
+
+    <!-- 许可协议文件（放在 meta 目录下） -->
+    <License name="License Agreement" file="license.txt" />
+</Package>
