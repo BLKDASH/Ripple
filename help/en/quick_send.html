@@ -1,0 +1,22 @@
+<h1>Quick Send Grid</h1>
+<hr>
+<p>The quick-send panel provides <strong>6 configurable buttons</strong> that let you fire frequently-used commands with a single click.</p>
+<hr>
+<h2>JSON Format</h2>
+<p>Each slot is a JSON object with two fields:</p>
+<ul>
+<li><code>command</code> (string) — the payload to send. In HEX mode this should be space-separated hex bytes, e.g. <code>"01 02 FF"</code>.</li>
+<li><code>hex</code> (bool) — <code>true</code> to send the command as hex bytes, <code>false</code> to send it as raw text.</li>
+</ul>
+<hr>
+<h2>Template (6 slots)</h2>
+<pre>[
+  { "command": "AT",      "hex": false },
+  { "command": "AT+GMR",  "hex": false },
+  { "command": "",        "hex": false },
+  { "command": "",        "hex": false },
+  { "command": "",        "hex": false },
+  { "command": "",        "hex": false }
+]</pre>
+<hr>
+<p>Use <strong>Load</strong> / <strong>Save</strong> to import or export the grid as a <code>.json</code> file.</p>

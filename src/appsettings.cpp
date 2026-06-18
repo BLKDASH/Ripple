@@ -204,17 +204,43 @@ void AppSettings::setAutoLogEnabled(bool value)
     emit autoLogEnabledChanged();
 }
 
-QString AppSettings::autoLogPath() const
+QString AppSettings::autoLogFolder() const
 {
-    return m_settings->value(QStringLiteral("UI/autoLogPath"), QString()).toString();
+    return m_settings->value(QStringLiteral("UI/autoLogFolder"), QString()).toString();
 }
 
-void AppSettings::setAutoLogPath(const QString &value)
+void AppSettings::setAutoLogFolder(const QString &value)
 {
-    if (autoLogPath() == value)
+    if (autoLogFolder() == value)
         return;
-    setValue(QLatin1String(GROUP_UI), QStringLiteral("autoLogPath"), value);
-    emit autoLogPathChanged();
+    setValue(QLatin1String(GROUP_UI), QStringLiteral("autoLogFolder"), value);
+    emit autoLogFolderChanged();
+}
+
+int AppSettings::windowWidth() const
+{
+    return m_settings->value(QStringLiteral("UI/windowWidth"), 1000).toInt();
+}
+
+void AppSettings::setWindowWidth(int value)
+{
+    if (windowWidth() == value || value <= 0)
+        return;
+    setValue(QLatin1String(GROUP_UI), QStringLiteral("windowWidth"), value);
+    emit windowWidthChanged();
+}
+
+int AppSettings::windowHeight() const
+{
+    return m_settings->value(QStringLiteral("UI/windowHeight"), 700).toInt();
+}
+
+void AppSettings::setWindowHeight(int value)
+{
+    if (windowHeight() == value || value <= 0)
+        return;
+    setValue(QLatin1String(GROUP_UI), QStringLiteral("windowHeight"), value);
+    emit windowHeightChanged();
 }
 
 // ── Send pane ─────────────────────────────────────────────────────────────

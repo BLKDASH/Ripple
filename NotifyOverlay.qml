@@ -66,7 +66,7 @@ Item {
                     Label {
                         text: toast._icon
                         color: "white"
-                        font.pixelSize: 16
+                        font.pixelSize: Theme.fontSizeLarge
                         font.bold: true
                         anchors.verticalCenter: parent.verticalCenter
                     }
@@ -74,7 +74,7 @@ Item {
                         id: toastLabel
                         text: toast.message
                         color: "white"
-                        font.pixelSize: 13
+                        font.pixelSize: Theme.fontSizeMedium
                         wrapMode: Text.Wrap
                         anchors.verticalCenter: parent.verticalCenter
                         width: parent.width - 50
@@ -90,7 +90,7 @@ Item {
                         anchors.centerIn: parent
                         text: "✕"
                         color: "white"
-                        font.pixelSize: 13
+                        font.pixelSize: Theme.fontSizeMedium
                         opacity: 0.7
                     }
                 }

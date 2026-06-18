@@ -15,7 +15,7 @@ Rectangle {
     // Font shared by the line delegate and the column-calculation metrics so
     // that selection rectangles align with the rendered text. Column-based
     // selection still assumes a monospace font.
-    property font displayFont: Qt.font({ family: "Consolas", pixelSize: 13 })
+    property font displayFont: Qt.font({ family: Theme.monoFontFamily, pixelSize: Theme.fontSizeMedium })
 
     signal saveRequested()
     signal clearRequested()

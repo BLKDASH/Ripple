@@ -1,4 +1,5 @@
 #include "serialportmanager.h"
+#include <QCoreApplication>
 #include <QDebug>
 #include <QFile>
 #include <QTextStream>
@@ -67,7 +68,7 @@ int SerialPortManager::stopBits() const { return m_stopBits; }
 int SerialPortManager::parity() const { return m_parity; }
 int SerialPortManager::flowControl() const { return m_flowControl; }
 bool SerialPortManager::autoLogEnabled() const { return m_autoLogEnabled; }
-QString SerialPortManager::autoLogPath() const { return m_autoLogPath; }
+QString SerialPortManager::autoLogFolder() const { return m_autoLogFolder; }
 bool SerialPortManager::recordingEnabled() const { return m_recordingEnabled; }
 QString SerialPortManager::recordingPath() const { return m_recordingPath; }
 
@@ -121,11 +122,11 @@ void SerialPortManager::setAutoLogEnabled(bool enabled)
     syncAutoLogToWorker();
 }
 
-void SerialPortManager::setAutoLogPath(const QString &path)
+void SerialPortManager::setAutoLogFolder(const QString &folder)
 {
-    if (m_autoLogPath == path) return;
-    m_autoLogPath = path;
-    emit autoLogPathChanged();
+    if (m_autoLogFolder == folder) return;
+    m_autoLogFolder = folder;
+    emit autoLogFolderChanged();
     syncAutoLogToWorker();
 }
 
@@ -226,10 +227,10 @@ void SerialPortManager::stopRecording()
 
 void SerialPortManager::syncAutoLogToWorker()
 {
-    QString path = m_autoLogPath;
+    QString folder = m_autoLogFolder;
     bool enabled = m_autoLogEnabled;
-    QMetaObject::invokeMethod(m_worker, [this, path, enabled]() {
-        m_worker->setAutoLog(path, enabled);
+    QMetaObject::invokeMethod(m_worker, [this, folder, enabled]() {
+        m_worker->setAutoLogFolder(folder, enabled);
     }, Qt::QueuedConnection);
 }
 
@@ -322,4 +323,9 @@ bool SerialPortManager::writeFile(const QString &filePath, const QString &conten
     if (!ok)
         qWarning() << "Failed to write file:" << filePath;
     return ok;
+}
+
+QString SerialPortManager::applicationDirPath()
+{
+    return QCoreApplication::applicationDirPath();
 }

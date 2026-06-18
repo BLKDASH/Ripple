@@ -7,6 +7,7 @@ import CWY.Theme
 Dialog {
     id: root
     title: qsTr("Edit Quick Send")
+    font.family: Theme.fontFamily
     standardButtons: Dialog.Save | Dialog.Cancel
     modal: true
 
@@ -30,11 +31,6 @@ Dialog {
             Layout.fillWidth: true
             text: root.item ? root.item.name : ""
             color: Theme.text
-            background: Rectangle {
-                color: Theme.inputBg
-                border.color: Theme.border
-                radius: 4
-            }
         }
 
         Label {
@@ -47,12 +43,7 @@ Dialog {
             Layout.fillHeight: true
             text: root.item ? root.item.content : ""
             color: Theme.text
-            font.family: "Consolas"
-            background: Rectangle {
-                color: Theme.inputBg
-                border.color: Theme.border
-                radius: 4
-            }
+            font.family: Theme.monoFontFamily
         }
 
         RowLayout {

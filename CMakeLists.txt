@@ -42,6 +42,7 @@ qt_add_qml_module(appCWY
         FluentComboBox.qml
         CustomScrollBar.qml
         GlassPanel.qml
+        HelpDialog.qml
         Theme.qml
         NotificationManager.qml
 )
@@ -59,6 +60,17 @@ qt_add_translations(appCWY
 install(FILES ${QM_FILES}
     DESTINATION ${CMAKE_INSTALL_BINDIR}/translations
 )
+
+# Copy help markdown files next to the executable for runtime loading.
+add_custom_command(TARGET appCWY POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    ${CMAKE_SOURCE_DIR}/help $<TARGET_FILE_DIR:appCWY>/help
+    COMMENT "Copying help files to build directory"
+)
+install(DIRECTORY ${CMAKE_SOURCE_DIR}/help/
+    DESTINATION ${CMAKE_INSTALL_BINDIR}/help
+)
+
 set(CWY_RELEASE_DATE "2026-06-18" CACHE STRING "Release date shown in the installer package.xml")
 
 # Generate installer metadata from templates so the version number only has to

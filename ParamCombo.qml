@@ -17,7 +17,7 @@ ColumnLayout {
     Label {
         text: root.label
         color: Theme.text
-        font.pixelSize: 12
+        font.pixelSize: Theme.fontSize
     }
 
     FluentComboBox {

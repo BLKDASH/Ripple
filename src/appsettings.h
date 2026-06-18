@@ -22,7 +22,9 @@ class AppSettings : public QObject
     Q_PROPERTY(QString language READ language WRITE setLanguage NOTIFY languageChanged)
     Q_PROPERTY(bool showQuickSend READ showQuickSend WRITE setShowQuickSend NOTIFY showQuickSendChanged)
     Q_PROPERTY(bool autoLogEnabled READ autoLogEnabled WRITE setAutoLogEnabled NOTIFY autoLogEnabledChanged)
-    Q_PROPERTY(QString autoLogPath READ autoLogPath WRITE setAutoLogPath NOTIFY autoLogPathChanged)
+    Q_PROPERTY(QString autoLogFolder READ autoLogFolder WRITE setAutoLogFolder NOTIFY autoLogFolderChanged)
+    Q_PROPERTY(int windowWidth READ windowWidth WRITE setWindowWidth NOTIFY windowWidthChanged)
+    Q_PROPERTY(int windowHeight READ windowHeight WRITE setWindowHeight NOTIFY windowHeightChanged)
 
     // Send pane
     Q_PROPERTY(bool sendHexMode READ sendHexMode WRITE setSendHexMode NOTIFY sendHexModeChanged)
@@ -73,8 +75,14 @@ public:
     bool autoLogEnabled() const;
     void setAutoLogEnabled(bool value);
 
-    QString autoLogPath() const;
-    void setAutoLogPath(const QString &value);
+    QString autoLogFolder() const;
+    void setAutoLogFolder(const QString &value);
+
+    int windowWidth() const;
+    void setWindowWidth(int value);
+
+    int windowHeight() const;
+    void setWindowHeight(int value);
 
     // Send
     bool sendHexMode() const;
@@ -108,7 +116,9 @@ signals:
     void languageChanged();
     void showQuickSendChanged();
     void autoLogEnabledChanged();
-    void autoLogPathChanged();
+    void autoLogFolderChanged();
+    void windowWidthChanged();
+    void windowHeightChanged();
 
     void sendHexModeChanged();
     void sendAppendCrChanged();

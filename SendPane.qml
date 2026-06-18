@@ -106,8 +106,8 @@ Rectangle {
                     height: Math.max(implicitHeight, sendFlickable.height)
                     color: Theme.text
                     wrapMode: Text.Wrap
-                    font.family: "Consolas"
-                    font.pixelSize: 13
+                    font.family: Theme.monoFontFamily
+                    font.pixelSize: Theme.fontSizeMedium
                     textFormat: Text.PlainText
                     property bool validInput: true
 
@@ -175,7 +175,7 @@ Rectangle {
             Label {
                 text: qsTr("Interval (ms)")
                 color: Theme.text
-                font.pixelSize: 12
+                font.pixelSize: Theme.fontSize
             }
             SpinBox {
                 id: intervalSpin

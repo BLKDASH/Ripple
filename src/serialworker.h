@@ -25,7 +25,7 @@ public slots:
     void sendData(const QByteArray &data);
     void startRecording(const QString &filePath);
     void stopRecording();
-    void setAutoLog(const QString &filePath, bool enabled);
+    void setAutoLogFolder(const QString &folder, bool enabled);
 
 signals:
     void batchDataReady(const QVariantList &batch);
@@ -44,6 +44,8 @@ private slots:
 private:
     void writeRecord(const QByteArray &data, const QDateTime &arrivalTime);
     void writeAutoLog(const QByteArray &data, const QDateTime &arrivalTime);
+    void openAutoLogFile();
+    void closeAutoLogFile();
 
     QSerialPort *m_serialPort = nullptr;
     QTimer *m_warmupTimer = nullptr;
@@ -59,7 +61,7 @@ private:
     // Auto log
     QFile *m_autoLogFile = nullptr;
     QTextStream *m_autoLogStream = nullptr;
-    QString m_autoLogPath;
+    QString m_autoLogFolder;
     bool m_autoLogEnabled = false;
 
     // Batch buffering for UI updates

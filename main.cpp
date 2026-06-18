@@ -72,8 +72,8 @@ int main(int argc, char *argv[])
                      [serialManager, appSettings]() { appSettings->setFlowControl(serialManager->flowControl()); });
     QObject::connect(serialManager, &SerialPortManager::autoLogEnabledChanged, appSettings,
                      [serialManager, appSettings]() { appSettings->setAutoLogEnabled(serialManager->autoLogEnabled()); });
-    QObject::connect(serialManager, &SerialPortManager::autoLogPathChanged, appSettings,
-                     [serialManager, appSettings]() { appSettings->setAutoLogPath(serialManager->autoLogPath()); });
+    QObject::connect(serialManager, &SerialPortManager::autoLogFolderChanged, appSettings,
+                     [serialManager, appSettings]() { appSettings->setAutoLogFolder(serialManager->autoLogFolder()); });
 
     qmlRegisterSingletonInstance("CWY.Logger", 1, 0, "Logger", logger);
     qmlRegisterSingletonInstance("CWY.AppSettings", 1, 0, "AppSettings", appSettings);

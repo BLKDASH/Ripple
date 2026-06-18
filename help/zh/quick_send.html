@@ -1,0 +1,22 @@
+<h1>快捷发送面板</h1>
+<hr>
+<p>快捷发送面板提供 <strong>6 个可配置按钮</strong>，一键发送常用指令。</p>
+<hr>
+<h2>JSON 格式</h2>
+<p>每个槽位是一个包含两个字段的 JSON 对象：</p>
+<ul>
+<li><code>command</code>（字符串）— 要发送的内容。HEX 模式下为空格分隔的十六进制字节，如 <code>"01 02 FF"</code>。</li>
+<li><code>hex</code>（布尔值）— <code>true</code> 表示以 HEX 字节发送，<code>false</code> 表示以原始文本发送。</li>
+</ul>
+<hr>
+<h2>模板（6 个槽位）</h2>
+<pre>[
+  { "command": "AT",      "hex": false },
+  { "command": "AT+GMR",  "hex": false },
+  { "command": "",        "hex": false },
+  { "command": "",        "hex": false },
+  { "command": "",        "hex": false },
+  { "command": "",        "hex": false }
+]</pre>
+<hr>
+<p>使用 <strong>Load</strong> / <strong>Save</strong> 按钮导入或导出 <code>.json</code> 配置文件。</p>

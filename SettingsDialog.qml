@@ -11,6 +11,7 @@ import CWY.Theme
 Dialog {
     id: root
     title: qsTr("Settings")
+    font.family: Theme.fontFamily
     standardButtons: Dialog.Ok | Dialog.Cancel
     modal: true
 
@@ -26,7 +27,7 @@ Dialog {
         themeCombo.currentIndex = Theme.darkTheme ? 0 : 1
         showQuickSendCheck.checked = appWindow ? appWindow.showQuickSend : false
         autoLogCheck.checked = AppSettings.autoLogEnabled
-        logPathField.text = AppSettings.autoLogPath
+        logPathField.text = AppSettings.autoLogFolder
     }
 
     width: 420
@@ -49,11 +50,6 @@ Dialog {
             GroupBox {
                 Layout.fillWidth: true
                 title: qsTr("Appearance")
-                background: Rectangle {
-                    color: Theme.inputBg
-                    border.color: Theme.border
-                    radius: 4
-                }
                 label: Label {
                     text: parent.title
                     color: Theme.text
@@ -97,11 +93,6 @@ Dialog {
             GroupBox {
                 Layout.fillWidth: true
                 title: qsTr("Receive")
-                background: Rectangle {
-                    color: Theme.inputBg
-                    border.color: Theme.border
-                    radius: 4
-                }
                 label: Label {
                     text: parent.title
                     color: Theme.text
@@ -122,11 +113,6 @@ Dialog {
             GroupBox {
                 Layout.fillWidth: true
                 title: qsTr("Auto Log")
-                background: Rectangle {
-                    color: Theme.inputBg
-                    border.color: Theme.border
-                    radius: 4
-                }
                 label: Label {
                     text: parent.title
                     color: Theme.text
@@ -146,18 +132,13 @@ Dialog {
                         TextField {
                             id: logPathField
                             Layout.fillWidth: true
-                            text: AppSettings.autoLogPath
-                            placeholderText: qsTr("Select log file path...")
+                            text: AppSettings.autoLogFolder
+                            placeholderText: qsTr("Select log folder...")
                             color: Theme.text
-                            background: Rectangle {
-                                color: Theme.inputBg
-                                border.color: Theme.border
-                                radius: 4
-                            }
                         }
                         Button {
                             text: qsTr("Browse")
-                            onClicked: logFileDialog.open()
+                            onClicked: logFolderDialog.open()
                         }
                     }
                 }
@@ -165,12 +146,10 @@ Dialog {
         }
     }
 
-    FileDialog {
-        id: logFileDialog
-        title: qsTr("Select auto log file")
-        fileMode: FileDialog.SaveFile
-        nameFilters: ["Log files (*.log)", "Text files (*.txt)", "All files (*)"]
-        onAccepted: logPathField.text = selectedFile.toString().replace(/^file:\/\/+/, "")
+    FolderDialog {
+        id: logFolderDialog
+        title: qsTr("Select auto log folder")
+        onAccepted: logPathField.text = selectedFolder.toString().replace(/^file:\/\/+/, "")
     }
 
     onAccepted: {
@@ -185,6 +164,6 @@ Dialog {
         }
 
         SerialPort.autoLogEnabled = autoLogCheck.checked
-        SerialPort.autoLogPath = logPathField.text
+        SerialPort.autoLogFolder = logPathField.text
     }
 }

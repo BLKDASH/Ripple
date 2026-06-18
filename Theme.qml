@@ -36,4 +36,12 @@ QtObject {
 
     // Extra helpers used by glass panels / notifications
     readonly property real glassOpacity: 0.72
+
+    // Font — centralized sizes and monospace family so every component
+    // picks up the same values. Change here and the whole UI follows.
+    readonly property string fontFamily: "Microsoft YaHei"
+    readonly property string monoFontFamily: "Consolas"
+    readonly property int fontSize: 12
+    readonly property int fontSizeMedium: 13
+    readonly property int fontSizeLarge: 16
 }

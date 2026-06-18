@@ -64,7 +64,7 @@ Rectangle {
             Label {
                 text: qsTr("Baud Rate")
                 color: Theme.text
-                font.pixelSize: 12
+                font.pixelSize: Theme.fontSize
             }
             RowLayout {
                 Layout.fillWidth: true
@@ -104,15 +104,10 @@ Rectangle {
                     enabled: !SerialPort.isOpen
                     text: SerialPort.baudRate
                     color: Theme.text
-                    font.family: "Consolas"
-                    font.pixelSize: 12
+                    font.family: Theme.monoFontFamily
+                    font.pixelSize: Theme.fontSize
                     horizontalAlignment: Text.AlignRight
                     validator: IntValidator { bottom: 1; top: 99999999 }
-                    background: Rectangle {
-                        color: Theme.inputBg
-                        border.color: Theme.border
-                        radius: 4
-                    }
                     onEditingFinished: {
                         var rate = parseInt(text)
                         if (!isNaN(rate) && rate > 0) {

@@ -80,13 +80,13 @@ Rectangle {
                   ? qsTr("Connected")
                   : qsTr("Disconnected")
             color: Theme.text
-            font.pixelSize: 12
+            font.pixelSize: Theme.fontSize
         }
 
         Label {
             text: "|"
             color: Theme.text
-            font.pixelSize: 12
+            font.pixelSize: Theme.fontSize
         }
 
         Label {
@@ -100,7 +100,7 @@ Rectangle {
                     .arg(["None", "HW", "SW"][SerialPort.flowControl] || "None")
                   : qsTr("No port")
             color: Theme.text
-            font.pixelSize: 12
+            font.pixelSize: Theme.fontSize
         }
 
         Item { Layout.fillWidth: true }
@@ -109,8 +109,8 @@ Rectangle {
             id: rxTxLabel
             text: qsTr("RX: %1 | TX: %2").arg(root.rxCount).arg(root.txCount)
             color: Theme.text
-            font.pixelSize: 12
-            font.family: "Consolas"
+            font.pixelSize: Theme.fontSize
+            font.family: Theme.monoFontFamily
         }
     }
 }

@@ -18,7 +18,7 @@ class SerialPortManager : public QObject
     Q_PROPERTY(int parity READ parity WRITE setParity NOTIFY parityChanged)
     Q_PROPERTY(int flowControl READ flowControl WRITE setFlowControl NOTIFY flowControlChanged)
     Q_PROPERTY(bool autoLogEnabled READ autoLogEnabled WRITE setAutoLogEnabled NOTIFY autoLogEnabledChanged)
-    Q_PROPERTY(QString autoLogPath READ autoLogPath WRITE setAutoLogPath NOTIFY autoLogPathChanged)
+    Q_PROPERTY(QString autoLogFolder READ autoLogFolder WRITE setAutoLogFolder NOTIFY autoLogFolderChanged)
     Q_PROPERTY(bool recordingEnabled READ recordingEnabled WRITE setRecordingEnabled NOTIFY recordingEnabledChanged)
     Q_PROPERTY(QString recordingPath READ recordingPath WRITE setRecordingPath NOTIFY recordingPathChanged)
 
@@ -34,7 +34,7 @@ public:
     int parity() const;
     int flowControl() const;
     bool autoLogEnabled() const;
-    QString autoLogPath() const;
+    QString autoLogFolder() const;
     bool recordingEnabled() const;
     QString recordingPath() const;
 
@@ -45,7 +45,7 @@ public:
     void setParity(int parity);
     void setFlowControl(int flow);
     void setAutoLogEnabled(bool enabled);
-    void setAutoLogPath(const QString &path);
+    void setAutoLogFolder(const QString &folder);
     void setRecordingEnabled(bool enabled);
     void setRecordingPath(const QString &path);
 
@@ -61,6 +61,7 @@ public:
     Q_INVOKABLE QString readFile(const QString &filePath);
     Q_INVOKABLE QString readFileAsHex(const QString &filePath);
     Q_INVOKABLE bool writeFile(const QString &filePath, const QString &content);
+    Q_INVOKABLE static QString applicationDirPath();
 
 signals:
     void isOpenChanged();
@@ -71,7 +72,7 @@ signals:
     void parityChanged();
     void flowControlChanged();
     void autoLogEnabledChanged();
-    void autoLogPathChanged();
+    void autoLogFolderChanged();
     void recordingEnabledChanged();
     void recordingPathChanged();
     void bytesSent(qint64 count);
@@ -95,7 +96,7 @@ private:
     int m_flowControl = static_cast<int>(QSerialPort::NoFlowControl);
 
     bool m_autoLogEnabled = false;
-    QString m_autoLogPath;
+    QString m_autoLogFolder;
     bool m_recordingEnabled = false;
     QString m_recordingPath;
 };

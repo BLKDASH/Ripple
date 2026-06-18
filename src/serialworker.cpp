@@ -1,4 +1,5 @@
 #include "serialworker.h"
+#include <QDate>
 #include <QDateTime>
 #include <QDebug>
 
@@ -49,12 +50,23 @@ SerialWorker::SerialWorker(QObject *parent)
 SerialWorker::~SerialWorker()
 {
     stopRecording();
-    setAutoLog(QString(), false);
+    closeAutoLogFile();
     if (m_serialPort && m_serialPort->isOpen())
         m_serialPort->close();
-    delete m_serialPort;
-    delete m_warmupTimer;
-    delete m_batchTimer;
+    // Use deleteLater() as a safety net — normal cleanup is done in quit()
+    // on the worker thread to avoid cross-thread timer warnings.
+    if (m_serialPort) {
+        m_serialPort->deleteLater();
+        m_serialPort = nullptr;
+    }
+    if (m_warmupTimer) {
+        m_warmupTimer->deleteLater();
+        m_warmupTimer = nullptr;
+    }
+    if (m_batchTimer) {
+        m_batchTimer->deleteLater();
+        m_batchTimer = nullptr;
+    }
 }
 
 void SerialWorker::init()
@@ -78,11 +90,20 @@ void SerialWorker::quit()
 {
     // Flush any pending UI batch before the event loop stops.
     flushBatch();
-    m_batchTimer->stop();
 
     closePort();
     stopRecording();
-    setAutoLog(QString(), false);
+    closeAutoLogFile();
+
+    // Clean up objects that were created on this worker thread.
+    // Deleting them here instead of the destructor avoids
+    // "Timers cannot be stopped from another thread" warnings.
+    delete m_serialPort;
+    m_serialPort = nullptr;
+    delete m_warmupTimer;
+    m_warmupTimer = nullptr;
+    delete m_batchTimer;
+    m_batchTimer = nullptr;
 }
 
 void SerialWorker::openPort(const QString &name, int baudRate, int dataBits, int stopBits, int parity, int flowControl)
@@ -129,6 +150,7 @@ void SerialWorker::openPort(const QString &name, int baudRate, int dataBits, int
     m_warmupTimer->start(150);
 
     emit isOpenChanged(true);
+    openAutoLogFile();
 }
 
 void SerialWorker::closePort()
@@ -139,6 +161,7 @@ void SerialWorker::closePort()
     qInfo() << "Serial port closed:" << m_serialPort->portName();
     m_serialPort->close();
     emit isOpenChanged(false);
+    closeAutoLogFile();
 }
 
 void SerialWorker::sendData(const QByteArray &data)
@@ -209,9 +232,51 @@ void SerialWorker::stopRecording()
     }
 }
 
-void SerialWorker::setAutoLog(const QString &filePath, bool enabled)
+void SerialWorker::setAutoLogFolder(const QString &folder, bool enabled)
 {
-    // Close existing auto-log file
+    // Close any existing auto-log file
+    closeAutoLogFile();
+
+    m_autoLogEnabled = enabled;
+    m_autoLogFolder = folder;
+
+    if (enabled && !folder.isEmpty()) {
+        qInfo() << "Auto-log folder set:" << folder;
+    } else if (!enabled) {
+        qInfo() << "Auto-log disabled";
+    }
+
+    // If port is currently open, open the log file immediately
+    if (m_serialPort && m_serialPort->isOpen() && enabled && !folder.isEmpty()) {
+        openAutoLogFile();
+    }
+}
+
+void SerialWorker::openAutoLogFile()
+{
+    if (!m_autoLogEnabled || m_autoLogFolder.isEmpty())
+        return;
+
+    if (m_autoLogFile)
+        closeAutoLogFile();
+
+    QString fileName = QDate::currentDate().toString("yyyy-MM-dd") + QStringLiteral(".log");
+    QString filePath = m_autoLogFolder + QStringLiteral("/") + fileName;
+
+    m_autoLogFile = new QFile(filePath, this);
+    if (m_autoLogFile->open(QIODevice::Append | QIODevice::Text)) {
+        m_autoLogStream = new QTextStream(m_autoLogFile);
+        qInfo() << "Auto-log opened:" << filePath;
+    } else {
+        qWarning() << "Failed to open auto-log file:" << filePath;
+        emit errorOccurred(tr("Failed to open auto-log file: %1").arg(filePath));
+        delete m_autoLogFile;
+        m_autoLogFile = nullptr;
+    }
+}
+
+void SerialWorker::closeAutoLogFile()
+{
     if (m_autoLogStream) {
         m_autoLogStream->flush();
         delete m_autoLogStream;
@@ -221,25 +286,6 @@ void SerialWorker::setAutoLog(const QString &filePath, bool enabled)
         m_autoLogFile->close();
         delete m_autoLogFile;
         m_autoLogFile = nullptr;
-    }
-
-    m_autoLogEnabled = enabled;
-    m_autoLogPath = filePath;
-
-    if (enabled && !filePath.isEmpty()) {
-        m_autoLogFile = new QFile(filePath, this);
-        if (m_autoLogFile->open(QIODevice::Append | QIODevice::Text)) {
-            m_autoLogStream = new QTextStream(m_autoLogFile);
-            qInfo() << "Auto-log enabled:" << filePath;
-        } else {
-            qWarning() << "Failed to open auto-log file:" << filePath;
-            emit errorOccurred(tr("Failed to open auto-log file: %1").arg(filePath));
-            delete m_autoLogFile;
-            m_autoLogFile = nullptr;
-            m_autoLogEnabled = false;
-        }
-    } else if (!enabled) {
-        qInfo() << "Auto-log disabled";
     }
 }
 

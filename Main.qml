@@ -14,6 +14,7 @@ ApplicationWindow {
     width: 1000
     height: 700
     minimumWidth: 800
+    font.family: Theme.fontFamily
     minimumHeight: 600
     visible: true
     title: qsTr("CWY Serial Assistant")
@@ -27,7 +28,25 @@ ApplicationWindow {
         color: Theme.darkTheme ? "#101010" : "#FFFFFF"
     }
 
+    // Debounce saving window geometry so we don't hammer the settings file
+    // during live resize.
+    Timer {
+        id: saveGeometryTimer
+        interval: 500
+        repeat: false
+        onTriggered: {
+            AppSettings.windowWidth = root.width
+            AppSettings.windowHeight = root.height
+        }
+    }
+
     Component.onCompleted: {
+        // Restore last window size (defaults to 1000×700 if not saved).
+        var w = AppSettings.windowWidth
+        var h = AppSettings.windowHeight
+        if (w > 0) root.width = w
+        if (h > 0) root.height = h
+
         Theme.darkTheme = AppSettings.darkTheme
         root.showQuickSend = AppSettings.showQuickSend
 
@@ -37,8 +56,11 @@ ApplicationWindow {
 
         Translator.setCurrentLanguage(AppSettings.language)
         SerialPort.autoLogEnabled = AppSettings.autoLogEnabled
-        SerialPort.autoLogPath = AppSettings.autoLogPath
+        SerialPort.autoLogFolder = AppSettings.autoLogFolder
     }
+
+    onWidthChanged: saveGeometryTimer.restart()
+    onHeightChanged: saveGeometryTimer.restart()
 
     Connections {
         target: Theme
@@ -51,16 +73,9 @@ ApplicationWindow {
 
     // ── Top menu bar ───────────────────────────────────────────
     menuBar: MenuBar {
-        topPadding: 0
-        bottomPadding: 0
+        spacing: 8
         background: Rectangle { color: Theme.panelBg }
-        delegate: MenuBarItem {
-            topPadding: 4
-            bottomPadding: 4
-            leftPadding: 10
-            rightPadding: 10
-            background: Rectangle { color: "transparent" }
-        }
+        delegate: MenuBarItem { }
 
         Menu {
             title: "CWY"
@@ -75,6 +90,10 @@ ApplicationWindow {
                 onTriggered: Theme.darkTheme = !Theme.darkTheme
             }
             MenuSeparator {}
+            MenuItem {
+                text: qsTr("Help")
+                onTriggered: helpDialog.open()
+            }
             MenuItem {
                 text: qsTr("Quit")
                 onTriggered: Qt.quit()
@@ -250,6 +269,15 @@ ApplicationWindow {
 
         onAboutToShow: {
             settingsDialog.loadSettings()
+            x = (root.width - width) / 2
+            y = (root.height - height) / 2
+        }
+    }
+
+    HelpDialog {
+        id: helpDialog
+
+        onAboutToShow: {
             x = (root.width - width) / 2
             y = (root.height - height) / 2
         }

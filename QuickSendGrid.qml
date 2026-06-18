@@ -57,13 +57,8 @@ Rectangle {
                     text: model.command
                     placeholderText: qsTr("Command") + " " + (index + 1)
                     color: Theme.text
-                    font.family: "Consolas"
-                    font.pixelSize: 12
-                    background: Rectangle {
-                        color: Theme.inputBg
-                        border.color: Theme.border
-                        radius: 4
-                    }
+                    font.family: Theme.monoFontFamily
+                    font.pixelSize: Theme.fontSize
                     onTextChanged: {
                         // Guard against model refresh loops when delegate is reused.
                         if (model.command !== text) {

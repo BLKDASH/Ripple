@@ -271,8 +271,8 @@
     </message>
     <message>
         <location filename="../SettingsDialog.qml"/>
-        <source>Select log file path...</source>
-        <translation>选择日志文件路径...</translation>
+        <source>Select log folder...</source>
+        <translation>选择日志文件夹...</translation>
     </message>
     <message>
         <location filename="../SettingsDialog.qml"/>
@@ -281,8 +281,8 @@
     </message>
     <message>
         <location filename="../SettingsDialog.qml"/>
-        <source>Select auto log file</source>
-        <translation>选择自动日志文件</translation>
+        <source>Select auto log folder</source>
+        <translation>选择自动日志文件夹</translation>
     </message>
 </context>
 <context>
@@ -529,6 +529,39 @@
         <location filename="../src/serialworker.cpp"/>
         <source>Invalid HEX format</source>
         <translation>HEX 格式错误</translation>
+    </message>
+</context>
+<context>
+    <name>HelpDialog</name>
+    <message>
+        <location filename="../HelpDialog.qml"/>
+        <source>Help</source>
+        <translation>帮助</translation>
+    </message>
+    <message>
+        <location filename="../HelpDialog.qml"/>
+        <source>Quick Send</source>
+        <translation>快捷发送</translation>
+    </message>
+    <message>
+        <location filename="../HelpDialog.qml"/>
+        <source>Auto Log</source>
+        <translation>自动日志</translation>
+    </message>
+    <message>
+        <location filename="../HelpDialog.qml"/>
+        <source>Shortcuts</source>
+        <translation>快捷键</translation>
+    </message>
+    <message>
+        <location filename="../HelpDialog.qml"/>
+        <source>About</source>
+        <translation>关于</translation>
+    </message>
+    <message>
+        <location filename="../HelpDialog.qml"/>
+        <source>Help file not found</source>
+        <translation>帮助文件未找到</translation>
     </message>
 </context>
 </TS>

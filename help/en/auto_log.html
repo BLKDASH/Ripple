@@ -1,0 +1,19 @@
+<h1>Auto Log</h1>
+<hr>
+<p>Auto-log records all incoming serial data to daily log files so you never lose received data.</p>
+<hr>
+<h2>How it works</h2>
+<ol>
+<li>Go to <strong>Settings</strong> and enable "Auto log".</li>
+<li>Choose a <strong>folder</strong> — NOT a file. All logs will be stored there.</li>
+<li>When the serial port opens, a new log file is created (or opened) with the name <code>yyyy-MM-dd.log</code> (e.g. <code>2026-06-19.log</code>).</li>
+<li>All incoming data is appended to today's file.</li>
+<li>When the port closes, the log file is closed.</li>
+</ol>
+<hr>
+<h2>Notes</h2>
+<ul>
+<li>Text data is logged as UTF-8. Binary data (more than 5% non-UTF-8 bytes) is logged as a hex preview.</li>
+<li>If a session spans midnight, data continues writing to the previous day's file. Re-open the port to start a new file.</li>
+<li>A dashed ring appears on the status-bar indicator when auto-log is active.</li>
+</ul>
