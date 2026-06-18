@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import CWY.AppSettings
 import CWY.Serial
 import CWY.Theme
 import CWY.NotificationManager
@@ -16,6 +17,20 @@ Rectangle {
     property bool appendLf: false
     property bool cyclicSend: false
     property int cyclicInterval: 1000
+
+    Component.onCompleted: {
+        hexMode = AppSettings.sendHexMode
+        appendCr = AppSettings.sendAppendCr
+        appendLf = AppSettings.sendAppendLf
+        cyclicSend = AppSettings.sendCyclicSend
+        cyclicInterval = AppSettings.sendCyclicInterval
+    }
+
+    onHexModeChanged: AppSettings.sendHexMode = hexMode
+    onAppendCrChanged: AppSettings.sendAppendCr = appendCr
+    onAppendLfChanged: AppSettings.sendAppendLf = appendLf
+    onCyclicSendChanged: AppSettings.sendCyclicSend = cyclicSend
+    onCyclicIntervalChanged: AppSettings.sendCyclicInterval = cyclicInterval
 
     signal sent()
 
@@ -48,6 +63,11 @@ Rectangle {
     function setContent(text, asHex) {
         sendInput.text = text
         root.hexMode = asHex
+    }
+
+    function clearInput() {
+        sendInput.text = ""
+        sendInput.validInput = true
     }
 
     ColumnLayout {

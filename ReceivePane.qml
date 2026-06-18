@@ -12,6 +12,11 @@ Rectangle {
     border.color: Theme.border
     radius: 4
 
+    // Font shared by the line delegate and the column-calculation metrics so
+    // that selection rectangles align with the rendered text. Column-based
+    // selection still assumes a monospace font.
+    property font displayFont: Qt.font({ family: "Consolas", pixelSize: 13 })
+
     signal saveRequested()
     signal clearRequested()
 
@@ -25,6 +30,12 @@ Rectangle {
         receiveList.pendingAutoScroll = false
         receiveList.maxDelegateWidth = 0
         root.clearRequested()
+    }
+
+    function copyAll() {
+        clipboardHelper.text = ReceiveModel.allText()
+        clipboardHelper.selectAll()
+        clipboardHelper.copy()
     }
 
     ColumnLayout {
@@ -53,42 +64,6 @@ Rectangle {
                 }
 
                 Item { Layout.fillWidth: true }
-
-                Button {
-                    text: ReceiveModel.hexMode ? qsTr("HEX") : qsTr("Text")
-                    flat: true
-                    Layout.minimumWidth: implicitContentWidth + 16
-                    onClicked: {
-                        Logger.info("ReceivePane: toggling hex mode to " + !ReceiveModel.hexMode)
-                        receiveList.pendingAutoScroll = true
-                        uiUpdateTimer.restart()
-                        ReceiveModel.hexMode = !ReceiveModel.hexMode
-                    }
-                }
-
-                Button {
-                    text: qsTr("TS")
-                    flat: true
-                    highlighted: ReceiveModel.showTimestamp
-                    Layout.minimumWidth: implicitContentWidth + 16
-                    onClicked: {
-                        Logger.info("ReceivePane: toggling timestamp to " + !ReceiveModel.showTimestamp)
-                        receiveList.pendingAutoScroll = true
-                        uiUpdateTimer.restart()
-                        ReceiveModel.showTimestamp = !ReceiveModel.showTimestamp
-                    }
-                }
-
-                Button {
-                    text: qsTr("Wrap")
-                    flat: true
-                    highlighted: root.autoWrap
-                    Layout.minimumWidth: implicitContentWidth + 16
-                    onClicked: {
-                        Logger.info("ReceivePane: toggling wrap to " + !root.autoWrap)
-                        root.autoWrap = !root.autoWrap
-                    }
-                }
 
                 Button {
                     text: qsTr("Clear")
@@ -391,8 +366,7 @@ Rectangle {
                 // Tabs and multi-byte characters will not align perfectly.
                 TextMetrics {
                     id: charMetrics
-                    font.family: "Consolas"
-                    font.pixelSize: 13
+                    font: root.displayFont
                     text: "X"
                 }
 
@@ -455,8 +429,7 @@ Rectangle {
                     Text {
                         id: lineText
                         text: model.display
-                        font.family: "Consolas"
-                        font.pixelSize: 13
+                        font: root.displayFont
                         color: Theme.text
                         textFormat: Text.PlainText
                         width: root.autoWrap ? parent.width : undefined
@@ -521,11 +494,7 @@ Rectangle {
         }
         MenuItem {
             text: qsTr("Copy All")
-            onTriggered: {
-                clipboardHelper.text = ReceiveModel.allText()
-                clipboardHelper.selectAll()
-                clipboardHelper.copy()
-            }
+            onTriggered: root.copyAll()
         }
         MenuSeparator {}
         MenuItem {

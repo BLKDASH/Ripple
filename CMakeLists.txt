@@ -1,7 +1,8 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(CWY VERSION 0.1 LANGUAGES CXX)
+project(CWY VERSION 0.1.0 LANGUAGES CXX)
 
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(QT_QML_GENERATE_QMLLS_INI ON)
 
@@ -11,6 +12,8 @@ qt_standard_project_setup(REQUIRES 6.8)
 
 qt_add_executable(appCWY
     main.cpp
+    src/appsettings.h
+    src/appsettings.cpp
     src/serialportmanager.h
     src/serialportmanager.cpp
     src/serialworker.h
@@ -36,6 +39,7 @@ qt_add_qml_module(appCWY
         QuickSendEditDialog.qml
         StatusBar.qml
         SettingsDialog.qml
+        FluentComboBox.qml
         CustomScrollBar.qml
         GlassPanel.qml
         Theme.qml
@@ -47,7 +51,30 @@ set_source_files_properties(Theme.qml NotificationManager.qml
 
 qt_add_translations(appCWY
     TS_FILES translations/CWY_zh_CN.ts
+    QM_FILES_OUTPUT_VARIABLE QM_FILES
 )
+
+# Deploy the generated .qm files next to the executable so the Translator
+# singleton can load them from applicationDirPath()/translations.
+install(FILES ${QM_FILES}
+    DESTINATION ${CMAKE_INSTALL_BINDIR}/translations
+)
+set(CWY_RELEASE_DATE "2026-06-18" CACHE STRING "Release date shown in the installer package.xml")
+
+# Generate installer metadata from templates so the version number only has to
+# be updated in project() above.
+configure_file(
+    ${CMAKE_SOURCE_DIR}/Installer/config/config.xml.in
+    ${CMAKE_SOURCE_DIR}/Installer/config/config.xml
+    @ONLY)
+configure_file(
+    ${CMAKE_SOURCE_DIR}/Installer/packages/com.cwy.cwyapp/meta/package.xml.in
+    ${CMAKE_SOURCE_DIR}/Installer/packages/com.cwy.cwyapp/meta/package.xml
+    @ONLY)
+configure_file(
+    ${CMAKE_SOURCE_DIR}/Installer/build_installer.bat.in
+    ${CMAKE_SOURCE_DIR}/Installer/build_installer.bat
+    @ONLY)
 
 set_target_properties(appCWY PROPERTIES
     MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}

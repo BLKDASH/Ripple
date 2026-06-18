@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Dialogs
-import QtCore
+import CWY.AppSettings
 import CWY.Serial
 import CWY.I18n
 import CWY.Receive
@@ -18,25 +18,7 @@ ApplicationWindow {
     visible: true
     title: qsTr("CWY Serial Assistant")
 
-    // Dark mode toggle. The Theme singleton is the source of truth for the
-    // actual palette; this property exists so Settings can alias it.
-    property bool darkTheme: false
-    onDarkThemeChanged: Theme.darkTheme = darkTheme
-
     property bool showQuickSend: false
-
-    palette {
-        window: Theme.window
-        windowText: Theme.windowText
-        base: Theme.base
-        text: Theme.text
-        button: Theme.button
-        buttonText: Theme.buttonText
-        highlight: Theme.highlight
-        highlightedText: Theme.highlightedText
-        toolTipBase: Theme.toolTipBase
-        toolTipText: Theme.toolTipText
-    }
 
     // Solid fill under everything so the FluentWinUI3 background stays consistent.
     Rectangle {
@@ -45,83 +27,161 @@ ApplicationWindow {
         color: Theme.darkTheme ? "#101010" : "#FFFFFF"
     }
 
-    // ── Persistent settings ────────────────────────────────────
-    Settings {
-        id: appSettings
-        property alias darkTheme: root.darkTheme
-        property alias showQuickSend: root.showQuickSend
-        property string language: "zh_CN"
-        property bool autoLogEnabled: false
-        property string autoLogPath: ""
-    }
-
     Component.onCompleted: {
+        Theme.darkTheme = AppSettings.darkTheme
+        root.showQuickSend = AppSettings.showQuickSend
+
         SerialPort.errorOccurred.connect(function(msg) {
             NotificationManager.error(msg)
         })
 
-        Translator.setCurrentLanguage(appSettings.language)
-        SerialPort.autoLogEnabled = appSettings.autoLogEnabled
-        SerialPort.autoLogPath = appSettings.autoLogPath
+        Translator.setCurrentLanguage(AppSettings.language)
+        SerialPort.autoLogEnabled = AppSettings.autoLogEnabled
+        SerialPort.autoLogPath = AppSettings.autoLogPath
     }
 
-    // ── Top toolbar ────────────────────────────────────────────
-    header: ToolBar {
-        height: 44
+    Connections {
+        target: Theme
+        function onDarkThemeChanged() {
+            AppSettings.darkTheme = Theme.darkTheme
+        }
+    }
+
+    onShowQuickSendChanged: AppSettings.showQuickSend = showQuickSend
+
+    // ── Top menu bar ───────────────────────────────────────────
+    menuBar: MenuBar {
+        topPadding: 0
+        bottomPadding: 0
         background: Rectangle { color: Theme.panelBg }
-        RowLayout {
-            anchors.fill: parent
-            anchors.leftMargin: 12
-            anchors.rightMargin: 12
-            spacing: 8
+        delegate: MenuBarItem {
+            topPadding: 4
+            bottomPadding: 4
+            leftPadding: 10
+            rightPadding: 10
+            background: Rectangle { color: "transparent" }
+        }
 
-            Button {
-                text: SerialPort.isOpen ? qsTr("Disconnect") : qsTr("Connect")
-                highlighted: true
-                onClicked: SerialPort.isOpen ? SerialPort.closePort() : SerialPort.openPort()
+        Menu {
+            title: "CWY"
+            MenuItem {
+                text: qsTr("Settings")
+                onTriggered: settingsDialog.open()
             }
+            MenuItem {
+                text: qsTr("Dark Theme")
+                checkable: true
+                checked: Theme.darkTheme
+                onTriggered: Theme.darkTheme = !Theme.darkTheme
+            }
+            MenuSeparator {}
+            MenuItem {
+                text: qsTr("Quit")
+                onTriggered: Qt.quit()
+            }
+        }
 
-            ToolSeparator {}
+        Menu {
+            title: qsTr("Port")
+            MenuItem {
+                text: qsTr("Refresh Ports")
+                onTriggered: serialPortPanel.refreshPorts()
+            }
+            MenuSeparator {}
+            MenuItem {
+                text: SerialPort.isOpen ? qsTr("Disconnect") : qsTr("Connect")
+                onTriggered: SerialPort.isOpen ? SerialPort.closePort() : SerialPort.openPort()
+            }
+        }
 
-            Button {
+        Menu {
+            title: qsTr("Receive Area")
+            MenuItem {
                 text: qsTr("Clear")
-                onClicked: {
+                onTriggered: {
                     receivePane.clear()
                     rxCount = 0
                 }
             }
-
-            Button {
-                id: recordButton
+            MenuItem {
+                text: qsTr("Copy All")
+                onTriggered: receivePane.copyAll()
+            }
+            MenuItem {
                 text: SerialPort.recordingEnabled ? qsTr("Stop Recording") : qsTr("Record")
-                highlighted: SerialPort.recordingEnabled
-                onClicked: {
-                    if (SerialPort.recordingEnabled) {
-                        SerialPort.stopRecording()
-                    } else {
-                        recordFileDialog.open()
-                    }
-                }
+                onTriggered: SerialPort.recordingEnabled ? SerialPort.stopRecording() : recordFileDialog.open()
             }
-
-            Button {
-                text: qsTr("Load to Send")
-                onClicked: loadFileDialog.open()
+            MenuSeparator {}
+            MenuItem {
+                text: qsTr("HEX")
+                checkable: true
+                checked: ReceiveModel.hexMode
+                onTriggered: ReceiveModel.hexMode = !ReceiveModel.hexMode
             }
-
-            Item { Layout.fillWidth: true }
-
-            Button {
-                id: settingsButton
-                text: qsTr("Settings")
-                onClicked: settingsDialog.open()
+            MenuItem {
+                text: qsTr("Show Timestamp")
+                checkable: true
+                checked: ReceiveModel.showTimestamp
+                onTriggered: ReceiveModel.showTimestamp = !ReceiveModel.showTimestamp
             }
-
-            Button {
-                text: Theme.darkTheme ? "☀" : "🌙"
-                onClicked: root.darkTheme = !root.darkTheme
+            MenuItem {
+                text: qsTr("Wrap")
+                checkable: true
+                checked: receivePane.autoWrap
+                onTriggered: receivePane.autoWrap = !receivePane.autoWrap
             }
         }
+
+        Menu {
+            title: qsTr("Send Area")
+            MenuItem {
+                text: qsTr("Send")
+                onTriggered: sendPane.send()
+            }
+            MenuItem {
+                text: qsTr("Load to Send")
+                onTriggered: loadFileDialog.open()
+            }
+            MenuItem {
+                text: qsTr("Clear Input")
+                onTriggered: sendPane.clearInput()
+            }
+            MenuSeparator {}
+            MenuItem {
+                text: qsTr("HEX")
+                checkable: true
+                checked: sendPane.hexMode
+                onTriggered: sendPane.hexMode = !sendPane.hexMode
+            }
+            MenuItem {
+                text: qsTr("Append \\r")
+                checkable: true
+                checked: sendPane.appendCr
+                onTriggered: sendPane.appendCr = !sendPane.appendCr
+            }
+            MenuItem {
+                text: qsTr("Append \\n")
+                checkable: true
+                checked: sendPane.appendLf
+                onTriggered: sendPane.appendLf = !sendPane.appendLf
+            }
+            MenuItem {
+                text: qsTr("Cyclic")
+                checkable: true
+                checked: sendPane.cyclicSend
+                onTriggered: sendPane.cyclicSend = !sendPane.cyclicSend
+            }
+        }
+    }
+
+    // ── Global shortcuts ───────────────────────────────────────
+    Shortcut {
+        sequences: [StandardKey.Quit]
+        onActivated: Qt.quit()
+    }
+    Shortcut {
+        sequences: ["Ctrl+Enter"]
+        onActivated: sendPane.send()
     }
 
     // ── Main content area ──────────────────────────────────────
@@ -132,6 +192,7 @@ ApplicationWindow {
 
         // Left: serial port config panel
         SerialPortPanel {
+            id: serialPortPanel
             Layout.preferredWidth: 200
             Layout.fillHeight: true
         }
@@ -186,30 +247,11 @@ ApplicationWindow {
     SettingsDialog {
         id: settingsDialog
         appWindow: root
-        appSettings: appSettings
 
         onAboutToShow: {
             settingsDialog.loadSettings()
-
-            var btnPos = settingsButton.mapToItem(parent, 0, 0)
-            var desiredX = btnPos.x + settingsButton.width - width
-            x = Math.max(12, Math.min(desiredX, root.width - width - 12))
-
-            var belowY = btnPos.y + settingsButton.height
-            var availableBelow = root.height - belowY - 12
-            var availableAbove = btnPos.y - 12
-            var preferredHeight = 420
-
-            if (availableBelow >= preferredHeight) {
-                y = belowY
-                height = preferredHeight
-            } else if (availableAbove >= preferredHeight) {
-                height = preferredHeight
-                y = btnPos.y - height
-            } else {
-                height = Math.max(240, root.height - 24)
-                y = 12 + (root.height - 24 - height) / 2
-            }
+            x = (root.width - width) / 2
+            y = (root.height - height) / 2
         }
     }
 

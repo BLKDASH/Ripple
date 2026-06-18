@@ -39,18 +39,16 @@ SerialPortManager::SerialPortManager(QObject *parent)
 
 SerialPortManager::~SerialPortManager()
 {
-    QMetaObject::invokeMethod(m_worker, &SerialWorker::closePort, Qt::QueuedConnection);
-    QMetaObject::invokeMethod(m_worker, &SerialWorker::stopRecording, Qt::QueuedConnection);
-    QMetaObject::invokeMethod(m_worker, [this]() {
-        m_worker->setAutoLog(QString(), false);
-    }, Qt::QueuedConnection);
+    // Ask the worker to shut down cleanly on its own thread.
+    QMetaObject::invokeMethod(m_worker, &SerialWorker::quit, Qt::QueuedConnection);
 
+    // Request the worker thread's event loop to finish after pending events
+    // (including the queued quit() call) are processed.
     m_workerThread->quit();
-    m_workerThread->wait(3000);
-
-    if (m_workerThread->isRunning()) {
-        m_workerThread->terminate();
-        m_workerThread->wait(1000);
+    if (!m_workerThread->wait(5000)) {
+        qWarning() << "Worker thread did not stop within timeout; resources may leak";
+        // Do NOT call terminate() — it can leave the serial port handle and
+        // recording files in an inconsistent state.
     }
 
     delete m_worker;
@@ -306,4 +304,22 @@ QString SerialPortManager::readFileAsHex(const QString &filePath)
     QByteArray data = file.readAll();
     file.close();
     return bytesToHexString(data);
+}
+
+bool SerialPortManager::writeFile(const QString &filePath, const QString &content)
+{
+    QFile file(filePath);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
+        qWarning() << "Failed to open file for writing:" << filePath << file.errorString();
+        return false;
+    }
+
+    QTextStream stream(&file);
+    stream << content;
+    const bool ok = (stream.status() == QTextStream::Ok);
+    file.close();
+
+    if (!ok)
+        qWarning() << "Failed to write file:" << filePath;
+    return ok;
 }

@@ -60,6 +60,7 @@ public:
     Q_INVOKABLE static QString bytesToHexString(const QByteArray &bytes);
     Q_INVOKABLE QString readFile(const QString &filePath);
     Q_INVOKABLE QString readFileAsHex(const QString &filePath);
+    Q_INVOKABLE bool writeFile(const QString &filePath, const QString &content);
 
 signals:
     void isOpenChanged();

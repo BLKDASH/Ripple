@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Dialogs
+import CWY.AppSettings
 import CWY.Serial
 import CWY.I18n
 import CWY.Receive
@@ -18,16 +19,14 @@ Dialog {
     parent: Overlay.overlay
 
     property var appWindow
-    property var appSettings
-
     property string selectedLanguage: "en"
 
     function loadSettings() {
-        selectedLanguage = appSettings ? appSettings.language : "en"
-        themeCombo.currentIndex = appWindow && appWindow.darkTheme ? 0 : 1
+        selectedLanguage = AppSettings.language
+        themeCombo.currentIndex = Theme.darkTheme ? 0 : 1
         showQuickSendCheck.checked = appWindow ? appWindow.showQuickSend : false
-        autoLogCheck.checked = appSettings ? appSettings.autoLogEnabled : false
-        logPathField.text = appSettings ? appSettings.autoLogPath : ""
+        autoLogCheck.checked = AppSettings.autoLogEnabled
+        logPathField.text = AppSettings.autoLogPath
     }
 
     width: 420
@@ -68,19 +67,19 @@ Dialog {
                         text: qsTr("Theme")
                         color: Theme.text
                     }
-                    ComboBox {
+                    FluentComboBox {
                         id: themeCombo
                         Layout.fillWidth: true
                         model: [qsTr("Dark"), qsTr("Light")]
                         popup.y: themeCombo.height + 4
-                        currentIndex: appWindow && appWindow.darkTheme ? 0 : 1
+                        currentIndex: Theme.darkTheme ? 0 : 1
                     }
 
                     Label {
                         text: qsTr("Language")
                         color: Theme.text
                     }
-                    ComboBox {
+                    FluentComboBox {
                         id: languageCombo
                         Layout.fillWidth: true
                         textRole: "text"
@@ -140,14 +139,14 @@ Dialog {
                     CheckBox {
                         id: autoLogCheck
                         text: qsTr("Enable auto log")
-                        checked: appSettings ? appSettings.autoLogEnabled : false
+                        checked: AppSettings.autoLogEnabled
                     }
                     RowLayout {
                         Layout.fillWidth: true
                         TextField {
                             id: logPathField
                             Layout.fillWidth: true
-                            text: appSettings ? appSettings.autoLogPath : ""
+                            text: AppSettings.autoLogPath
                             placeholderText: qsTr("Select log file path...")
                             color: Theme.text
                             background: Rectangle {
@@ -175,22 +174,17 @@ Dialog {
     }
 
     onAccepted: {
-        if (appWindow) {
-            appWindow.darkTheme = (themeCombo.currentIndex === 0)
+        Theme.darkTheme = (themeCombo.currentIndex === 0)
+        if (appWindow)
             appWindow.showQuickSend = showQuickSendCheck.checked
+
+        var lang = languageCombo.currentValue
+        if (lang !== AppSettings.language) {
+            AppSettings.language = lang
+            Translator.setCurrentLanguage(lang)
         }
 
         SerialPort.autoLogEnabled = autoLogCheck.checked
         SerialPort.autoLogPath = logPathField.text
-
-        if (appSettings) {
-            var lang = languageCombo.currentValue
-            if (lang !== appSettings.language) {
-                appSettings.language = lang
-                Translator.setCurrentLanguage(lang)
-            }
-            appSettings.autoLogEnabled = SerialPort.autoLogEnabled
-            appSettings.autoLogPath = SerialPort.autoLogPath
-        }
     }
 }

@@ -27,7 +27,7 @@ Rectangle {
             Layout.fillWidth: true
             Layout.preferredHeight: portCombo.implicitHeight
 
-            ComboBox {
+            FluentComboBox {
                 id: portCombo
                 anchors.fill: parent
                 textRole: "display"
@@ -51,7 +51,6 @@ Rectangle {
                 onPressed: function(mouse) {
                     if (!portCombo.popup.opened) {
                         refreshPorts()
-                        NotificationManager.info(qsTr("串口列表已刷新"))
                     }
                     mouse.accepted = false
                 }
@@ -70,7 +69,7 @@ Rectangle {
             RowLayout {
                 Layout.fillWidth: true
                 spacing: 6
-                ComboBox {
+                FluentComboBox {
                     id: baudCombo
                     Layout.fillWidth: true
                     enabled: !SerialPort.isOpen
@@ -230,6 +229,7 @@ Rectangle {
         }
         portCombo.currentIndex = selectedIndex >= 0 ? selectedIndex : 0
         updatePopupWidth()
+        NotificationManager.info(qsTr("串口列表已刷新"))
     }
 
     function updatePopupWidth() {

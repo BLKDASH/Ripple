@@ -93,6 +93,16 @@ void ReceiveModel::appendBatch(const QVariantList &batch)
     int totalLength = 0;
     int newRowCount = 0;
 
+    struct PendingRecord {
+        QByteArray raw;
+        QDateTime timestamp;
+        QStringList lines;
+        int lineCount = 0;
+    };
+    QVector<PendingRecord> pending;
+    pending.reserve(batch.size());
+
+    // First pass: parse and measure everything without touching the model.
     for (const QVariant &item : batch) {
         QVariantMap record = item.toMap();
         QByteArray rawData = record.value("raw").toByteArray();
@@ -114,14 +124,19 @@ void ReceiveModel::appendBatch(const QVariantList &batch)
             continue;
 
         int lineCount = static_cast<int>(lines.size());
-        m_lines.append(lines);
-        m_records.push_back({rawData, timestamp, lineCount});
+        pending.append({rawData, timestamp, lines, lineCount});
         newRowCount += lineCount;
     }
 
     if (newRowCount > 0) {
-        int firstNewRow = static_cast<int>(m_lines.size()) - newRowCount;
+        // Modify the containers only while the insert notification is active,
+        // so rowCount() and data() stay consistent with the model's public state.
+        int firstNewRow = static_cast<int>(m_lines.size());
         beginInsertRows(QModelIndex(), firstNewRow, firstNewRow + newRowCount - 1);
+        for (const auto &p : pending) {
+            m_lines.append(p.lines);
+            m_records.push_back({p.raw, p.timestamp, p.lineCount});
+        }
         endInsertRows();
     }
 

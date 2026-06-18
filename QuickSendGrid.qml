@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Dialogs
+import CWY.AppSettings
 import CWY.Serial
 import CWY.Theme
 import CWY.NotificationManager
@@ -13,7 +14,6 @@ Rectangle {
     radius: 4
 
     property int itemCount: 6
-
     ColumnLayout {
         anchors.fill: parent
         anchors.margins: 12
@@ -66,8 +66,10 @@ Rectangle {
                     }
                     onTextChanged: {
                         // Guard against model refresh loops when delegate is reused.
-                        if (model.command !== text)
+                        if (model.command !== text) {
                             quickModel.setProperty(index, "command", text)
+                            saveToSettings()
+                        }
                     }
                 }
 
@@ -75,8 +77,10 @@ Rectangle {
                     text: qsTr("HEX")
                     checked: model.hex
                     onCheckedChanged: {
-                        if (model.hex !== checked)
+                        if (model.hex !== checked) {
                             quickModel.setProperty(index, "hex", checked)
+                            saveToSettings()
+                        }
                     }
                 }
 
@@ -107,12 +111,42 @@ Rectangle {
         onAccepted: loadConfig(selectedFile.toString().replace(/^file:\/\/+/, ""))
     }
 
-    Component.onCompleted: initDefault()
+    Component.onCompleted: restoreFromSettings()
 
     function initDefault() {
         quickModel.clear()
         for (var i = 0; i < root.itemCount; ++i) {
             quickModel.append({ command: "", hex: false })
+        }
+    }
+
+    function saveToSettings() {
+        var items = []
+        for (var i = 0; i < quickModel.count; ++i) {
+            var item = quickModel.get(i)
+            items.push({ command: item.command, hex: item.hex })
+        }
+        AppSettings.quickSendJson = JSON.stringify(items)
+    }
+
+    function restoreFromSettings() {
+        var json = AppSettings.quickSendJson
+        if (!json) {
+            initDefault()
+            return
+        }
+        try {
+            var items = JSON.parse(json)
+            quickModel.clear()
+            for (var i = 0; i < root.itemCount; ++i) {
+                if (i < items.length) {
+                    quickModel.append(items[i])
+                } else {
+                    quickModel.append({ command: "", hex: false })
+                }
+            }
+        } catch (e) {
+            initDefault()
         }
     }
 

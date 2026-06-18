@@ -53,6 +53,81 @@
         <source>Load file to send</source>
         <translation>加载文件到发送区</translation>
     </message>
+    <message>
+        <location filename="../Main.qml"/>
+        <source>Port</source>
+        <translation>端口</translation>
+    </message>
+    <message>
+        <location filename="../Main.qml"/>
+        <source>Receive Area</source>
+        <translation>接收区</translation>
+    </message>
+    <message>
+        <location filename="../Main.qml"/>
+        <source>Send Area</source>
+        <translation>发送区</translation>
+    </message>
+    <message>
+        <location filename="../Main.qml"/>
+        <source>Quit</source>
+        <translation>退出</translation>
+    </message>
+    <message>
+        <location filename="../Main.qml"/>
+        <source>Refresh Ports</source>
+        <translation>刷新串口</translation>
+    </message>
+    <message>
+        <location filename="../Main.qml"/>
+        <source>Dark Theme</source>
+        <translation>深色主题</translation>
+    </message>
+    <message>
+        <location filename="../Main.qml"/>
+        <source>HEX</source>
+        <translation>十六进制</translation>
+    </message>
+    <message>
+        <location filename="../Main.qml"/>
+        <source>Show Timestamp</source>
+        <translation>显示时间戳</translation>
+    </message>
+    <message>
+        <location filename="../Main.qml"/>
+        <source>Wrap</source>
+        <translation>换行</translation>
+    </message>
+    <message>
+        <location filename="../Main.qml"/>
+        <source>Copy All</source>
+        <translation>复制全部</translation>
+    </message>
+    <message>
+        <location filename="../Main.qml"/>
+        <source>Send</source>
+        <translation>发送</translation>
+    </message>
+    <message>
+        <location filename="../Main.qml"/>
+        <source>Clear Input</source>
+        <translation>清空输入</translation>
+    </message>
+    <message>
+        <location filename="../Main.qml"/>
+        <source>Append \r</source>
+        <translation>追加 \r</translation>
+    </message>
+    <message>
+        <location filename="../Main.qml"/>
+        <source>Append \n</source>
+        <translation>追加 \n</translation>
+    </message>
+    <message>
+        <location filename="../Main.qml"/>
+        <source>Cyclic</source>
+        <translation>循环发送</translation>
+    </message>
 </context>
 <context>
     <name>SerialPortPanel</name>

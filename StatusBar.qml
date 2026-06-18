@@ -33,20 +33,45 @@ Rectangle {
         anchors.rightMargin: 12
         spacing: 12
 
-        Rectangle {
-            width: 8
-            height: 8
-            radius: 4
-            color: SerialPort.isOpen ? Theme.success : Theme.error
-            Behavior on color {
-                ColorAnimation { duration: 200 }
+        // Combined status indicator.
+        // Inner dot  → connection status (green pulsing / red still).
+        // Outer ring → auto-log active (visible only when auto-log is enabled).
+        Item {
+            width: 14
+            height: 14
+
+            // Outer ring — only visible when auto-log is enabled
+            Rectangle {
+                anchors.centerIn: parent
+                width: 14
+                height: 14
+                radius: 7
+                color: "transparent"
+                border.color: SerialPort.isOpen ? Theme.success : Theme.error
+                border.width: 1
+                visible: SerialPort.autoLogEnabled
+                Behavior on border.color {
+                    ColorAnimation { duration: 200 }
+                }
             }
 
-            SequentialAnimation on opacity {
-                loops: Animation.Infinite
-                running: SerialPort.isOpen
-                NumberAnimation { from: 1.0; to: 0.4; duration: 800 }
-                NumberAnimation { from: 0.4; to: 1.0; duration: 800 }
+            // Inner dot — always visible, shows connection status
+            Rectangle {
+                anchors.centerIn: parent
+                width: 8
+                height: 8
+                radius: 4
+                color: SerialPort.isOpen ? Theme.success : Theme.error
+                Behavior on color {
+                    ColorAnimation { duration: 200 }
+                }
+
+                SequentialAnimation on opacity {
+                    loops: Animation.Infinite
+                    running: SerialPort.isOpen
+                    NumberAnimation { from: 1.0; to: 0.4; duration: 800 }
+                    NumberAnimation { from: 0.4; to: 1.0; duration: 800 }
+                }
             }
         }
 

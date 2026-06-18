@@ -20,7 +20,7 @@ ColumnLayout {
         font.pixelSize: 12
     }
 
-    ComboBox {
+    FluentComboBox {
         id: combo
         Layout.fillWidth: true
         enabled: !SerialPort.isOpen

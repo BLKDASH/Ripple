@@ -12,6 +12,35 @@ static QString normalizeLogLine(const QString &text)
     return line;
 }
 
+static QString hexPreview(const QByteArray &data, int maxBytes = 64)
+{
+    QByteArray preview = data.left(maxBytes);
+    QString hex = QString::fromLatin1(preview.toHex(' '));
+    if (data.size() > maxBytes)
+        hex += QStringLiteral(" ... (%1 more bytes)").arg(data.size() - maxBytes);
+    return QStringLiteral("[Binary data (%1 bytes): %2]").arg(data.size()).arg(hex);
+}
+
+// Try to interpret the raw bytes as UTF-8 text. If a significant fraction of
+// the decoded characters are Unicode replacement characters, the data is almost
+// certainly binary and should be logged as a hex preview to avoid polluting the
+// log file with replacement characters.
+static QString formatLogData(const QByteArray &data)
+{
+    const QString text = QString::fromUtf8(data);
+    int replacementCount = 0;
+    for (const QChar &c : text) {
+        if (c.unicode() == QChar::ReplacementCharacter)
+            replacementCount++;
+    }
+
+    // Heuristic: more than 5 % replacement characters means binary data.
+    if (!text.isEmpty() && replacementCount * 20 > text.size())
+        return hexPreview(data);
+
+    return text;
+}
+
 SerialWorker::SerialWorker(QObject *parent)
     : QObject(parent)
 {
@@ -43,6 +72,17 @@ void SerialWorker::init()
 
     m_batchTimer->setSingleShot(true);
     connect(m_batchTimer, &QTimer::timeout, this, &SerialWorker::flushBatch);
+}
+
+void SerialWorker::quit()
+{
+    // Flush any pending UI batch before the event loop stops.
+    flushBatch();
+    m_batchTimer->stop();
+
+    closePort();
+    stopRecording();
+    setAutoLog(QString(), false);
 }
 
 void SerialWorker::openPort(const QString &name, int baudRate, int dataBits, int stopBits, int parity, int flowControl)
@@ -114,7 +154,9 @@ void SerialWorker::sendData(const QByteArray &data)
         emit errorOccurred(m_serialPort->errorString());
         return;
     }
-    m_serialPort->flush();
+    // Do not call QSerialPort::flush() here — it blocks the worker thread's
+    // event loop and can stall readyRead/batch timer processing at high baud
+    // rates. The OS transmit buffer already holds the data after write().
     emit bytesSent(written);
 }
 
@@ -251,13 +293,12 @@ void SerialWorker::writeRecord(const QByteArray &data, const QDateTime &arrivalT
         return;
 
     if (m_recordPath.endsWith(".bin", Qt::CaseInsensitive)) {
+        // Binary recording: write raw bytes. Flushing is deferred until the
+        // recording is stopped to avoid killing throughput at high baud rates.
         m_recordFile->write(data);
-        m_recordFile->flush();
     } else if (m_recordStream) {
-        const QString textData = QString::fromUtf8(data);
         *m_recordStream << "[" << arrivalTime.toString("yyyy-MM-dd hh:mm:ss.zzz") << "] ";
-        *m_recordStream << normalizeLogLine(textData) << "\n";
-        m_recordStream->flush();
+        *m_recordStream << normalizeLogLine(formatLogData(data)) << "\n";
     }
 }
 
@@ -266,10 +307,8 @@ void SerialWorker::writeAutoLog(const QByteArray &data, const QDateTime &arrival
     if (!m_autoLogFile || !m_autoLogFile->isOpen() || !m_autoLogStream)
         return;
 
-    const QString textData = QString::fromUtf8(data);
     *m_autoLogStream << "[" << arrivalTime.toString("yyyy-MM-dd hh:mm:ss.zzz") << "] ";
-    *m_autoLogStream << normalizeLogLine(textData) << "\n";
-    m_autoLogStream->flush();
+    *m_autoLogStream << normalizeLogLine(formatLogData(data)) << "\n";
 }
 
 void SerialWorker::flushBatch()

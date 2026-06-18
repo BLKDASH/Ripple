@@ -4,7 +4,7 @@
     <Name>CWY Serial Assistant</Name>
 
     <!-- 安装包版本号，与 CMakeLists.txt 中的 project() 版本保持一致 -->
-    <Version>0.1.0</Version>
+    <Version>@PROJECT_VERSION@</Version>
 
     <!-- 安装程序窗口标题 -->
     <Title>CWY Serial Assistant 安装程序</Title>
@@ -14,7 +14,7 @@
     <ProductUrl>https://github.com/BLKDASH</ProductUrl>
 
     <!-- 默认安装目录（Windows 64 位示例：C:\Program Files\CWY Serial Assistant） -->
-    <TargetDir>/CWY Serial Assistant</TargetDir>
+    <TargetDir>@ApplicationsDir@/CWY Serial Assistant</TargetDir>
 
     <!-- 开始菜单文件夹 -->
     <StartMenuDir>CWY Serial Assistant</StartMenuDir>

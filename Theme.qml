@@ -8,8 +8,7 @@ import QtQuick
 QtObject {
     id: root
 
-    // Public toggle. Main.qml binds its own darkTheme property to this value
-    // and persists it through Settings.
+    // Public toggle. Main.qml persists this value through Settings.
     property bool darkTheme: false
 
     // Core palette
