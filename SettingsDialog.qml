@@ -12,7 +12,6 @@ Dialog {
     standardButtons: Dialog.Ok | Dialog.Cancel
     modal: true
 
-    property var themePalette
     property var appWindow
     property var appSettings
 
@@ -20,7 +19,7 @@ Dialog {
 
     function loadSettings() {
         selectedLanguage = appSettings ? appSettings.language : "en"
-        themeCombo.currentIndex = appWindow ? (appWindow.darkTheme ? 0 : 1) : 1
+        themeCombo.currentIndex = appWindow && appWindow.darkTheme ? 0 : 1
         showQuickSendCheck.checked = appWindow ? appWindow.showQuickSend : false
         autoLogCheck.checked = appSettings ? appSettings.autoLogEnabled : false
         logPathField.text = appSettings ? appSettings.autoLogPath : ""
@@ -46,13 +45,13 @@ Dialog {
                 Layout.fillWidth: true
                 title: qsTr("Appearance")
             background: Rectangle {
-                color: root.themePalette.background
-                border.color: root.themePalette.border
+                color: _inputBg
+                border.color: _border
                 radius: 4
             }
             label: Label {
                 text: parent.title
-                color: root.themePalette.text
+                color: _text
                 font.bold: true
             }
 
@@ -61,19 +60,19 @@ Dialog {
                 spacing: 8
                 Label {
                     text: qsTr("Theme")
-                    color: root.themePalette.text
+                    color: _text
                 }
                 ComboBox {
                     id: themeCombo
                     Layout.fillWidth: true
                     model: [qsTr("Dark"), qsTr("Light")]
                     popup.y: themeCombo.height + 4
-                    currentIndex: appWindow ? (appWindow.darkTheme ? 0 : 1) : 0
+                    currentIndex: appWindow && appWindow.darkTheme ? 0 : 1
                 }
 
                 Label {
                     text: qsTr("Language")
-                    color: root.themePalette.text
+                    color: _text
                 }
                 ComboBox {
                     id: languageCombo
@@ -94,13 +93,13 @@ Dialog {
             Layout.fillWidth: true
             title: qsTr("Receive")
             background: Rectangle {
-                color: root.themePalette.background
-                border.color: root.themePalette.border
+                color: _inputBg
+                border.color: _border
                 radius: 4
             }
             label: Label {
                 text: parent.title
-                color: root.themePalette.text
+                color: _text
                 font.bold: true
             }
 
@@ -119,13 +118,13 @@ Dialog {
             Layout.fillWidth: true
             title: qsTr("Auto Log")
             background: Rectangle {
-                color: root.themePalette.background
-                border.color: root.themePalette.border
+                color: _inputBg
+                border.color: _border
                 radius: 4
             }
             label: Label {
                 text: parent.title
-                color: root.themePalette.text
+                color: _text
                 font.bold: true
             }
 
@@ -144,10 +143,10 @@ Dialog {
                         Layout.fillWidth: true
                         text: appSettings ? appSettings.autoLogPath : ""
                         placeholderText: qsTr("Select log file path...")
-                        color: root.themePalette.text
+                        color: _text
                         background: Rectangle {
-                            color: root.themePalette.background
-                            border.color: root.themePalette.border
+                            color: _inputBg
+                            border.color: _border
                             radius: 4
                         }
                     }

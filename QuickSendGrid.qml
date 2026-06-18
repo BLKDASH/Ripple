@@ -6,11 +6,10 @@ import CWY.Serial
 
 Rectangle {
     id: root
-    color: themePalette.panel
-    border.color: themePalette.border
+    color: _panelBg
+    border.color: _border
     radius: 4
 
-    property var themePalette
     property int itemCount: 6
 
     ColumnLayout {
@@ -23,7 +22,7 @@ Rectangle {
             Label {
                 text: qsTr("Quick Send")
                 font.bold: true
-                color: themePalette.text
+                color: _text
             }
             Item { Layout.fillWidth: true }
             Button {
@@ -55,12 +54,12 @@ Rectangle {
                     Layout.fillWidth: true
                     text: model.command
                     placeholderText: qsTr("Command") + " " + (index + 1)
-                    color: themePalette.text
+                    color: _text
                     font.family: "Consolas"
                     font.pixelSize: 12
                     background: Rectangle {
-                        color: themePalette.background
-                        border.color: themePalette.border
+                        color: _inputBg
+                        border.color: _border
                         radius: 4
                     }
                     onTextChanged: quickModel.set(index, { "command": text })
@@ -82,29 +81,6 @@ Rectangle {
     }
 
     ListModel { id: quickModel }
-
-    Popup {
-        id: errorPopup
-        property alias text: errorLabel.text
-        x: (parent.width - width) / 2
-        y: 12
-        width: 360
-        height: 50
-        modal: false
-        focus: false
-        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
-        background: Rectangle {
-            color: "#F85149"
-            radius: 4
-        }
-        contentItem: Label {
-            id: errorLabel
-            color: "white"
-            horizontalAlignment: Text.AlignHCenter
-            verticalAlignment: Text.AlignVCenter
-            wrapMode: Text.Wrap
-        }
-    }
 
     FileDialog {
         id: saveDialog
@@ -151,16 +127,14 @@ Rectangle {
         }
         var json = JSON.stringify(items, null, 2)
         if (!SerialPort.writeFile(filePath, json)) {
-            errorPopup.text = qsTr("Failed to save config")
-            errorPopup.open()
+            notify.error(qsTr("Failed to save config"))
         }
     }
 
     function loadConfig(filePath) {
         var json = SerialPort.readFile(filePath)
         if (json.length === 0) {
-            errorPopup.text = qsTr("Failed to load config")
-            errorPopup.open()
+            notify.error(qsTr("Failed to load config"))
             return
         }
         try {
@@ -174,8 +148,7 @@ Rectangle {
                 }
             }
         } catch (e) {
-            errorPopup.text = qsTr("Invalid config file")
-            errorPopup.open()
+            notify.error(qsTr("Invalid config file"))
         }
     }
 }

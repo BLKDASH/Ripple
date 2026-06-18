@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
     app.setOrganizationDomain("cwy.local");
     app.setApplicationName("CWY Serial Assistant");
 
-    QQuickStyle::setStyle("Fusion");
+    QQuickStyle::setStyle("FluentWinUI3");
 
     // Create singleton instances explicitly so we can wire them together in C++.
     SerialPortManager *serialManager = new SerialPortManager();

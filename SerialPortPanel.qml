@@ -5,11 +5,9 @@ import CWY.Serial
 
 Rectangle {
     id: root
-    color: themePalette.panel
-    border.color: themePalette.border
+    color: _panelBg
+    border.color: _border
     radius: 4
-
-    property var themePalette
 
     ColumnLayout {
         anchors.fill: parent
@@ -19,30 +17,22 @@ Rectangle {
         Label {
             text: qsTr("Serial Port")
             font.bold: true
-            color: themePalette.text
+            color: _text
         }
 
-        // Port selection
-        RowLayout {
+        // Port selection — click to refresh
+        Item {
             Layout.fillWidth: true
-            spacing: 6
+            Layout.preferredHeight: portCombo.implicitHeight
+
             ComboBox {
                 id: portCombo
-                Layout.fillWidth: true
+                anchors.fill: parent
                 textRole: "display"
                 valueRole: "name"
                 enabled: !SerialPort.isOpen
                 model: ListModel { id: portModel }
                 popup.y: portCombo.height + 4
-                popup.width: {
-                    var maxW = portCombo.width
-                    for (var i = 0; i < portModel.count; ++i) {
-                        var item = portModel.get(i)
-                        textMetrics.text = item ? item.display : ""
-                        maxW = Math.max(maxW, textMetrics.advanceWidth + 32)
-                    }
-                    return maxW
-                }
                 onActivated: SerialPort.portName = currentValue
 
                 TextMetrics {
@@ -50,34 +40,18 @@ Rectangle {
                     font: portCombo.font
                 }
             }
-            Label {
-                id: refreshIcon
-                text: "🔃"
-                font.pixelSize: 18
-                color: SerialPort.isOpen ? themePalette.border : themePalette.text
+
+            // Intercept mouse press on the combo to refresh ports before popup opens
+            MouseArea {
+                anchors.fill: parent
+                propagateComposedEvents: true
                 enabled: !SerialPort.isOpen
-                opacity: enabled ? 1.0 : 0.4
-
-                ToolTip.visible: refreshMouseArea.containsMouse
-                ToolTip.text: qsTr("Refresh ports")
-
-                MouseArea {
-                    id: refreshMouseArea
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    onClicked: {
+                onPressed: function(mouse) {
+                    if (!portCombo.popup.opened) {
                         refreshPorts()
-                        refreshAnim.start()
+                        notify.info(qsTr("串口列表已刷新"))
                     }
-                    cursorShape: Qt.PointingHandCursor
-                }
-
-                RotationAnimator on rotation {
-                    id: refreshAnim
-                    from: 0
-                    to: 360
-                    duration: 400
-                    running: false
+                    mouse.accepted = false
                 }
             }
         }
@@ -88,7 +62,7 @@ Rectangle {
             spacing: 4
             Label {
                 text: qsTr("Baud Rate")
-                color: themePalette.text
+                color: _text
                 font.pixelSize: 12
             }
             RowLayout {
@@ -128,14 +102,14 @@ Rectangle {
                     visible: baudCombo.currentIndex === baudCombo.count - 1
                     enabled: !SerialPort.isOpen
                     text: SerialPort.baudRate
-                    color: themePalette.text
+                    color: _text
                     font.family: "Consolas"
                     font.pixelSize: 12
                     horizontalAlignment: Text.AlignRight
                     validator: IntValidator { bottom: 1; top: 99999999 }
                     background: Rectangle {
-                        color: themePalette.background
-                        border.color: themePalette.border
+                        color: _inputBg
+                        border.color: _border
                         radius: 4
                     }
                     onEditingFinished: {
@@ -151,7 +125,6 @@ Rectangle {
         // Data bits
         ParamCombo {
             label: qsTr("Data Bits")
-            themePalette: root.themePalette
             model: [
                 { value: 5, text: "5" },
                 { value: 6, text: "6" },
@@ -165,7 +138,6 @@ Rectangle {
         // Stop bits
         ParamCombo {
             label: qsTr("Stop Bits")
-            themePalette: root.themePalette
             model: [
                 { value: 1, text: "1" },
                 { value: 3, text: "1.5" },
@@ -178,7 +150,6 @@ Rectangle {
         // Parity
         ParamCombo {
             label: qsTr("Parity")
-            themePalette: root.themePalette
             model: [
                 { value: 0, text: qsTr("None") },
                 { value: 2, text: qsTr("Even") },
@@ -193,7 +164,6 @@ Rectangle {
         // Flow control
         ParamCombo {
             label: qsTr("Flow Control")
-            themePalette: root.themePalette
             model: [
                 { value: 0, text: qsTr("None") },
                 { value: 1, text: qsTr("Hardware") },
@@ -257,5 +227,16 @@ Rectangle {
             SerialPort.portName = ports[0].name
         }
         portCombo.currentIndex = selectedIndex >= 0 ? selectedIndex : 0
+        updatePopupWidth()
+    }
+
+    function updatePopupWidth() {
+        var maxW = portCombo.width
+        for (var i = 0; i < portModel.count; ++i) {
+            var item = portModel.get(i)
+            textMetrics.text = item ? item.display : ""
+            maxW = Math.max(maxW, textMetrics.advanceWidth + 32)
+        }
+        portCombo.popup.width = maxW
     }
 }

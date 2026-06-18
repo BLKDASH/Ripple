@@ -11,12 +11,11 @@ ColumnLayout {
     property string label
     property var model
     property int currentValue
-    property var themePalette
     signal valueChanged(int value)
 
     Label {
         text: root.label
-        color: themePalette.text
+        color: _text
         font.pixelSize: 12
     }
 

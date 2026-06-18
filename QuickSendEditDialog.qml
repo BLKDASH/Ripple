@@ -9,7 +9,6 @@ Dialog {
     standardButtons: Dialog.Save | Dialog.Cancel
     modal: true
 
-    property var themePalette
     property var item
 
     signal saved(var item)
@@ -23,34 +22,34 @@ Dialog {
 
         Label {
             text: qsTr("Button Name")
-            color: root.themePalette.text
+            color: _text
         }
         TextField {
             id: nameField
             Layout.fillWidth: true
             text: root.item ? root.item.name : ""
-            color: root.themePalette.text
+            color: _text
             background: Rectangle {
-                color: root.themePalette.background
-                border.color: root.themePalette.border
+                color: _inputBg
+                border.color: _border
                 radius: 4
             }
         }
 
         Label {
             text: qsTr("Send Content")
-            color: root.themePalette.text
+            color: _text
         }
         TextArea {
             id: contentField
             Layout.fillWidth: true
             Layout.fillHeight: true
             text: root.item ? root.item.content : ""
-            color: root.themePalette.text
+            color: _text
             font.family: "Consolas"
             background: Rectangle {
-                color: root.themePalette.background
-                border.color: root.themePalette.border
+                color: _inputBg
+                border.color: _border
                 radius: 4
             }
         }

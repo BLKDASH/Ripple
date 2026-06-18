@@ -25,6 +25,7 @@ qt_add_qml_module(appCWY
     URI CWY
     QML_FILES
         Main.qml
+        NotifyOverlay.qml
         SerialPortPanel.qml
         ParamCombo.qml
         ReceivePane.qml

@@ -231,8 +231,10 @@ QStringList ReceiveModel::formatRecordLines(const QByteArray &rawData) const
     if (text.isEmpty())
         return {};
 
-    // Split into individual display lines, dropping trailing empty.
-    QStringList lines = text.split('\n', Qt::SkipEmptyParts);
+    // Split into individual display lines.
+    QStringList lines = text.split('\n');
+    // Remove empty entries (trailing \n, double \n, etc.).
+    lines.removeAll(QString());
     return lines;
 }
 

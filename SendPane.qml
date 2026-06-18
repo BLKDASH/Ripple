@@ -5,11 +5,9 @@ import CWY.Serial
 
 Rectangle {
     id: root
-    color: themePalette.panel
-    border.color: themePalette.border
+    color: _panelBg
+    border.color: _border
     radius: 4
-
-    property var themePalette
 
     property bool hexMode: false
     property bool appendCr: false
@@ -21,8 +19,7 @@ Rectangle {
 
     function send() {
         if (!SerialPort.isOpen) {
-            errorPopup.text = qsTr("Serial port is not open")
-            errorPopup.open()
+            notify.error(qsTr("Serial port is not open"))
             return
         }
 
@@ -30,13 +27,11 @@ Rectangle {
         if (root.hexMode) {
             payload = payload.replace(/\s/g, "")
             if (payload.length % 2 !== 0) {
-                errorPopup.text = qsTr("Invalid HEX: odd number of digits")
-                errorPopup.open()
+                notify.error(qsTr("Invalid HEX: odd number of digits"))
                 return
             }
             if (!/^[0-9A-Fa-f]*$/.test(payload)) {
-                errorPopup.text = qsTr("Invalid HEX: only 0-9, A-F allowed")
-                errorPopup.open()
+                notify.error(qsTr("Invalid HEX: only 0-9, A-F allowed"))
                 return
             }
         }
@@ -61,15 +56,15 @@ Rectangle {
         Label {
             text: qsTr("Send")
             font.bold: true
-            color: themePalette.text
+            color: _text
         }
 
         // Send input with custom scrollbar
         Rectangle {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            color: themePalette.background
-            border.color: sendInput.validInput ? themePalette.border : themePalette.error
+            color: _inputBg
+            border.color: sendInput.validInput ? _border : _error
             radius: 4
             clip: true
 
@@ -87,7 +82,7 @@ Rectangle {
                     id: sendInput
                     width: sendFlickable.width
                     height: Math.max(implicitHeight, sendFlickable.height)
-                    color: themePalette.text
+                    color: _text
                     wrapMode: Text.Wrap
                     font.family: "Consolas"
                     font.pixelSize: 13
@@ -103,8 +98,9 @@ Rectangle {
                         }
                     }
 
-                    Keys.onReturnPressed: (event) => {
-                        if (event.modifiers & Qt.ControlModifier) {
+                    Keys.onPressed: (event) => {
+                        if ((event.key === Qt.Key_Return || event.key === Qt.Key_Enter)
+                            && (event.modifiers & Qt.ControlModifier)) {
                             root.send()
                             event.accepted = true
                         }
@@ -112,7 +108,6 @@ Rectangle {
                 }
 
                 ScrollBar.vertical: CustomScrollBar {
-                    themePalette: root.themePalette
                     orientation: Qt.Vertical
                     policy: sendFlickable.contentHeight > sendFlickable.height + 5 ? ScrollBar.AsNeeded : ScrollBar.AlwaysOff
                 }
@@ -157,7 +152,7 @@ Rectangle {
 
             Label {
                 text: qsTr("Interval (ms)")
-                color: themePalette.text
+                color: _text
                 font.pixelSize: 12
             }
             SpinBox {

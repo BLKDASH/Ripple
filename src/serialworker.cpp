@@ -66,7 +66,8 @@ void SerialWorker::openPort(const QString &name, int baudRate, int dataBits, int
     m_serialPort->setFlowControl(static_cast<QSerialPort::FlowControl>(flowControl));
 
     if (!m_serialPort->open(QIODevice::ReadWrite)) {
-        emit errorOccurred(m_serialPort->errorString());
+        // handleError() is already connected to QSerialPort::errorOccurred
+        // and will emit errorOccurred — avoid double emission here.
         emit isOpenChanged(false);
         return;
     }
