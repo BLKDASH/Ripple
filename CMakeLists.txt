@@ -19,6 +19,8 @@ qt_add_executable(appCWY
     src/translator.cpp
     src/receivemodel.h
     src/receivemodel.cpp
+    src/logger.h
+    src/logger.cpp
 )
 
 qt_add_qml_module(appCWY
@@ -36,7 +38,12 @@ qt_add_qml_module(appCWY
         SettingsDialog.qml
         CustomScrollBar.qml
         GlassPanel.qml
+        Theme.qml
+        NotificationManager.qml
 )
+
+set_source_files_properties(Theme.qml NotificationManager.qml
+    PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
 
 qt_add_translations(appCWY
     TS_FILES translations/CWY_zh_CN.ts

@@ -4,6 +4,7 @@
 #include <QAbstractListModel>
 #include <QByteArray>
 #include <QStringList>
+#include <QDateTime>
 #include <deque>
 
 class ReceiveModel : public QAbstractListModel
@@ -54,11 +55,12 @@ signals:
 private:
     struct Record {
         QByteArray raw;
+        QDateTime timestamp;
         int lineCount = 0;
     };
 
-    QStringList formatRecordLines(const QByteArray &rawData) const;
-    QString formatRecordText(const QByteArray &rawData) const;
+    QStringList formatRecordLines(const QByteArray &rawData, const QDateTime &timestamp) const;
+    QString formatRecordText(const QByteArray &rawData, const QDateTime &timestamp) const;
     void enforceBufferLimits();
     void regenerateAllLines();
     QString currentTimeString() const;

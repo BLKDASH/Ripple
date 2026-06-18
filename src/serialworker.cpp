@@ -68,9 +68,17 @@ void SerialWorker::openPort(const QString &name, int baudRate, int dataBits, int
     if (!m_serialPort->open(QIODevice::ReadWrite)) {
         // handleError() is already connected to QSerialPort::errorOccurred
         // and will emit errorOccurred — avoid double emission here.
+        qWarning() << "Failed to open serial port" << name;
         emit isOpenChanged(false);
         return;
     }
+
+    qInfo() << "Serial port opened:" << name
+            << "baud=" << baudRate
+            << "data=" << dataBits
+            << "stop=" << stopBits
+            << "parity=" << parity
+            << "flow=" << flowControl;
 
     // Discard any stale/noise data that may be present right after opening.
     m_serialPort->clear(QSerialPort::Input);
@@ -88,6 +96,7 @@ void SerialWorker::closePort()
     if (!m_serialPort || !m_serialPort->isOpen())
         return;
 
+    qInfo() << "Serial port closed:" << m_serialPort->portName();
     m_serialPort->close();
     emit isOpenChanged(false);
 }
@@ -101,6 +110,7 @@ void SerialWorker::sendData(const QByteArray &data)
 
     qint64 written = m_serialPort->write(data);
     if (written == -1) {
+        qWarning() << "Serial write failed:" << m_serialPort->errorString();
         emit errorOccurred(m_serialPort->errorString());
         return;
     }
@@ -120,11 +130,14 @@ void SerialWorker::startRecording(const QString &filePath)
         mode |= QIODevice::Text;
 
     if (!m_recordFile->open(mode)) {
+        qWarning() << "Failed to open recording file:" << filePath;
         emit errorOccurred(tr("Failed to open recording file: %1").arg(filePath));
         delete m_recordFile;
         m_recordFile = nullptr;
         return;
     }
+
+    qInfo() << "Recording started:" << filePath;
 
     if (!filePath.endsWith(".bin", Qt::CaseInsensitive))
         m_recordStream = new QTextStream(m_recordFile);
@@ -149,6 +162,7 @@ void SerialWorker::stopRecording()
     m_recordPath.clear();
     if (m_recordingEnabled) {
         m_recordingEnabled = false;
+        qInfo() << "Recording stopped";
         emit recordingChanged(false);
     }
 }
@@ -174,12 +188,16 @@ void SerialWorker::setAutoLog(const QString &filePath, bool enabled)
         m_autoLogFile = new QFile(filePath, this);
         if (m_autoLogFile->open(QIODevice::Append | QIODevice::Text)) {
             m_autoLogStream = new QTextStream(m_autoLogFile);
+            qInfo() << "Auto-log enabled:" << filePath;
         } else {
+            qWarning() << "Failed to open auto-log file:" << filePath;
             emit errorOccurred(tr("Failed to open auto-log file: %1").arg(filePath));
             delete m_autoLogFile;
             m_autoLogFile = nullptr;
             m_autoLogEnabled = false;
         }
+    } else if (!enabled) {
+        qInfo() << "Auto-log disabled";
     }
 }
 
@@ -195,18 +213,25 @@ void SerialWorker::readData()
     if (m_inWarmup)
         return;
 
+    // Capture the actual arrival time on the worker thread, before any
+    // batching or UI formatting delays. Use milliseconds since epoch so it
+    // survives the queued cross-thread signal in a QVariantMap.
+    qint64 arrivalTimeMs = QDateTime::currentDateTime().toMSecsSinceEpoch();
+    QDateTime arrivalTime = QDateTime::fromMSecsSinceEpoch(arrivalTimeMs);
+
     // Synchronous file append for recording
     if (m_recordingEnabled)
-        writeRecord(data);
+        writeRecord(data, arrivalTime);
 
     // Asynchronous auto-log (still synchronous in worker thread, but off GUI thread)
     if (m_autoLogEnabled)
-        writeAutoLog(data);
+        writeAutoLog(data, arrivalTime);
 
     // Accumulate for batched UI update
     QVariantMap record;
     record["raw"] = data;
     record["length"] = data.size();
+    record["time"] = arrivalTimeMs;
     m_pendingBatch.append(record);
     m_pendingBatchBytes += data.size();
 
@@ -220,7 +245,7 @@ void SerialWorker::readData()
     emit bytesReceived(data.size());
 }
 
-void SerialWorker::writeRecord(const QByteArray &data)
+void SerialWorker::writeRecord(const QByteArray &data, const QDateTime &arrivalTime)
 {
     if (!m_recordFile || !m_recordFile->isOpen())
         return;
@@ -230,19 +255,19 @@ void SerialWorker::writeRecord(const QByteArray &data)
         m_recordFile->flush();
     } else if (m_recordStream) {
         const QString textData = QString::fromUtf8(data);
-        *m_recordStream << "[" << QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss.zzz") << "] ";
+        *m_recordStream << "[" << arrivalTime.toString("yyyy-MM-dd hh:mm:ss.zzz") << "] ";
         *m_recordStream << normalizeLogLine(textData) << "\n";
         m_recordStream->flush();
     }
 }
 
-void SerialWorker::writeAutoLog(const QByteArray &data)
+void SerialWorker::writeAutoLog(const QByteArray &data, const QDateTime &arrivalTime)
 {
     if (!m_autoLogFile || !m_autoLogFile->isOpen() || !m_autoLogStream)
         return;
 
     const QString textData = QString::fromUtf8(data);
-    *m_autoLogStream << "[" << QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss.zzz") << "] ";
+    *m_autoLogStream << "[" << arrivalTime.toString("yyyy-MM-dd hh:mm:ss.zzz") << "] ";
     *m_autoLogStream << normalizeLogLine(textData) << "\n";
     m_autoLogStream->flush();
 }
@@ -264,6 +289,7 @@ void SerialWorker::handleError(QSerialPort::SerialPortError error)
     if (error == QSerialPort::NoError)
         return;
 
+    qWarning() << "Serial error:" << error << m_serialPort->errorString();
     emit errorOccurred(m_serialPort->errorString());
 
     if (error == QSerialPort::ResourceError) {

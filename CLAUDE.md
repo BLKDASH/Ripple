@@ -4,20 +4,28 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 构建命令
 
+本项目没有单元测试。推荐直接在 **Qt Creator** 中打开 `CMakeLists.txt`，选择已配好的 MinGW 套件后点击 **构建 > 重新构建项目**。
+
+如果要从命令行构建（根据实际 Qt 安装路径调整）：
+
 ```bash
-# 配置（根据实际 Qt 安装路径调整）
-cmake -B build/Desktop_Qt_6_11_1_llvm_mingw_64_bit-Release \
+# 1. 配置（首次或新增/删除 QML 文件时必须执行）
+cmake -G "MinGW Makefiles" \
+  -B build/Desktop_Qt_6_11_1_MinGW_64_bit-Release \
+  -S . \
   -DCMAKE_BUILD_TYPE=Release \
-  -DCMAKE_PREFIX_PATH=C:/Qt/6.11.1/llvm-mingw_64
+  -DCMAKE_PREFIX_PATH=C:/Qt/6.11.1/mingw_64 \
+  -DCMAKE_MAKE_PROGRAM=C:/Qt/Tools/mingw1310_64/bin/mingw32-make.exe \
+  -DCMAKE_CXX_COMPILER=C:/Qt/Tools/mingw1310_64/bin/g++.exe
 
-# 编译
-cmake --build build/Desktop_Qt_6_11_1_llvm_mingw_64_bit-Release
+# 2. 编译
+cmake --build build/Desktop_Qt_6_11_1_MinGW_64_bit-Release
 
-# 部署（将 QML 模块、DLL、插件打包到 exe 同级目录）
-cmake --install build/Desktop_Qt_6_11_1_llvm_mingw_64_bit-Release --prefix ./deploy/release
+# 3. 部署（将 QML 模块、DLL、插件打包到 exe 同级目录）
+cmake --install build/Desktop_Qt_6_11_1_MinGW_64_bit-Release --prefix ./deploy/release
 ```
 
-本项目没有单元测试。
+> **注意：** 新增或删除 `.qml` 文件后，务必先 **重新配置 CMake**（Qt Creator 中右键项目 → 重新构建；命令行下删除构建目录后重新执行 `cmake -B ...`），否则运行时会出现 `module "CWY.xxx" is not installed` 错误。
 
 ## 架构
 
@@ -73,9 +81,13 @@ QSerialPort::readyRead
 
 自定义组件：`GlassPanel.qml`、`CustomScrollBar.qml`、`ParamCombo.qml`、`QuickSendEditDialog.qml`。
 
+主题与通知通过两个 QML Singleton 集中管理：
+- `Theme.qml` — 明暗色板、窗口调色板映射；所有面板/控件统一从这里取色，不再依赖动态作用域。
+- `NotificationManager.qml` — 全局通知队列；任何 QML 文件调用 `NotificationManager.error/info/...` 即可弹出 Toast，不再依赖 `Main.qml` 里的 `notify` id。
+
 ### 跨线程信号连接（main.cpp）
 
-`SerialPortManager::batchDataReady` 在 `main.cpp` 中直接连接到 `ReceiveModel::appendBatch`。三个单例（`SerialPortManager`、`ReceiveModel`、`Translator`）均在 `main()` 中创建并注册到 QML 引擎，之后才加载 `Main.qml`。
+`SerialPortManager::batchDataReady` 在 `main.cpp` 中直接连接到 `ReceiveModel::appendBatch`。三个单例（`SerialPortManager`、`ReceiveModel`、`Translator`）均在 `main()` 中创建并注册到 QML 引擎，之后才加载 `Main.qml`。`Theme` 与 `NotificationManager` 通过 `qt_add_qml_module` 的 `QT_QML_SINGLETON_TYPE` 属性注册为 QML Singleton。
 
 ### 安装包
 

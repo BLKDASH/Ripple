@@ -6,7 +6,19 @@ setlocal EnableDelayedExpansion
 for %%I in ("%~dp0..") do set "PROJECT_ROOT=%%~fI"
 set "INSTALLER_DIR=%~dp0"
 set "DATA_DIR=%INSTALLER_DIR%packages\com.cwy.cwyapp\data"
-set "BUILD_DIR=%PROJECT_ROOT%\build\Desktop_Qt_6_11_1_llvm_mingw_64_bit-Release"
+set "BUILD_DIR=%PROJECT_ROOT%\build\Desktop_Qt_6_11_1_MinGW_64_bit-Release"
+
+:  Add Qt Installer Framework tools to PATH if not already present
+set "QIF_DIR=C:\Qt\Tools\QtInstallerFramework\4.11\bin"
+if exist "%QIF_DIR%" (
+    set "PATH=%PATH%;%QIF_DIR%"
+)
+
+:: Add CMake to PATH if not already present
+set "CMAKE_DIR=C:\Qt\Tools\CMake_64\bin"
+if exist "%CMAKE_DIR%" (
+    set "PATH=%PATH%;%CMAKE_DIR%"
+)
 
 :: 安装包版本号（与 config.xml / package.xml 保持一致）
 set "VERSION=0.1.0"

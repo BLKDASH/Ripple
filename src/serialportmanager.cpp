@@ -170,6 +170,8 @@ QVariantList SerialPortManager::availablePorts() const
 
 bool SerialPortManager::openPort()
 {
+    qInfo() << "Request open port:" << m_portName
+            << "baud=" << m_baudRate;
     QString name = m_portName;
     int baud = m_baudRate;
     int data = m_dataBits;
@@ -184,6 +186,7 @@ bool SerialPortManager::openPort()
 
 void SerialPortManager::closePort()
 {
+    qInfo() << "Request close port";
     QMetaObject::invokeMethod(m_worker, &SerialWorker::closePort, Qt::QueuedConnection);
 }
 
@@ -200,6 +203,7 @@ bool SerialPortManager::sendHex(const QString &hexString)
 {
     QByteArray data = hexStringToBytes(hexString);
     if (data.isEmpty() && !hexString.trimmed().isEmpty()) {
+        qWarning() << "Invalid HEX format:" << hexString;
         emit errorOccurred(tr("Invalid HEX format"));
         return false;
     }
@@ -211,12 +215,14 @@ bool SerialPortManager::sendHex(const QString &hexString)
 
 void SerialPortManager::startRecording(const QString &filePath)
 {
+    qInfo() << "Request start recording:" << filePath;
     setRecordingPath(filePath);
     setRecordingEnabled(true);
 }
 
 void SerialPortManager::stopRecording()
 {
+    qInfo() << "Request stop recording";
     setRecordingEnabled(false);
 }
 
@@ -300,11 +306,4 @@ QString SerialPortManager::readFileAsHex(const QString &filePath)
     QByteArray data = file.readAll();
     file.close();
     return bytesToHexString(data);
-}
-
-bool SerialPortManager::saveReceiveBuffer(const QString &filePath)
-{
-    Q_UNUSED(filePath)
-    // Receive buffer is no longer centrally stored; this function is deprecated.
-    return false;
 }

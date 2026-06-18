@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QSerialPort>
 #include <QTimer>
+#include <QDateTime>
 #include <QFile>
 #include <QTextStream>
 #include <QVariantList>
@@ -40,8 +41,8 @@ private slots:
     void flushBatch();
 
 private:
-    void writeRecord(const QByteArray &data);
-    void writeAutoLog(const QByteArray &data);
+    void writeRecord(const QByteArray &data, const QDateTime &arrivalTime);
+    void writeAutoLog(const QByteArray &data, const QDateTime &arrivalTime);
 
     QSerialPort *m_serialPort = nullptr;
     QTimer *m_warmupTimer = nullptr;

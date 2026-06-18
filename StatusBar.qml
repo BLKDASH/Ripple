@@ -2,12 +2,14 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import CWY.Serial
+import CWY.Theme
 
 Rectangle {
     id: root
     height: 28
-    color: _panelBg
-    border.color: _border
+    color: Theme.panelBg
+    border.color: Theme.border
+    radius: 4
 
     property int rxCount: 0
     property int txCount: 0
@@ -21,8 +23,8 @@ Rectangle {
 
     SequentialAnimation {
         id: flashColorAnim
-        ColorAnimation { target: rxTxLabel; property: "color"; to: _accent; duration: 100 }
-        ColorAnimation { target: rxTxLabel; property: "color"; to: _text; duration: 400 }
+        ColorAnimation { target: rxTxLabel; property: "color"; to: Theme.accent; duration: 100 }
+        ColorAnimation { target: rxTxLabel; property: "color"; to: Theme.text; duration: 400 }
     }
 
     RowLayout {
@@ -35,7 +37,7 @@ Rectangle {
             width: 8
             height: 8
             radius: 4
-            color: SerialPort.isOpen ? _success : _error
+            color: SerialPort.isOpen ? Theme.success : Theme.error
             Behavior on color {
                 ColorAnimation { duration: 200 }
             }
@@ -52,13 +54,13 @@ Rectangle {
             text: SerialPort.isOpen
                   ? qsTr("Connected")
                   : qsTr("Disconnected")
-            color: _text
+            color: Theme.text
             font.pixelSize: 12
         }
 
         Label {
             text: "|"
-            color: _text
+            color: Theme.text
             font.pixelSize: 12
         }
 
@@ -72,7 +74,7 @@ Rectangle {
                     .arg(SerialPort.stopBits === 3 ? "1.5" : SerialPort.stopBits)
                     .arg(["None", "HW", "SW"][SerialPort.flowControl] || "None")
                   : qsTr("No port")
-            color: _text
+            color: Theme.text
             font.pixelSize: 12
         }
 
@@ -81,7 +83,7 @@ Rectangle {
         Label {
             id: rxTxLabel
             text: qsTr("RX: %1 | TX: %2").arg(root.rxCount).arg(root.txCount)
-            color: _text
+            color: Theme.text
             font.pixelSize: 12
             font.family: "Consolas"
         }

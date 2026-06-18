@@ -3,11 +3,13 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import CWY.Serial
 import CWY.Receive
+import CWY.Theme
+import CWY.Logger
 
 Rectangle {
     id: root
-    color: _panelBg
-    border.color: _border
+    color: Theme.panelBg
+    border.color: Theme.border
     radius: 4
 
     signal saveRequested()
@@ -21,6 +23,7 @@ Rectangle {
         ReceiveModel.clear()
         receiveList.autoScroll = true
         receiveList.pendingAutoScroll = false
+        receiveList.maxDelegateWidth = 0
         root.clearRequested()
     }
 
@@ -31,20 +34,22 @@ Rectangle {
 
         // ── Toolbar ──────────────────────────────────────────
         Flickable {
+            id: toolbarFlick
             Layout.fillWidth: true
             height: toolbarRow.implicitHeight
-            contentWidth: toolbarRow.implicitWidth
+            contentWidth: Math.max(toolbarRow.implicitWidth, width)
             flickableDirection: Flickable.HorizontalFlick
             clip: true
 
             RowLayout {
                 id: toolbarRow
-                spacing: 4
+                width: toolbarFlick.contentWidth
+                spacing: 8
 
                 Label {
                     text: qsTr("Receive")
                     font.bold: true
-                    color: _text
+                    color: Theme.text
                 }
 
                 Item { Layout.fillWidth: true }
@@ -52,8 +57,9 @@ Rectangle {
                 Button {
                     text: ReceiveModel.hexMode ? qsTr("HEX") : qsTr("Text")
                     flat: true
-                    implicitWidth: Math.min(implicitContentWidth + 16, 70)
+                    Layout.minimumWidth: implicitContentWidth + 16
                     onClicked: {
+                        Logger.info("ReceivePane: toggling hex mode to " + !ReceiveModel.hexMode)
                         receiveList.pendingAutoScroll = true
                         uiUpdateTimer.restart()
                         ReceiveModel.hexMode = !ReceiveModel.hexMode
@@ -64,8 +70,9 @@ Rectangle {
                     text: qsTr("TS")
                     flat: true
                     highlighted: ReceiveModel.showTimestamp
-                    implicitWidth: Math.min(implicitContentWidth + 16, 50)
+                    Layout.minimumWidth: implicitContentWidth + 16
                     onClicked: {
+                        Logger.info("ReceivePane: toggling timestamp to " + !ReceiveModel.showTimestamp)
                         receiveList.pendingAutoScroll = true
                         uiUpdateTimer.restart()
                         ReceiveModel.showTimestamp = !ReceiveModel.showTimestamp
@@ -76,15 +83,21 @@ Rectangle {
                     text: qsTr("Wrap")
                     flat: true
                     highlighted: root.autoWrap
-                    implicitWidth: Math.min(implicitContentWidth + 16, 60)
-                    onClicked: root.autoWrap = !root.autoWrap
+                    Layout.minimumWidth: implicitContentWidth + 16
+                    onClicked: {
+                        Logger.info("ReceivePane: toggling wrap to " + !root.autoWrap)
+                        root.autoWrap = !root.autoWrap
+                    }
                 }
 
                 Button {
                     text: qsTr("Clear")
                     flat: true
-                    implicitWidth: Math.min(implicitContentWidth + 16, 60)
-                    onClicked: root.clear()
+                    Layout.minimumWidth: implicitContentWidth + 16
+                    onClicked: {
+                        Logger.info("ReceivePane: clear requested")
+                        root.clear()
+                    }
                 }
             }
         }
@@ -93,8 +106,8 @@ Rectangle {
         Rectangle {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            color: _inputBg
-            border.color: _border
+            color: Theme.inputBg
+            border.color: Theme.border
             radius: 4
             clip: true
 
@@ -116,7 +129,10 @@ Rectangle {
                 // ── Auto-scroll ──────────────────────────────
                 property bool autoScroll: true
                 property bool pendingAutoScroll: false
+                property bool scrollRestoreInProgress: false
                 property real prevContentY: 0
+                property int savedTopIndex: -1
+                property bool savedAutoScroll: true
 
                 function doAutoScroll() {
                     if (!pendingAutoScroll || !autoScroll)
@@ -126,9 +142,48 @@ Rectangle {
                         positionViewAtEnd()
                 }
 
-                onContentHeightChanged: doAutoScroll()
+                function saveScrollState() {
+                    scrollRestoreInProgress = true
+                    savedAutoScroll = autoScroll
+                    Logger.debug("ReceivePane saveScrollState: autoScroll=" + autoScroll
+                                 + " contentY=" + contentY.toFixed(1)
+                                 + " contentHeight=" + contentHeight.toFixed(1))
+                    if (autoScroll) {
+                        savedTopIndex = -1
+                    } else {
+                        savedTopIndex = indexAt(contentX, contentY)
+                        if (savedTopIndex < 0)
+                            savedTopIndex = indexAt(contentX + width / 2, contentY + height / 2)
+                    }
+                }
+
+                function restoreScrollState() {
+                    autoScroll = savedAutoScroll
+                    Logger.debug("ReceivePane restoreScrollState: savedAutoScroll=" + savedAutoScroll
+                                 + " savedTopIndex=" + savedTopIndex
+                                 + " count=" + count)
+                    if (autoScroll) {
+                        pendingAutoScroll = true
+                        doAutoScroll()
+                    } else if (savedTopIndex >= 0 && savedTopIndex < count) {
+                        positionViewAtIndex(savedTopIndex, ListView.Beginning)
+                    }
+                    prevContentY = contentY
+                    scrollRestoreInProgress = false
+                    savedTopIndex = -1
+                }
+
+                onContentHeightChanged: {
+                    if (!scrollRestoreInProgress)
+                        doAutoScroll()
+                }
 
                 onContentYChanged: {
+                    if (scrollRestoreInProgress) {
+                        prevContentY = contentY
+                        return
+                    }
+
                     // Any upward scroll (even 1px) stops auto-scroll.
                     // positionViewAtEnd() always scrolls down, so a
                     // decreasing contentY can only be user-initiated.
@@ -243,18 +298,13 @@ Rectangle {
                     function delegateAt(cx, cy) {
                         var row = receiveList.indexAt(cx, cy)
                         if (row < 0) return null
-                        // Search through instantiated delegates for the one at (cx,cy)
-                        var kids = receiveList.contentItem.children
-                        for (var i = 0; i < kids.length; i++) {
-                            var child = kids[i]
-                            if (child && typeof child._inSelection !== 'undefined' &&
-                                child.x <= cx && cx <= child.x + child.width &&
-                                child.y <= cy && cy <= child.y + child.height) {
-                                return { row: row,
-                                         localX: cx - child.x, localY: cy - child.y }
-                            }
-                        }
-                        return null
+                        // contentItem.childAt is more reliable than iterating
+                        // children, which may include internal ListView items.
+                        var child = receiveList.contentItem.childAt(cx, cy)
+                        if (!child || typeof child._inSelection === 'undefined')
+                            return null
+                        return { row: row,
+                                 localX: cx - child.x, localY: cy - child.y }
                     }
 
                     onPressed: (mouse) => {
@@ -337,6 +387,8 @@ Rectangle {
                 }
 
                 // ── Font metrics for column calculation ──────
+                // NOTE: column-based selection assumes a monospace font.
+                // Tabs and multi-byte characters will not align perfectly.
                 TextMetrics {
                     id: charMetrics
                     font.family: "Consolas"
@@ -396,7 +448,7 @@ Rectangle {
                                 return lineWrapper._nec * lineWrapper._cw
                             return parent.width  // full row
                         }
-                        color: _accent
+                        color: Theme.accent
                         opacity: 0.25
                     }
 
@@ -405,7 +457,7 @@ Rectangle {
                         text: model.display
                         font.family: "Consolas"
                         font.pixelSize: 13
-                        color: _text
+                        color: Theme.text
                         textFormat: Text.PlainText
                         width: root.autoWrap ? parent.width : undefined
                         wrapMode: root.autoWrap ? Text.Wrap : Text.NoWrap
@@ -442,7 +494,7 @@ Rectangle {
                 anchors.bottomMargin: 2
                 height: 4
                 radius: 2
-                color: _accent
+                color: Theme.accent
                 opacity: 0
                 enabled: false
             }
@@ -506,6 +558,10 @@ Rectangle {
     }
 
     property bool autoWrap: true
+    onAutoWrapChanged: {
+        if (!autoWrap)
+            receiveList.maxDelegateWidth = 0
+    }
 
     // Timer: fallback auto-scroll + flash animation
     Timer {
@@ -523,6 +579,14 @@ Rectangle {
         function onAppended(length) {
             receiveList.pendingAutoScroll = true
             uiUpdateTimer.restart()
+        }
+        function onModelAboutToBeReset() {
+            receiveList.saveScrollState()
+        }
+        function onModelReset() {
+            // Defer until the ListView has finished its own model-reset handling,
+            // otherwise the internal reset to contentY=0 will override us.
+            Qt.callLater(receiveList.restoreScrollState)
         }
     }
 

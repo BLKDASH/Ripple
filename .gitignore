@@ -82,3 +82,8 @@ CMakeLists.txt.user*
 .uic/
 /build*/
 /.qtcreator/
+
+# Deployment artifacts (should be produced by build/install scripts)
+/deploy/release.zip
+/Installer/packages/com.cwy.cwyapp/data/
+!/Installer/packages/com.cwy.cwyapp/data/.gitkeep

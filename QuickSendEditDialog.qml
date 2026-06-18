@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import CWY.Serial
+import CWY.Theme
 
 Dialog {
     id: root
@@ -22,34 +23,34 @@ Dialog {
 
         Label {
             text: qsTr("Button Name")
-            color: _text
+            color: Theme.text
         }
         TextField {
             id: nameField
             Layout.fillWidth: true
             text: root.item ? root.item.name : ""
-            color: _text
+            color: Theme.text
             background: Rectangle {
-                color: _inputBg
-                border.color: _border
+                color: Theme.inputBg
+                border.color: Theme.border
                 radius: 4
             }
         }
 
         Label {
             text: qsTr("Send Content")
-            color: _text
+            color: Theme.text
         }
         TextArea {
             id: contentField
             Layout.fillWidth: true
             Layout.fillHeight: true
             text: root.item ? root.item.content : ""
-            color: _text
+            color: Theme.text
             font.family: "Consolas"
             background: Rectangle {
-                color: _inputBg
-                border.color: _border
+                color: Theme.inputBg
+                border.color: Theme.border
                 radius: 4
             }
         }

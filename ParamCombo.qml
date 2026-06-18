@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import CWY.Serial
+import CWY.Theme
 
 ColumnLayout {
     id: root
@@ -15,7 +16,7 @@ ColumnLayout {
 
     Label {
         text: root.label
-        color: _text
+        color: Theme.text
         font.pixelSize: 12
     }
 

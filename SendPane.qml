@@ -2,11 +2,13 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import CWY.Serial
+import CWY.Theme
+import CWY.NotificationManager
 
 Rectangle {
     id: root
-    color: _panelBg
-    border.color: _border
+    color: Theme.panelBg
+    border.color: Theme.border
     radius: 4
 
     property bool hexMode: false
@@ -19,7 +21,7 @@ Rectangle {
 
     function send() {
         if (!SerialPort.isOpen) {
-            notify.error(qsTr("Serial port is not open"))
+            NotificationManager.error(qsTr("Serial port is not open"))
             return
         }
 
@@ -27,11 +29,11 @@ Rectangle {
         if (root.hexMode) {
             payload = payload.replace(/\s/g, "")
             if (payload.length % 2 !== 0) {
-                notify.error(qsTr("Invalid HEX: odd number of digits"))
+                NotificationManager.error(qsTr("Invalid HEX: odd number of digits"))
                 return
             }
             if (!/^[0-9A-Fa-f]*$/.test(payload)) {
-                notify.error(qsTr("Invalid HEX: only 0-9, A-F allowed"))
+                NotificationManager.error(qsTr("Invalid HEX: only 0-9, A-F allowed"))
                 return
             }
         }
@@ -56,15 +58,15 @@ Rectangle {
         Label {
             text: qsTr("Send")
             font.bold: true
-            color: _text
+            color: Theme.text
         }
 
         // Send input with custom scrollbar
         Rectangle {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            color: _inputBg
-            border.color: sendInput.validInput ? _border : _error
+            color: Theme.inputBg
+            border.color: sendInput.validInput ? Theme.border : Theme.error
             radius: 4
             clip: true
 
@@ -82,7 +84,7 @@ Rectangle {
                     id: sendInput
                     width: sendFlickable.width
                     height: Math.max(implicitHeight, sendFlickable.height)
-                    color: _text
+                    color: Theme.text
                     wrapMode: Text.Wrap
                     font.family: "Consolas"
                     font.pixelSize: 13
@@ -152,7 +154,7 @@ Rectangle {
 
             Label {
                 text: qsTr("Interval (ms)")
-                color: _text
+                color: Theme.text
                 font.pixelSize: 12
             }
             SpinBox {
@@ -181,8 +183,5 @@ Rectangle {
         repeat: true
         running: root.cyclicSend && SerialPort.isOpen
         onTriggered: root.send()
-        onRunningChanged: {
-            if (running) restart()
-        }
     }
 }

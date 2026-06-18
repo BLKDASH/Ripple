@@ -3,11 +3,13 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Dialogs
 import CWY.Serial
+import CWY.Theme
+import CWY.NotificationManager
 
 Rectangle {
     id: root
-    color: _panelBg
-    border.color: _border
+    color: Theme.panelBg
+    border.color: Theme.border
     radius: 4
 
     property int itemCount: 6
@@ -22,7 +24,7 @@ Rectangle {
             Label {
                 text: qsTr("Quick Send")
                 font.bold: true
-                color: _text
+                color: Theme.text
             }
             Item { Layout.fillWidth: true }
             Button {
@@ -44,7 +46,7 @@ Rectangle {
             clip: true
             spacing: 6
             model: quickModel
-            ScrollBar.vertical: ScrollBar {}
+            ScrollBar.vertical: CustomScrollBar { orientation: Qt.Vertical }
 
             delegate: RowLayout {
                 width: listView.width
@@ -54,21 +56,28 @@ Rectangle {
                     Layout.fillWidth: true
                     text: model.command
                     placeholderText: qsTr("Command") + " " + (index + 1)
-                    color: _text
+                    color: Theme.text
                     font.family: "Consolas"
                     font.pixelSize: 12
                     background: Rectangle {
-                        color: _inputBg
-                        border.color: _border
+                        color: Theme.inputBg
+                        border.color: Theme.border
                         radius: 4
                     }
-                    onTextChanged: quickModel.set(index, { "command": text })
+                    onTextChanged: {
+                        // Guard against model refresh loops when delegate is reused.
+                        if (model.command !== text)
+                            quickModel.setProperty(index, "command", text)
+                    }
                 }
 
                 CheckBox {
                     text: qsTr("HEX")
                     checked: model.hex
-                    onCheckedChanged: quickModel.set(index, { "hex": checked })
+                    onCheckedChanged: {
+                        if (model.hex !== checked)
+                            quickModel.setProperty(index, "hex", checked)
+                    }
                 }
 
                 Button {
@@ -87,7 +96,7 @@ Rectangle {
         title: qsTr("Save quick send config")
         fileMode: FileDialog.SaveFile
         nameFilters: ["JSON files (*.json)", "All files (*)"]
-        onAccepted: saveConfig(selectedFile.toString().replace(/^file:\/+/, ""))
+        onAccepted: saveConfig(selectedFile.toString().replace(/^file:\/\/+/, ""))
     }
 
     FileDialog {
@@ -95,7 +104,7 @@ Rectangle {
         title: qsTr("Load quick send config")
         fileMode: FileDialog.OpenFile
         nameFilters: ["JSON files (*.json)", "All files (*)"]
-        onAccepted: loadConfig(selectedFile.toString().replace(/^file:\/+/, ""))
+        onAccepted: loadConfig(selectedFile.toString().replace(/^file:\/\/+/, ""))
     }
 
     Component.onCompleted: initDefault()
@@ -127,20 +136,21 @@ Rectangle {
         }
         var json = JSON.stringify(items, null, 2)
         if (!SerialPort.writeFile(filePath, json)) {
-            notify.error(qsTr("Failed to save config"))
+            NotificationManager.error(qsTr("Failed to save config"))
         }
     }
 
     function loadConfig(filePath) {
         var json = SerialPort.readFile(filePath)
         if (json.length === 0) {
-            notify.error(qsTr("Failed to load config"))
+            NotificationManager.error(qsTr("Failed to load config"))
             return
         }
         try {
             var items = JSON.parse(json)
             quickModel.clear()
-            for (var i = 0; i < Math.max(items.length, root.itemCount); ++i) {
+            // Only load up to the configured number of slots.
+            for (var i = 0; i < root.itemCount; ++i) {
                 if (i < items.length) {
                     quickModel.append(items[i])
                 } else {
@@ -148,7 +158,7 @@ Rectangle {
                 }
             }
         } catch (e) {
-            notify.error(qsTr("Invalid config file"))
+            NotificationManager.error(qsTr("Invalid config file"))
         }
     }
 }

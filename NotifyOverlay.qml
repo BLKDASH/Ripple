@@ -1,38 +1,16 @@
 import QtQuick
 import QtQuick.Controls
+import CWY.Theme
+import CWY.NotificationManager
 
-// Unified notification overlay — drop-in anywhere in the window to get:
-//   notify.error("message")   notify.warning("message")
-//   notify.success("message")  notify.info("message")
-// Deeper children reach it via QML dynamic scoping (just use `notify` id directly).
+// Visual notification overlay. The actual notification queue lives in the
+// NotificationManager singleton so any component can trigger a toast without
+// dynamic scoping.
 Item {
     id: root
     anchors.fill: parent
     z: 9999
 
-    // ── public API ──────────────────────────────────────────────
-    function error(msg, duration)   { show(msg, "error",   duration || 5000) }
-    function warning(msg, duration) { show(msg, "warning", duration || 3500) }
-    function success(msg, duration) { show(msg, "success", duration || 2500) }
-    function info(msg, duration)    { show(msg, "info",    duration || 2500) }
-
-    // ── internal model ──────────────────────────────────────────
-    property int _uidSeq: 0
-
-    function show(msg, type, duration) {
-        if (!msg || msg === "") return
-        _uidSeq++
-        notifyModel.append({
-            uid: _uidSeq,
-            message: msg,
-            type: type,
-            duration: duration
-        })
-    }
-
-    ListModel { id: notifyModel }
-
-    // ── visual layer ────────────────────────────────────────────
     Column {
         id: toastColumn
         anchors.horizontalCenter: parent.horizontalCenter
@@ -42,7 +20,7 @@ Item {
         width: Math.min(520, parent.width - 24)
 
         Repeater {
-            model: notifyModel
+            model: NotificationManager.model
 
             delegate: Rectangle {
                 id: toast
@@ -56,18 +34,15 @@ Item {
                 height: Math.max(40, toastLabel.implicitHeight + 22)
                 radius: 6
                 opacity: 0
-                // slide-in offset — Column manages y, so we translate
                 transform: Translate { id: slideShift; y: -10 }
-                // track whether we've been fully set up (avoid double-dismiss)
                 property bool _ready: false
 
-                // colour per type — Material Design standard swatches
                 readonly property color _bg: {
                     switch (type) {
-                        case "error":   return "#F44336"
-                        case "warning": return "#FF9800"
-                        case "success": return "#4CAF50"
-                        default:        return _accent
+                        case "error":   return Theme.error
+                        case "warning": return Theme.warning
+                        case "success": return Theme.success
+                        default:        return Theme.accent
                     }
                 }
                 readonly property string _icon: {
@@ -106,7 +81,6 @@ Item {
                     }
                 }
 
-                // close button
                 MouseArea {
                     anchors { top: parent.top; right: parent.right; bottom: parent.bottom }
                     width: 36
@@ -121,21 +95,11 @@ Item {
                     }
                 }
 
-                function _removeFromModel() {
-                    for (var i = 0; i < notifyModel.count; i++) {
-                        if (notifyModel.get(i).uid === uid) {
-                            notifyModel.remove(i)
-                            break
-                        }
-                    }
-                }
-
                 function _dismiss() {
                     dismissTimer.stop()
                     fadeOut.start()
                 }
 
-                // animations
                 ParallelAnimation {
                     id: fadeIn
                     NumberAnimation { target: toast; property: "opacity"; to: 1.0; duration: 200; easing.type: Easing.OutCubic }
@@ -147,7 +111,7 @@ Item {
                     id: fadeOut
                     NumberAnimation { target: toast; property: "opacity"; to: 0.0; duration: 180; easing.type: Easing.InCubic }
                     NumberAnimation { target: slideShift; property: "y"; to: -10; duration: 180; easing.type: Easing.InCubic }
-                    onFinished: toast._removeFromModel()
+                    onFinished: NotificationManager.remove(toast.uid)
                 }
 
                 Timer {

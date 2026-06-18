@@ -7,6 +7,7 @@
 #include "src/serialportmanager.h"
 #include "src/translator.h"
 #include "src/receivemodel.h"
+#include "src/logger.h"
 
 int main(int argc, char *argv[])
 {
@@ -19,9 +20,11 @@ int main(int argc, char *argv[])
     QQuickStyle::setStyle("FluentWinUI3");
 
     // Create singleton instances explicitly so we can wire them together in C++.
+    Logger *logger = new Logger(&app);
     SerialPortManager *serialManager = new SerialPortManager();
     ReceiveModel *receiveModel = new ReceiveModel();
 
+    qmlRegisterSingletonInstance("CWY.Logger", 1, 0, "Logger", logger);
     qmlRegisterSingletonInstance("CWY.Serial", 1, 0, "SerialPort", serialManager);
     qmlRegisterSingletonInstance("CWY.Receive", 1, 0, "ReceiveModel", receiveModel);
 
@@ -30,6 +33,15 @@ int main(int argc, char *argv[])
                      receiveModel, &ReceiveModel::appendBatch);
 
     QQmlApplicationEngine engine;
+
+    // Register Theme and NotificationManager as singleton types under their own
+    // URIs. This is more reliable than relying on qt_add_qml_module's singleton
+    // property which may not emit the `singleton` keyword in qmldir on all Qt
+    // versions.
+    qmlRegisterSingletonType(QUrl(QStringLiteral("qrc:/qt/qml/CWY/Theme.qml")),
+                             "CWY.Theme", 1, 0, "Theme");
+    qmlRegisterSingletonType(QUrl(QStringLiteral("qrc:/qt/qml/CWY/NotificationManager.qml")),
+                             "CWY.NotificationManager", 1, 0, "NotificationManager");
 
     Translator translator(&engine);
     qmlRegisterSingletonType<Translator>("CWY.I18n", 1, 0, "Translator",

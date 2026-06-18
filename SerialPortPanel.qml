@@ -2,11 +2,13 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import CWY.Serial
+import CWY.Theme
+import CWY.NotificationManager
 
 Rectangle {
     id: root
-    color: _panelBg
-    border.color: _border
+    color: Theme.panelBg
+    border.color: Theme.border
     radius: 4
 
     ColumnLayout {
@@ -17,7 +19,7 @@ Rectangle {
         Label {
             text: qsTr("Serial Port")
             font.bold: true
-            color: _text
+            color: Theme.text
         }
 
         // Port selection — click to refresh
@@ -49,7 +51,7 @@ Rectangle {
                 onPressed: function(mouse) {
                     if (!portCombo.popup.opened) {
                         refreshPorts()
-                        notify.info(qsTr("串口列表已刷新"))
+                        NotificationManager.info(qsTr("串口列表已刷新"))
                     }
                     mouse.accepted = false
                 }
@@ -62,7 +64,7 @@ Rectangle {
             spacing: 4
             Label {
                 text: qsTr("Baud Rate")
-                color: _text
+                color: Theme.text
                 font.pixelSize: 12
             }
             RowLayout {
@@ -102,14 +104,14 @@ Rectangle {
                     visible: baudCombo.currentIndex === baudCombo.count - 1
                     enabled: !SerialPort.isOpen
                     text: SerialPort.baudRate
-                    color: _text
+                    color: Theme.text
                     font.family: "Consolas"
                     font.pixelSize: 12
                     horizontalAlignment: Text.AlignRight
                     validator: IntValidator { bottom: 1; top: 99999999 }
                     background: Rectangle {
-                        color: _inputBg
-                        border.color: _border
+                        color: Theme.inputBg
+                        border.color: Theme.border
                         radius: 4
                     }
                     onEditingFinished: {
@@ -190,9 +192,9 @@ Rectangle {
 
             background: Rectangle {
                 implicitHeight: 32
-                color: SerialPort.isOpen ? "#E57373" : "#81C784"
+                color: SerialPort.isOpen ? Theme.error : Theme.success
                 radius: 4
-                opacity: connectButton.down ? 0.8 : 1.0
+                opacity: connectButton.down || !connectButton.enabled ? 0.7 : 1.0
             }
         }
 

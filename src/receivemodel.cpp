@@ -37,6 +37,7 @@ void ReceiveModel::setShowTimestamp(bool value)
 {
     if (m_showTimestamp == value) return;
     m_showTimestamp = value;
+    qInfo() << "ReceiveModel showTimestamp changed:" << value;
     emit showTimestampChanged();
     regenerateAllLines();
 }
@@ -46,6 +47,7 @@ void ReceiveModel::setHexMode(bool value)
 {
     if (m_hexMode == value) return;
     m_hexMode = value;
+    qInfo() << "ReceiveModel hexMode changed:" << value;
     emit hexModeChanged();
     regenerateAllLines();
 }
@@ -74,11 +76,11 @@ void ReceiveModel::setMaxBufferMb(int value)
 
 void ReceiveModel::append(const QByteArray &rawData, int length)
 {
-    Q_UNUSED(length)
     QVariantList batch;
     QVariantMap record;
     record["raw"] = rawData;
-    record["length"] = rawData.size();
+    record["length"] = length > 0 ? length : rawData.size();
+    record["time"] = QDateTime::currentDateTime().toMSecsSinceEpoch();
     batch.append(record);
     appendBatch(batch);
 }
@@ -89,12 +91,15 @@ void ReceiveModel::appendBatch(const QVariantList &batch)
         return;
 
     int totalLength = 0;
-    int firstNewRow = static_cast<int>(m_lines.size());
     int newRowCount = 0;
 
     for (const QVariant &item : batch) {
         QVariantMap record = item.toMap();
         QByteArray rawData = record.value("raw").toByteArray();
+        qint64 timestampMs = record.value("time").toLongLong();
+        QDateTime timestamp = timestampMs > 0
+            ? QDateTime::fromMSecsSinceEpoch(timestampMs)
+            : QDateTime::currentDateTime();
         int length = rawData.size();
         if (length <= 0)
             length = record.value("length").toInt();
@@ -104,25 +109,27 @@ void ReceiveModel::appendBatch(const QVariantList &batch)
         totalLength += length;
         m_totalBytes += length;
 
-        QStringList lines = formatRecordLines(rawData);
+        QStringList lines = formatRecordLines(rawData, timestamp);
         if (lines.isEmpty())
             continue;
 
         int lineCount = static_cast<int>(lines.size());
         m_lines.append(lines);
-        m_records.push_back({rawData, lineCount});
+        m_records.push_back({rawData, timestamp, lineCount});
         newRowCount += lineCount;
     }
 
     if (newRowCount > 0) {
+        int firstNewRow = static_cast<int>(m_lines.size()) - newRowCount;
         beginInsertRows(QModelIndex(), firstNewRow, firstNewRow + newRowCount - 1);
-        enforceBufferLimits();
         endInsertRows();
-    } else {
-        // Still enforce limits — records may have been added without
-        // generating display lines (e.g., empty raw data).
-        enforceBufferLimits();
     }
+
+    // Trim oldest records if buffer limits are exceeded. This is done after the
+    // insert so that beginInsertRows / beginRemoveRows are never nested, and so
+    // the insert indices are always valid even when rows are removed from the
+    // front.
+    enforceBufferLimits();
 
     emit appended(totalLength);
 }
@@ -132,6 +139,7 @@ void ReceiveModel::clear()
     if (m_lines.isEmpty())
         return;
 
+    qInfo() << "ReceiveModel cleared, lines=" << m_lines.size();
     beginRemoveRows(QModelIndex(), 0, static_cast<int>(m_lines.size()) - 1);
     m_lines.clear();
     m_records.clear();
@@ -194,6 +202,11 @@ void ReceiveModel::enforceBufferLimits()
     if (removeRecs <= 0)
         return;
 
+    qInfo() << "ReceiveModel trimming buffer: records=" << removeRecs
+            << "lines=" << removeLines
+            << "remainingRecords=" << (recordCount - removeRecs)
+            << "remainingBytes=" << m_totalBytes;
+
     // Remove from the model in one batch.
     beginRemoveRows(QModelIndex(), 0, removeLines - 1);
     m_lines.erase(m_lines.begin(), m_lines.begin() + removeLines);
@@ -212,7 +225,7 @@ void ReceiveModel::regenerateAllLines()
     newLines.reserve(static_cast<int>(m_lines.size())); // rough estimate
 
     for (const Record &rec : m_records) {
-        QStringList lines = formatRecordLines(rec.raw);
+        QStringList lines = formatRecordLines(rec.raw, rec.timestamp);
         if (!lines.isEmpty())
             newLines.append(lines);
     }
@@ -225,20 +238,21 @@ void ReceiveModel::regenerateAllLines()
 
 // ── Formatting helpers ──────────────────────────────────────
 
-QStringList ReceiveModel::formatRecordLines(const QByteArray &rawData) const
+QStringList ReceiveModel::formatRecordLines(const QByteArray &rawData, const QDateTime &timestamp) const
 {
-    QString text = formatRecordText(rawData);
+    QString text = formatRecordText(rawData, timestamp);
     if (text.isEmpty())
         return {};
 
-    // Split into individual display lines.
+    // Split into individual display lines. Preserve empty lines in the middle
+    // (e.g. \n\n) but drop only trailing empties caused by a trailing newline.
     QStringList lines = text.split('\n');
-    // Remove empty entries (trailing \n, double \n, etc.).
-    lines.removeAll(QString());
+    while (!lines.isEmpty() && lines.last().isEmpty())
+        lines.removeLast();
     return lines;
 }
 
-QString ReceiveModel::formatRecordText(const QByteArray &rawData) const
+QString ReceiveModel::formatRecordText(const QByteArray &rawData, const QDateTime &timestamp) const
 {
     if (rawData.isEmpty())
         return {};
@@ -249,8 +263,11 @@ QString ReceiveModel::formatRecordText(const QByteArray &rawData) const
         return {};
 
     QString prefix;
-    if (m_showTimestamp)
-        prefix = QStringLiteral("[%1] ").arg(currentTimeString());
+    if (m_showTimestamp) {
+        prefix = QStringLiteral("[%1] ").arg(timestamp.isValid()
+            ? timestamp.toString(QStringLiteral("hh:mm:ss.zzz"))
+            : currentTimeString());
+    }
 
     QString suffix;
     // In hex mode every formatted line already ends with \n.

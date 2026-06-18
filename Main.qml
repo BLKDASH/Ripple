@@ -6,6 +6,8 @@ import QtCore
 import CWY.Serial
 import CWY.I18n
 import CWY.Receive
+import CWY.Theme
+import CWY.NotificationManager
 
 ApplicationWindow {
     id: root
@@ -16,37 +18,31 @@ ApplicationWindow {
     visible: true
     title: qsTr("CWY Serial Assistant")
 
-    // ── Theme ──────────────────────────────────────────────────
+    // Dark mode toggle. The Theme singleton is the source of truth for the
+    // actual palette; this property exists so Settings can alias it.
     property bool darkTheme: false
+    onDarkThemeChanged: Theme.darkTheme = darkTheme
 
-    readonly property color _panelBg:  darkTheme ? "#202020" : "#F3F3F3"
-    readonly property color _inputBg:  darkTheme ? "#181818" : "#FFFFFF"
-    readonly property color _border:   darkTheme ? "#383838" : "#E0E0E0"
-    readonly property color _text:     darkTheme ? "#E8E8E8" : "#151515"
-    readonly property color _accent:   darkTheme ? "#60CDFF" : "#005FB8"
-    readonly property color _success:  "#2EA043"
-    readonly property color _error:    "#F85149"
-    readonly property color _warning:  "#D29922"
+    property bool showQuickSend: false
 
-    // Set FluentWinUI3 window colours
     palette {
-        window: _panelBg
-        windowText: _text
-        base: _inputBg
-        text: _text
-        button: _panelBg
-        buttonText: _text
-        highlight: _accent
-        highlightedText: darkTheme ? "#000000" : "#FFFFFF"
-        toolTipBase: _panelBg
-        toolTipText: _text
+        window: Theme.window
+        windowText: Theme.windowText
+        base: Theme.base
+        text: Theme.text
+        button: Theme.button
+        buttonText: Theme.buttonText
+        highlight: Theme.highlight
+        highlightedText: Theme.highlightedText
+        toolTipBase: Theme.toolTipBase
+        toolTipText: Theme.toolTipText
     }
 
-    // Leave a solid fill under everything
+    // Solid fill under everything so the FluentWinUI3 background stays consistent.
     Rectangle {
         anchors.fill: parent
         z: -1
-        color: darkTheme ? "#101010" : "#FFFFFF"
+        color: Theme.darkTheme ? "#101010" : "#FFFFFF"
     }
 
     // ── Persistent settings ────────────────────────────────────
@@ -59,11 +55,9 @@ ApplicationWindow {
         property string autoLogPath: ""
     }
 
-    property bool showQuickSend: false
-
     Component.onCompleted: {
         SerialPort.errorOccurred.connect(function(msg) {
-            notify.error(msg)
+            NotificationManager.error(msg)
         })
 
         Translator.setCurrentLanguage(appSettings.language)
@@ -74,7 +68,7 @@ ApplicationWindow {
     // ── Top toolbar ────────────────────────────────────────────
     header: ToolBar {
         height: 44
-        background: Rectangle { color: _panelBg }
+        background: Rectangle { color: Theme.panelBg }
         RowLayout {
             anchors.fill: parent
             anchors.leftMargin: 12
@@ -124,7 +118,7 @@ ApplicationWindow {
             }
 
             Button {
-                text: darkTheme ? "☀" : "🌙"
+                text: Theme.darkTheme ? "☀" : "🌙"
                 onClicked: root.darkTheme = !root.darkTheme
             }
         }
@@ -229,7 +223,7 @@ ApplicationWindow {
         fileMode: FileDialog.SaveFile
         nameFilters: ["Log files (*.log)", "Text files (*.txt)", "Binary files (*.bin)", "All files (*)"]
         onAccepted: {
-            var path = selectedFile.toString().replace(/^file:\/+/, "")
+            var path = selectedFile.toString().replace(/^file:\/\/+/, "")
             SerialPort.startRecording(path)
         }
     }
@@ -240,7 +234,7 @@ ApplicationWindow {
         fileMode: FileDialog.OpenFile
         nameFilters: ["Text files (*.txt)", "Binary files (*.bin)", "All files (*)"]
         onAccepted: {
-            var path = selectedFile.toString().replace(/^file:\/+/, "")
+            var path = selectedFile.toString().replace(/^file:\/\/+/, "")
             if (path.endsWith(".bin")) {
                 var hex = SerialPort.readFileAsHex(path)
                 sendPane.setContent(hex, true)

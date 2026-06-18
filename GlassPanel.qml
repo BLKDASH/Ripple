@@ -1,17 +1,18 @@
 import QtQuick
+import CWY.Theme
 
 Rectangle {
     id: root
     radius: 8
 
-    property real glassOpacity: 0.72
+    property real glassOpacity: Theme.glassOpacity
 
     color: {
-        var base = _panelBg
+        var base = Theme.panelBg
         return Qt.rgba(base.r, base.g, base.b, root.glassOpacity)
     }
     border.color: {
-        var base = _text
+        var base = Theme.text
         return Qt.rgba(base.r, base.g, base.b, 0.3)
     }
 
@@ -24,6 +25,6 @@ Rectangle {
         height: parent.radius * 0.4
         radius: parent.radius * 0.4
         color: "white"
-        opacity: _text.r > 0.5 ? 0.08 : 0.12
+        opacity: Theme.text.r > 0.5 ? 0.08 : 0.12
     }
 }
