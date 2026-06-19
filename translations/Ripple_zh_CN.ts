@@ -5,7 +5,7 @@
     <name>Main</name>
     <message>
         <location filename="../Main.qml"/>
-        <source>凌波</source>
+        <source>Ripple</source>
         <translation>凌波</translation>
     </message>
     <message>
@@ -75,6 +75,11 @@
     </message>
     <message>
         <location filename="../Main.qml"/>
+        <source>Help</source>
+        <translation>帮助</translation>
+    </message>
+    <message>
+        <location filename="../Main.qml"/>
         <source>Quit</source>
         <translation>退出</translation>
     </message>
@@ -82,11 +87,6 @@
         <location filename="../Main.qml"/>
         <source>Refresh Ports</source>
         <translation>刷新串口</translation>
-    </message>
-    <message>
-        <location filename="../Main.qml"/>
-        <source>Dark Theme</source>
-        <translation>深色主题</translation>
     </message>
     <message>
         <location filename="../Main.qml"/>

@@ -17,7 +17,7 @@ ApplicationWindow {
     font.family: Theme.fontFamily
     minimumHeight: 600
     visible: true
-    title: qsTr("凌波")
+    title: qsTr("Ripple")
 
     property bool showQuickSend: false
 
@@ -78,19 +78,13 @@ ApplicationWindow {
         delegate: MenuBarItem { }
 
         Menu {
-            title: "凌波"
+            title: qsTr("Ripple")
             MenuItem {
                 text: qsTr("Settings")
                 onTriggered: {
                     settingsDialog.loadSettings()
                     settingsDialog.toggle()
                 }
-            }
-            MenuItem {
-                text: qsTr("Dark Theme")
-                checkable: true
-                checked: Theme.darkTheme
-                onTriggered: Theme.darkTheme = !Theme.darkTheme
             }
             MenuSeparator {}
             MenuItem {
