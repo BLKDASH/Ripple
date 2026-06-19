@@ -9,7 +9,7 @@
    <item>
     <widget class="QLabel" name="description">
      <property name="text">
-      <string>请选择 CWY 串口调试助手的安装位置。若目标目录已存在旧版本，将自动执行升级。</string>
+      <string>请选择凌波的安装位置。若目标目录已存在旧版本，将自动执行升级。</string>
      </property>
      <property name="wordWrap">
       <bool>true</bool>

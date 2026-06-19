@@ -2,12 +2,12 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Dialogs
-import CWY.AppSettings
-import CWY.Serial
-import CWY.I18n
-import CWY.Receive
-import CWY.Theme
-import CWY.NotificationManager
+import Ripple.AppSettings
+import Ripple.Serial
+import Ripple.I18n
+import Ripple.Receive
+import Ripple.Theme
+import Ripple.NotificationManager
 
 Dialog {
     id: root
@@ -145,6 +145,8 @@ Dialog {
                         id: showQuickSendCheck
                         text: qsTr("Show quick send panel")
                         checked: appWindow ? appWindow.showQuickSend : false
+                        indicator.width: 16
+                        indicator.height: 16
                     }
                 }
             }
@@ -165,6 +167,8 @@ Dialog {
                         id: autoLogCheck
                         text: qsTr("Enable auto log")
                         checked: AppSettings.autoLogEnabled
+                        indicator.width: 16
+                        indicator.height: 16
                     }
                     RowLayout {
                         Layout.fillWidth: true

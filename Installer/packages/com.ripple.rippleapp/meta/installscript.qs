@@ -4,6 +4,9 @@ function Component()
 {
     // 注册组件加载完成后的回调，用于插入自定义页面
     component.loaded.connect(this, this.installerLoaded);
+
+    // 美化安装程序样式
+    installer.setValue("StyleSheet", "style.qss");
 }
 
 // 工具函数：统一路径分隔符为反斜杠（Windows）
@@ -25,7 +28,7 @@ Component.prototype.installerLoaded = function()
     targetDirectoryPage = gui.pageWidgetByObjectName("DynamicTargetWidget");
     targetDirectoryPage.windowTitle = "选择安装目录";
     targetDirectoryPage.description.setText(
-        "请选择 CWY 串口调试助手的安装位置。\n"
+        "请选择凌波的安装位置。\n"
         + "如果目标目录已存在旧版本，安装程序会先自动卸载旧版本，再继续安装。"
     );
     targetDirectoryPage.targetDirectory.textChanged.connect(this, this.targetDirectoryChanged);
@@ -54,11 +57,11 @@ Component.prototype.targetDirectoryChanged = function()
     var dir = targetDirectoryPage.targetDirectory.text;
     installer.setValue("TargetDir", dir);
 
-    var hasMaintenance = installer.fileExists(dir + "/CWYMaintenanceTool.exe");
+    var hasMaintenance = installer.fileExists(dir + "/RippleMaintenanceTool.exe");
     var installerFiles = [];
     if (systemInfo.productType === "windows") {
         // 检测目标目录中是否包含安装程序自身（按常见命名规则）
-        installerFiles = QDesktopServices.findFiles(dir, "CWY_SerialAssistant_*_Installer.exe");
+        installerFiles = QDesktopServices.findFiles(dir, "Ripple_*_Installer.exe");
     }
 
     if (installerFiles.length > 0) {
@@ -92,7 +95,7 @@ Component.prototype.componentSelectionPageEntered = function()
     if (!dir)
         return;
 
-    var maintenanceTool = Dir.toNativeSparator(dir + "/CWYMaintenanceTool.exe");
+    var maintenanceTool = Dir.toNativeSparator(dir + "/RippleMaintenanceTool.exe");
     if (installer.fileExists(maintenanceTool)) {
         console.log("检测到旧版本，执行维护工具 purge：" + maintenanceTool);
         var result = installer.execute(maintenanceTool, ["purge"], "yes");
@@ -109,19 +112,19 @@ Component.prototype.createOperations = function()
     if (systemInfo.productType === "windows") {
         // 开始菜单快捷方式（始终创建）
         component.addOperation("CreateShortcut",
-            "@TargetDir@/bin/appCWY.exe",
-            "@StartMenuDir@/CWY Serial Assistant.lnk",
+            "@TargetDir@/bin/appRipple.exe",
+            "@StartMenuDir@/凌波.lnk",
             "workingDirectory=@TargetDir@/bin",
-            "description=启动 CWY 串口调试助手");
+            "description=启动凌波");
 
         // 桌面快捷方式（根据用户复选框选择）
         var shortcutPage = component.userInterface("ShortcutPage");
         if (shortcutPage && shortcutPage.desktopShortcutCheckBox.checked) {
             component.addOperation("CreateShortcut",
-                "@TargetDir@/bin/appCWY.exe",
-                "@DesktopDir@/CWY Serial Assistant.lnk",
+                "@TargetDir@/bin/appRipple.exe",
+                "@DesktopDir@/凌波.lnk",
                 "workingDirectory=@TargetDir@/bin",
-                "description=启动 CWY 串口调试助手");
+                "description=启动凌波");
         }
     }
 };

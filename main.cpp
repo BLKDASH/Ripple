@@ -5,6 +5,7 @@
 #include <QStyleHints>
 #include <QTranslator>
 #include <QLocale>
+#include <QIcon>
 #include "src/appsettings.h"
 #include "src/serialportmanager.h"
 #include "src/translator.h"
@@ -35,9 +36,10 @@ int main(int argc, char *argv[])
 {
     QGuiApplication app(argc, argv);
 
-    app.setOrganizationName("CWY");
-    app.setOrganizationDomain("cwy.local");
-    app.setApplicationName("CWY Serial Assistant");
+    app.setOrganizationName("Ripple");
+    app.setOrganizationDomain("ripple.local");
+    app.setApplicationName("凌波");
+    app.setWindowIcon(QIcon(QStringLiteral(":/qt/qml/Ripple/ripple-icon.svg")));
 
     QQuickStyle::setStyle("FluentWinUI3");
 
@@ -76,10 +78,10 @@ int main(int argc, char *argv[])
     QObject::connect(serialManager, &SerialPortManager::autoLogFolderChanged, appSettings,
                      [serialManager, appSettings]() { appSettings->setAutoLogFolder(serialManager->autoLogFolder()); });
 
-    qmlRegisterSingletonInstance("CWY.Logger", 1, 0, "Logger", logger);
-    qmlRegisterSingletonInstance("CWY.AppSettings", 1, 0, "AppSettings", appSettings);
-    qmlRegisterSingletonInstance("CWY.Serial", 1, 0, "SerialPort", serialManager);
-    qmlRegisterSingletonInstance("CWY.Receive", 1, 0, "ReceiveModel", receiveModel);
+    qmlRegisterSingletonInstance("Ripple.Logger", 1, 0, "Logger", logger);
+    qmlRegisterSingletonInstance("Ripple.AppSettings", 1, 0, "AppSettings", appSettings);
+    qmlRegisterSingletonInstance("Ripple.Serial", 1, 0, "SerialPort", serialManager);
+    qmlRegisterSingletonInstance("Ripple.Receive", 1, 0, "ReceiveModel", receiveModel);
 
     // Worker thread feeds the UI model directly on the main thread.
     QObject::connect(serialManager, &SerialPortManager::batchDataReady,
@@ -92,14 +94,14 @@ int main(int argc, char *argv[])
     // property which may not emit the `singleton` keyword in qmldir on all Qt
     // versions.
     const int themeTypeId =
-        qmlRegisterSingletonType(QUrl(QStringLiteral("qrc:/qt/qml/CWY/Theme.qml")),
-                                 "CWY.Theme", 1, 0, "Theme");
-    qmlRegisterSingletonType(QUrl(QStringLiteral("qrc:/qt/qml/CWY/NotificationManager.qml")),
-                             "CWY.NotificationManager", 1, 0, "NotificationManager");
+        qmlRegisterSingletonType(QUrl(QStringLiteral("qrc:/qt/qml/Ripple/Theme.qml")),
+                                 "Ripple.Theme", 1, 0, "Theme");
+    qmlRegisterSingletonType(QUrl(QStringLiteral("qrc:/qt/qml/Ripple/NotificationManager.qml")),
+                             "Ripple.NotificationManager", 1, 0, "NotificationManager");
 
     Translator translator(&engine);
     translator.setCurrentLanguage(appSettings->language());  // load persisted language on startup
-    qmlRegisterSingletonType<Translator>("CWY.I18n", 1, 0, "Translator",
+    qmlRegisterSingletonType<Translator>("Ripple.I18n", 1, 0, "Translator",
         [&translator](QQmlEngine *qmlEngine, QJSEngine *scriptEngine) -> QObject * {
             Q_UNUSED(qmlEngine)
             Q_UNUSED(scriptEngine)
@@ -118,7 +120,7 @@ int main(int argc, char *argv[])
         &app,
         []() { QCoreApplication::exit(-1); },
         Qt::QueuedConnection);
-    engine.loadFromModule("CWY", "Main");
+    engine.loadFromModule("Ripple", "Main");
 
     if (QObject *theme = engine.singletonInstance<QObject *>(themeTypeId)) {
         auto *helper = new ThemeSyncHelper(theme, styleHints, &app);

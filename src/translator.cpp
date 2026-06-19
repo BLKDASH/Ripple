@@ -9,7 +9,7 @@ Translator::Translator(QQmlEngine *engine, QObject *parent)
     , m_engine(engine)
     , m_translator(new QTranslator(this))
 {
-    m_translationPrefix = "CWY_";
+    m_translationPrefix = "Ripple_";
 }
 
 QString Translator::currentLanguage() const

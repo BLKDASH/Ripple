@@ -1,6 +1,10 @@
 # CLAUDE.md
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+## 写在最前
+
+注意，Qt框架的所有文档在C:\Qt\Docs
+如有不清楚的地方，请查阅qt文档
 
 ## 构建命令
 
@@ -25,11 +29,11 @@ cmake --build build/Desktop_Qt_6_11_1_MinGW_64_bit-Release
 cmake --install build/Desktop_Qt_6_11_1_MinGW_64_bit-Release --prefix ./deploy/release
 ```
 
-> **注意：** 新增或删除 `.qml` 文件后，务必先 **重新配置 CMake**（Qt Creator 中右键项目 → 重新构建；命令行下删除构建目录后重新执行 `cmake -B ...`），否则运行时会出现 `module "CWY.xxx" is not installed` 错误。
+> **注意：** 新增或删除 `.qml` 文件后，务必先 **重新配置 CMake**（Qt Creator 中右键项目 → 重新构建；命令行下删除构建目录后重新执行 `cmake -B ...`），否则运行时会出现 `module "Ripple.xxx" is not installed` 错误。
 
 ## 架构
 
-**CWY 串口助手** — 跨平台桌面串口调试工具。基于 Qt 6.8+，采用 C++ 后端 / QML 前端分离架构。
+**凌波** — 跨平台桌面串口调试工具。基于 Qt 6.8+，采用 C++ 后端 / QML 前端分离架构。
 
 ### 线程模型
 
@@ -52,10 +56,10 @@ QSerialPort::readyRead
 
 | 类 | 职责 | 所在线程 |
 |---|---|---|
-| `SerialPortManager` | QML 单例（`CWY.Serial`），线程持有者，暴露属性和 invokable 方法 | 主线程 |
+| `SerialPortManager` | QML 单例（`Ripple.Serial`），线程持有者，暴露属性和 invokable 方法 | 主线程 |
 | `SerialWorker` | 持有 `QSerialPort`，负责所有 I/O、数据批处理、录制、自动日志 | 工作线程 |
-| `ReceiveModel` | `QAbstractListModel` 单例（`CWY.Receive`），接收数据的唯一数据源 | 主线程 |
-| `Translator` | 国际化单例（`CWY.I18n`），运行时加载 `.qm` 文件 | 主线程 |
+| `ReceiveModel` | `QAbstractListModel` 单例（`Ripple.Receive`），接收数据的唯一数据源 | 主线程 |
+| `Translator` | 国际化单例（`Ripple.I18n`），运行时加载 `.qm` 文件 | 主线程 |
 
 ### SerialWorker 数据批处理
 

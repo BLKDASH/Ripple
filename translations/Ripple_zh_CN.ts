@@ -5,8 +5,8 @@
     <name>Main</name>
     <message>
         <location filename="../Main.qml"/>
-        <source>CWY Serial Assistant</source>
-        <translation>CWY 串口助手</translation>
+        <source>凌波</source>
+        <translation>凌波</translation>
     </message>
     <message>
         <location filename="../Main.qml"/>

@@ -1,7 +1,7 @@
 pragma Singleton
 import QtQuick
 
-// Centralized theme singleton for CWY.
+// Centralized theme singleton for Ripple.
 // This replaces the scattered dynamic-scope colour references used by the
 // previous implementation and lets every component access the same palette
 // without depending on ids declared in Main.qml.

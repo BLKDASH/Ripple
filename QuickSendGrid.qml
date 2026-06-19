@@ -2,10 +2,10 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Dialogs
-import CWY.AppSettings
-import CWY.Serial
-import CWY.Theme
-import CWY.NotificationManager
+import Ripple.AppSettings
+import Ripple.Serial
+import Ripple.Theme
+import Ripple.NotificationManager
 
 MainPanel {
     id: root
@@ -114,6 +114,8 @@ MainPanel {
                         text: "HEX"
                         font.pixelSize: Theme.fontSize
                         font.family: Theme.fontFamily
+                        indicator.width: 16
+                        indicator.height: 16
                         checked: model.hex
                         onCheckedChanged: {
                             if (model.hex !== checked) {

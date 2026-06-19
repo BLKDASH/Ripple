@@ -1,9 +1,9 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import CWY.AppSettings
-import CWY.Serial
-import CWY.Theme
+import Ripple.AppSettings
+import Ripple.Serial
+import Ripple.Theme
 
 Dialog {
     id: root

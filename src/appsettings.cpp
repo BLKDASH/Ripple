@@ -16,13 +16,13 @@ static const char *GROUP_QUICKSEND = "QuickSend";
 static QString resolveConfigPath()
 {
     // 1. Environment variable override (highest priority).
-    const QByteArray envPath = qgetenv("CWY_SETTINGS_PATH");
+    const QByteArray envPath = qgetenv("RIPPLE_SETTINGS_PATH");
     if (!envPath.isEmpty())
         return QString::fromLocal8Bit(envPath);
 
-    // 2. Portable mode: CWY.ini next to the executable.
+    // 2. Portable mode: Ripple.ini next to the executable.
     const QString appDir = QCoreApplication::applicationDirPath();
-    const QString portablePath = appDir + QStringLiteral("/CWY.ini");
+    const QString portablePath = appDir + QStringLiteral("/Ripple.ini");
     if (QFileInfo::exists(portablePath))
         return portablePath;
 
@@ -30,7 +30,7 @@ static QString resolveConfigPath()
     const QString appDataDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     if (!appDataDir.isEmpty())
         QDir().mkpath(appDataDir);
-    return appDataDir + QStringLiteral("/CWY.ini");
+    return appDataDir + QStringLiteral("/Ripple.ini");
 }
 
 AppSettings::AppSettings(QObject *parent)

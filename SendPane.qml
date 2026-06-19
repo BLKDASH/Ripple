@@ -1,10 +1,10 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import CWY.AppSettings
-import CWY.Serial
-import CWY.Theme
-import CWY.NotificationManager
+import Ripple.AppSettings
+import Ripple.Serial
+import Ripple.Theme
+import Ripple.NotificationManager
 
 MainPanel {
     id: root
@@ -158,21 +158,29 @@ MainPanel {
                 text: qsTr("HEX")
                 checked: root.hexMode
                 onCheckedChanged: root.hexMode = checked
+                indicator.width: 16
+                indicator.height: 16
             }
             CheckBox {
                 text: qsTr("Append \\r")
                 checked: root.appendCr
                 onCheckedChanged: root.appendCr = checked
+                indicator.width: 16
+                indicator.height: 16
             }
             CheckBox {
                 text: qsTr("Append \\n")
                 checked: root.appendLf
                 onCheckedChanged: root.appendLf = checked
+                indicator.width: 16
+                indicator.height: 16
             }
             CheckBox {
                 text: qsTr("Cyclic")
                 checked: root.cyclicSend
                 onCheckedChanged: root.cyclicSend = checked
+                indicator.width: 16
+                indicator.height: 16
             }
         }
 

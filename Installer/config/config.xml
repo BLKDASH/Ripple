@@ -1,30 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Installer>
     <!-- 安装包名称（显示在标题栏） -->
-    <Name>CWY Serial Assistant</Name>
+    <Name>凌波</Name>
 
     <!-- 安装包版本号，与 CMakeLists.txt 中的 project() 版本保持一致 -->
     <Version>0.1.0</Version>
 
     <!-- 安装程序窗口标题 -->
-    <Title>CWY Serial Assistant 安装程序</Title>
+    <Title>凌波</Title>
 
     <!-- 发布者信息 -->
-    <Publisher>CWY</Publisher>
+    <Publisher>Ripple</Publisher>
     <ProductUrl>https://github.com/BLKDASH</ProductUrl>
 
-    <!-- 默认安装目录（Windows 64 位示例：C:\Program Files\CWY Serial Assistant） -->
-    <TargetDir>/CWY Serial Assistant</TargetDir>
+    <!-- 默认安装目录 -->
+    <TargetDir>C:/Program Files/Ripple</TargetDir>
 
     <!-- 开始菜单文件夹 -->
-    <StartMenuDir>CWY Serial Assistant</StartMenuDir>
+    <StartMenuDir>Ripple</StartMenuDir>
 
     <!-- 安装/卸载程序图标（.ico，放在 config 目录下） -->
     <InstallerApplicationIcon>installer-icon</InstallerApplicationIcon>
     <InstallerWindowIcon>installer-icon.png</InstallerWindowIcon>
 
     <!-- 维护工具名称 -->
-    <MaintenanceToolName>CWYMaintenanceTool</MaintenanceToolName>
+    <MaintenanceToolName>RippleMaintenanceTool</MaintenanceToolName>
 
     <!-- 卸载时是否删除整个目标目录 -->
     <RemoveTargetDir>true</RemoveTargetDir>

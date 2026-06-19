@@ -1,4 +1,4 @@
-# CWY Installer（Qt Installer Framework）
+# 凌波 Installer（Qt Installer Framework）
 
 本目录存放使用 [Qt Installer Framework](https://doc.qt.io/qtinstallerframework/) 生成离线安装包所需的配置与包数据。
 
@@ -11,7 +11,7 @@ Installer/
 │   ├── installer-icon.ico      # 安装程序图标（可选，需自行准备）
 │   └── installer-icon.png      # 安装程序窗口图标（可选，需自行准备）
 ├── packages/
-│   └── com.cwy.cwyapp/         # 主程序包
+│   └── com.ripple.rippleapp/    # 主程序包
 │       ├── meta/
 │       │   ├── package.xml     # 包元数据
 │       │   ├── installscript.qs# 安装脚本（创建快捷方式）
@@ -19,7 +19,7 @@ Installer/
 │       │   └── license.txt     # 许可协议
 │       └── data/               # 安装内容（构建时由 CMake install 填充）
 │           ├── bin/
-│           │   ├── appCWY.exe  # 主程序
+│           │   ├── appRipple.exe  # 主程序
 │           │   ├── Qt6*.dll    # Qt 运行库
 │           │   └── qt.conf
 │           ├── qml/            # QML 模块
@@ -51,7 +51,7 @@ Installer/
 脚本会自动完成清理、部署、打包三步，生成结果位于项目根目录：
 
 ```
-CWY_SerialAssistant_0.1.0_Installer.exe
+Ripple_0.1.0_Installer.exe
 ```
 
 ### 方式二：手动执行
@@ -59,15 +59,15 @@ CWY_SerialAssistant_0.1.0_Installer.exe
 1. 清理并准备安装包数据目录：
 
    ```bat
-   rd /s /q Installer\packages\com.cwy.cwyapp\data
-   mkdir Installer\packages\com.cwy.cwyapp\data
+   rd /s /q Installer\packages\com.ripple.rippleapp\data
+   mkdir Installer\packages\com.ripple.rippleapp\data
    ```
 
 2. 将主程序及依赖部署到安装包数据目录（**必须使用绝对路径作为 prefix**，否则 Qt 部署脚本生成 `qt.conf` 会失败）：
 
    ```bat
    "C:\Qt\Tools\CMake_64\bin\cmake.exe" --install build\Desktop_Qt_6_11_1_MinGW_64_bit-Release ^
-         --prefix C:\Users\dengy\BLK_Project\Qt\CWY\Installer\packages\com.cwy.cwyapp\data
+         --prefix C:\Users\dengy\BLK_Project\Qt\CWY\Installer\packages\com.ripple.rippleapp\data
    ```
 
 3. 使用 `binarycreator` 生成安装包：
@@ -77,7 +77,7 @@ CWY_SerialAssistant_0.1.0_Installer.exe
        -c Installer\config\config.xml ^
        -p Installer\packages ^
        -f ^
-       CWY_SerialAssistant_0.1.0_Installer.exe
+       Ripple_0.1.0_Installer.exe
    ```
 
    说明：
@@ -90,12 +90,12 @@ CWY_SerialAssistant_0.1.0_Installer.exe
 
 - `build_installer.bat` 默认使用 `build\Desktop_Qt_6_11_1_MinGW_64_bit-Release` 作为构建目录。若使用其他套件或构建目录，请修改脚本中的 `BUILD_DIR`。
 - `config.xml` 中默认安装目录使用 `@ApplicationsDir@`（即 64 位系统的 `C:\Program Files`），适合本项目的 64 位构建。
-- 安装后的程序位于 `bin/appCWY.exe`，`installscript.qs` 中的快捷方式目标也对应为 `@TargetDir@/bin/appCWY.exe`。
-- `Installer/packages/com.cwy.cwyapp/data/` 目录在版本控制中仅保留 `.gitkeep`。实际构建时会由 CMake install 步骤填充，请勿手动提交二进制文件。
+- 安装后的程序位于 `bin/appRipple.exe`，`installscript.qs` 中的快捷方式目标也对应为 `@TargetDir@/bin/appRipple.exe`。
+- `Installer/packages/com.ripple.rippleapp/data/` 目录在版本控制中仅保留 `.gitkeep`。实际构建时会由 CMake install 步骤填充，请勿手动提交二进制文件。
 - 如需修改版本号，请同步更新：
-  - `CMakeLists.txt` 中的 `project(CWY VERSION x.x)`
+  - `CMakeLists.txt` 中的 `project(Ripple VERSION x.x)`
   - `Installer/config/config.xml` 中的 `<Version>`
-  - `Installer/packages/com.cwy.cwyapp/meta/package.xml` 中的 `<Version>`
+  - `Installer/packages/com.ripple.rippleapp/meta/package.xml` 中的 `<Version>`
   - `Installer/build_installer.bat` 中的输出文件名
 - 目前安装脚本针对 Windows 创建开始菜单快捷方式（始终创建）和桌面快捷方式（安装过程中可在自定义页面选择是否创建）；
   如需支持 macOS/Linux，请扩展 `installscript.qs`。

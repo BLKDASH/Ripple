@@ -18,13 +18,13 @@ Logger::Logger(QObject *parent)
     if (!dir.exists())
         dir.mkpath(dirPath);
 
-    m_logPath = dirPath + QStringLiteral("/cwy.log");
+    m_logPath = dirPath + QStringLiteral("/ripple.log");
     rotateLogIfNeeded();
     m_file.setFileName(m_logPath);
     m_open = m_file.open(QIODevice::Append | QIODevice::Text);
     if (m_open) {
         m_stream.setDevice(&m_file);
-        write(QtInfoMsg, QStringLiteral("=== CWY Serial Assistant started ==="));
+        write(QtInfoMsg, QStringLiteral("=== 凌波 started ==="));
     }
 
     qInstallMessageHandler(Logger::messageHandler);

@@ -1,8 +1,8 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import CWY.Serial
-import CWY.Theme
+import Ripple.Serial
+import Ripple.Theme
 
 Rectangle {
     id: root

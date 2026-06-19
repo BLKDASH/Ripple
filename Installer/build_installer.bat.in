@@ -5,7 +5,7 @@ setlocal EnableDelayedExpansion
 :: 获取脚本所在目录的绝对路径，并据此得到项目根目录
 for %%I in ("%~dp0..") do set "PROJECT_ROOT=%%~fI"
 set "INSTALLER_DIR=%~dp0"
-set "DATA_DIR=%INSTALLER_DIR%packages\com.cwy.cwyapp\data"
+set "DATA_DIR=%INSTALLER_DIR%packages\com.ripple.rippleapp\data"
 set "BUILD_DIR=%PROJECT_ROOT%\build\Desktop_Qt_6_11_1_MinGW_64_bit-Release"
 
 ::  Add Qt Installer Framework tools to PATH if not already present
@@ -22,10 +22,10 @@ if exist "%CMAKE_DIR%" (
 
 :: 安装包版本号（与 CMakeLists.txt / config.xml / package.xml 保持一致）
 set "VERSION=@PROJECT_VERSION@"
-set "OUTPUT_NAME=CWY_SerialAssistant_%VERSION%_Installer.exe"
+set "OUTPUT_NAME=Ripple_%VERSION%_Installer.exe"
 
 echo ========================================
-echo  Building CWY Installer v%VERSION%
+echo  Building Ripple Installer v%VERSION%
 echo ========================================
 
 :: 检查 binarycreator 是否可用

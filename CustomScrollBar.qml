@@ -1,6 +1,6 @@
 import QtQuick
 import QtQuick.Controls
-import CWY.Theme
+import Ripple.Theme
 
 ScrollBar {
     id: root

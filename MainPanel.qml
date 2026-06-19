@@ -1,5 +1,5 @@
 import QtQuick
-import CWY.Theme
+import Ripple.Theme
 
 Rectangle {
     id: root

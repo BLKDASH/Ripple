@@ -1,4 +1,4 @@
-# CWY Serial Assistant 安装程序（QIF）使用说明
+# 凌波 安装程序（QIF）使用说明
 
 本安装程序基于 **Qt Installer Framework（QIF）** 构建，支持常规安装与**原路径覆盖升级**。
 
@@ -9,13 +9,13 @@
 构建产物：
 
 ```
-CWY_SerialAssistant_0.1.0_Installer.exe
+Ripple_0.1.0_Installer.exe
 ```
 
 默认安装位置：
 
 ```
-C:\Program Files\CWY Serial Assistant
+C:\Program Files\Ripple
 ```
 
 ---
@@ -25,7 +25,7 @@ C:\Program Files\CWY Serial Assistant
 双击安装程序，按向导提示操作即可：
 
 1. 欢迎页 → 点击“下一步”
-2. 选择安装目录（默认推荐 `C:\Program Files\CWY Serial Assistant`）
+2. 选择安装目录（默认推荐 `C:\Program Files\Ripple`）
 3. 选择组件（本安装包只有一个主程序组件，默认勾选）
 4. 接受许可协议
 5. 选择是否创建桌面快捷方式
@@ -39,16 +39,16 @@ C:\Program Files\CWY Serial Assistant
 
 ### 适用场景
 
-- 旧版本安装在 `C:\Program Files\CWY Serial Assistant`
+- 旧版本安装在 `C:\Program Files\Ripple`
 - 运行新版安装程序，目标目录仍选择旧版本所在目录
 - 安装程序会自动检测并清理旧版本，然后安装新版本
 
 ### 升级流程
 
-1. 运行 `CWY_SerialAssistant_0.1.0_Installer.exe`
+1. 运行 `Ripple_0.1.0_Installer.exe`
 2. 在“选择安装目录”页面，选择旧版本的安装目录
 3. 页面会提示：**“检测到目标目录中已存在旧版本，继续安装将先卸载旧版本并覆盖安装。”**
-4. 进入组件选择页后，安装程序会自动调用维护工具（`CWYMaintenanceTool.exe purge`）清理旧版本
+4. 进入组件选择页后，安装程序会自动调用维护工具（`RippleMaintenanceTool.exe purge`）清理旧版本
 5. 继续完成安装
 
 > ⚠️ **注意**：升级过程中旧版本的快捷方式、开始菜单项等会被重新创建。若旧版本正在运行，请先退出，否则可能导致文件被占用。
@@ -59,15 +59,15 @@ C:\Program Files\CWY Serial Assistant
 
 安装程序**无法覆盖正在运行的自身**。因此：
 
-- **不要将安装目标目录设置为 `CWY_SerialAssistant_0.1.0_Installer.exe` 所在的目录**
-- 如果目标目录中包含类似 `CWY_SerialAssistant_*_Installer.exe` 的文件，安装程序会提示错误并阻止继续
+- **不要将安装目标目录设置为 `Ripple_0.1.0_Installer.exe` 所在的目录**
+- 如果目标目录中包含类似 `Ripple_*_Installer.exe` 的文件，安装程序会提示错误并阻止继续
 
 ### 正确做法
 
 | 场景 | 推荐操作 |
 |------|---------|
-| 安装程序在 `C:\Users\GM\GGPro\cwy\` | 将安装程序复制到桌面或下载目录后再运行，目标目录选择 `C:\Program Files\CWY Serial Assistant` |
-| 想安装到项目目录 | 先把安装程序移出该目录，或安装到一个子目录（如 `C:\Users\GM\GGPro\cwy\CWY`） |
+| 安装程序在 `C:\Users\GM\GGPro\ripple\` | 将安装程序复制到桌面或下载目录后再运行，目标目录选择 `C:\Program Files\Ripple` |
+| 想安装到项目目录 | 先把安装程序移出该目录，或安装到一个子目录（如 `C:\Users\GM\GGPro\ripple\Ripple`） |
 | 想升级旧版本 | 运行安装程序，目标目录选择旧版本的安装目录（不是安装程序所在的目录） |
 
 ---
@@ -79,7 +79,7 @@ C:\Program Files\CWY Serial Assistant
 ### 静默安装到指定目录
 
 ```bat
-CWY_SerialAssistant_0.1.0_Installer.exe --root "C:\Program Files\CWY Serial Assistant" --confirm-command install
+Ripple_0.1.0_Installer.exe --root "C:\Program Files\Ripple" --confirm-command install
 ```
 
 参数说明：
@@ -91,7 +91,7 @@ CWY_SerialAssistant_0.1.0_Installer.exe --root "C:\Program Files\CWY Serial Assi
 ### 静默升级
 
 ```bat
-CWY_SerialAssistant_0.1.0_Installer.exe --root "C:\Program Files\CWY Serial Assistant" --confirm-command install
+Ripple_0.1.0_Installer.exe --root "C:\Program Files\Ripple" --confirm-command install
 ```
 
 > 由于安装程序内置了 `OverwriteTargetDirectory` 自动回答为“是”，升级时不会提示覆盖确认。
@@ -99,7 +99,7 @@ CWY_SerialAssistant_0.1.0_Installer.exe --root "C:\Program Files\CWY Serial Assi
 ### 查看所有可用参数
 
 ```bat
-CWY_SerialAssistant_0.1.0_Installer.exe --help
+Ripple_0.1.0_Installer.exe --help
 ```
 
 ---
@@ -109,7 +109,7 @@ CWY_SerialAssistant_0.1.0_Installer.exe --help
 安装完成后，目标目录会生成维护工具：
 
 ```
-C:\Program Files\CWY Serial Assistant\CWYMaintenanceTool.exe
+C:\Program Files\Ripple\RippleMaintenanceTool.exe
 ```
 
 可用于：
@@ -121,7 +121,7 @@ C:\Program Files\CWY Serial Assistant\CWYMaintenanceTool.exe
 命令行清理旧版本（开发/测试用）：
 
 ```bat
-"C:\Program Files\CWY Serial Assistant\CWYMaintenanceTool.exe" purge
+"C:\Program Files\Ripple\RippleMaintenanceTool.exe" purge
 ```
 
 输入 `yes` 确认后，将删除该目录下的安装记录和文件。
@@ -143,7 +143,7 @@ C:\Program Files\CWY Serial Assistant\CWYMaintenanceTool.exe
 **解决**：新版安装程序会自动检测并清理旧版本。若仍失败，可手动运行维护工具卸载：
 
 ```bat
-"目标目录\CWYMaintenanceTool.exe" purge
+"目标目录\RippleMaintenanceTool.exe" purge
 ```
 
 ### Q3：安装后没有桌面快捷方式
@@ -152,7 +152,7 @@ C:\Program Files\CWY Serial Assistant\CWYMaintenanceTool.exe
 
 ### Q4：安装程序需要管理员权限吗？
 
-默认安装到 `C:\Program Files` 需要管理员权限。若安装到用户目录（如 `C:\Users\<用户名>\AppData\Local\CWY Serial Assistant`），通常不需要。
+默认安装到 `C:\Program Files` 需要管理员权限。若安装到用户目录（如 `C:\Users\<用户名>\AppData\Local\Ripple`），通常不需要。
 
 ---
 
@@ -167,9 +167,9 @@ C:\Program Files\CWY Serial Assistant\CWYMaintenanceTool.exe
 或手动执行：
 
 ```bat
-cmake --install build\Desktop_Qt_6_11_1_llvm_mingw_64_bit-Release --prefix C:\Users\GM\GGPro\cwy\Installer\packages\com.cwy.cwyapp\data
+cmake --install build\Desktop_Qt_6_11_1_llvm_mingw_64_bit-Release --prefix C:\Users\GM\GGPro\ripple\Installer\packages\com.ripple.rippleapp\data
 
-binarycreator --offline-only -c Installer\config\config.xml -p Installer\packages -f CWY_SerialAssistant_0.1.0_Installer.exe
+binarycreator --offline-only -c Installer\config\config.xml -p Installer\packages -f Ripple_0.1.0_Installer.exe
 ```
 
 ---
@@ -180,7 +180,7 @@ binarycreator --offline-only -c Installer\config\config.xml -p Installer\package
 |------|------|
 | `Installer/config/config.xml` | 安装程序全局配置 |
 | `Installer/config/controlscript.qs` | 控制脚本，处理自动消息框回答 |
-| `Installer/packages/com.cwy.cwyapp/meta/installscript.qs` | 安装脚本，处理目标目录页、快捷方式、旧版本清理 |
-| `Installer/packages/com.cwy.cwyapp/meta/targetwidget.ui` | 自定义目标目录选择页面 |
-| `Installer/packages/com.cwy.cwyapp/meta/page.ui` | 快捷方式选项页面 |
+| `Installer/packages/com.ripple.rippleapp/meta/installscript.qs` | 安装脚本，处理目标目录页、快捷方式、旧版本清理 |
+| `Installer/packages/com.ripple.rippleapp/meta/targetwidget.ui` | 自定义目标目录选择页面 |
+| `Installer/packages/com.ripple.rippleapp/meta/page.ui` | 快捷方式选项页面 |
 | `Installer/build_installer.bat` | 一键构建脚本 |

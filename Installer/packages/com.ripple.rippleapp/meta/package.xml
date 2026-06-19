@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Package>
     <!-- 包的唯一标识符，反向域名风格 -->
-    <Name>com.cwy.cwyapp</Name>
+    <Name>com.ripple.rippleapp</Name>
 
     <!-- 显示名称 -->
-    <DisplayName>CWY Serial Assistant</DisplayName>
+    <DisplayName>凌波</DisplayName>
 
     <!-- 包描述，会显示在组件选择页 -->
-    <Description>CWY 串口调试助手主程序及运行依赖。</Description>
+    <Description>凌波主程序及运行依赖。</Description>
 
     <!-- 包版本，与 config.xml 保持一致 -->
     <Version>0.1.0</Version>

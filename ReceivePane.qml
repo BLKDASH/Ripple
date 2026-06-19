@@ -1,10 +1,10 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import CWY.Serial
-import CWY.Receive
-import CWY.Theme
-import CWY.Logger
+import Ripple.Serial
+import Ripple.Receive
+import Ripple.Theme
+import Ripple.Logger
 
 MainPanel {
     id: root

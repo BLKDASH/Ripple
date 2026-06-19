@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(CWY VERSION 0.1.0 LANGUAGES CXX)
+project(Ripple VERSION 0.1.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -10,8 +10,9 @@ find_package(Qt6 REQUIRED COMPONENTS Quick SerialPort QuickControls2 LinguistToo
 
 qt_standard_project_setup(REQUIRES 6.8)
 
-qt_add_executable(appCWY
+qt_add_executable(appRipple
     main.cpp
+    icon/app.rc
     src/appsettings.h
     src/appsettings.cpp
     src/serialportmanager.h
@@ -26,8 +27,13 @@ qt_add_executable(appCWY
     src/logger.cpp
 )
 
-qt_add_qml_module(appCWY
-    URI CWY
+set_source_files_properties(icon/ripple-icon.svg
+    PROPERTIES QT_RESOURCE_ALIAS "ripple-icon.svg")
+
+qt_add_qml_module(appRipple
+    URI Ripple
+    RESOURCES
+        icon/ripple-icon.svg
     QML_FILES
         Main.qml
         NotifyOverlay.qml
@@ -50,8 +56,8 @@ qt_add_qml_module(appCWY
 set_source_files_properties(Theme.qml NotificationManager.qml
     PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
 
-qt_add_translations(appCWY
-    TS_FILES translations/CWY_zh_CN.ts
+qt_add_translations(appRipple
+    TS_FILES translations/Ripple_zh_CN.ts
     QM_FILES_OUTPUT_VARIABLE QM_FILES
 )
 
@@ -62,16 +68,16 @@ install(FILES ${QM_FILES}
 )
 
 # Copy help markdown files next to the executable for runtime loading.
-add_custom_command(TARGET appCWY POST_BUILD
+add_custom_command(TARGET appRipple POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
-    ${CMAKE_SOURCE_DIR}/help $<TARGET_FILE_DIR:appCWY>/help
+    ${CMAKE_SOURCE_DIR}/help $<TARGET_FILE_DIR:appRipple>/help
     COMMENT "Copying help files to build directory"
 )
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/help/
     DESTINATION ${CMAKE_INSTALL_BINDIR}/help
 )
 
-set(CWY_RELEASE_DATE "2026-06-18" CACHE STRING "Release date shown in the installer package.xml")
+set(RIPPLE_RELEASE_DATE "2026-06-18" CACHE STRING "Release date shown in the installer package.xml")
 
 # Generate installer metadata from templates so the version number only has to
 # be updated in project() above.
@@ -80,26 +86,26 @@ configure_file(
     ${CMAKE_SOURCE_DIR}/Installer/config/config.xml
     @ONLY)
 configure_file(
-    ${CMAKE_SOURCE_DIR}/Installer/packages/com.cwy.cwyapp/meta/package.xml.in
-    ${CMAKE_SOURCE_DIR}/Installer/packages/com.cwy.cwyapp/meta/package.xml
+    ${CMAKE_SOURCE_DIR}/Installer/packages/com.ripple.rippleapp/meta/package.xml.in
+    ${CMAKE_SOURCE_DIR}/Installer/packages/com.ripple.rippleapp/meta/package.xml
     @ONLY)
 configure_file(
     ${CMAKE_SOURCE_DIR}/Installer/build_installer.bat.in
     ${CMAKE_SOURCE_DIR}/Installer/build_installer.bat
     @ONLY)
 
-set_target_properties(appCWY PROPERTIES
+set_target_properties(appRipple PROPERTIES
     MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
     MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
     MACOSX_BUNDLE TRUE
     WIN32_EXECUTABLE TRUE
 )
 
-target_link_libraries(appCWY
+target_link_libraries(appRipple
     PRIVATE Qt6::Quick Qt6::SerialPort Qt6::QuickControls2
 )
 
-install(TARGETS appCWY
+install(TARGETS appRipple
     BUNDLE DESTINATION .
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
@@ -107,7 +113,7 @@ install(TARGETS appCWY
 
 # Generate a deployment script for the QML application and include it at install time
 qt_generate_deploy_qml_app_script(
-    TARGET appCWY
+    TARGET appRipple
     OUTPUT_SCRIPT deploy_script
     NO_UNSUPPORTED_PLATFORM_ERROR
     DEPLOY_USER_QML_MODULES_ON_UNSUPPORTED_PLATFORM

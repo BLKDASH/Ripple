@@ -9,7 +9,7 @@
    <item>
     <widget class="QLabel" name="descriptionLabel">
      <property name="text">
-      <string>请选择是否为 CWY 串口调试助手创建桌面快捷方式。</string>
+      <string>请选择是否为凌波创建桌面快捷方式。</string>
      </property>
      <property name="wordWrap">
       <bool>true</bool>

@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Controls
-import CWY.Theme
-import CWY.NotificationManager
+import Ripple.Theme
+import Ripple.NotificationManager
 
 // Visual notification overlay. The actual notification queue lives in the
 // NotificationManager singleton so any component can trigger a toast without

@@ -1,8 +1,8 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import CWY.Serial
-import CWY.Theme
+import Ripple.Serial
+import Ripple.Theme
 
 Dialog {
     id: root
@@ -53,11 +53,15 @@ Dialog {
                 id: hexCheck
                 text: qsTr("HEX")
                 checked: root.item ? root.item.hex : false
+                indicator.width: 16
+                indicator.height: 16
             }
             CheckBox {
                 id: lfCheck
                 text: qsTr("Append \\n")
                 checked: root.item ? root.item.appendLf : false
+                indicator.width: 16
+                indicator.height: 16
             }
         }
     }

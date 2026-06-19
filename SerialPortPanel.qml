@@ -1,9 +1,9 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import CWY.Serial
-import CWY.Theme
-import CWY.NotificationManager
+import Ripple.Serial
+import Ripple.Theme
+import Ripple.NotificationManager
 
 MainPanel {
     id: root

@@ -2,12 +2,12 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Dialogs
-import CWY.AppSettings
-import CWY.Serial
-import CWY.I18n
-import CWY.Receive
-import CWY.Theme
-import CWY.NotificationManager
+import Ripple.AppSettings
+import Ripple.Serial
+import Ripple.I18n
+import Ripple.Receive
+import Ripple.Theme
+import Ripple.NotificationManager
 
 ApplicationWindow {
     id: root
@@ -17,7 +17,7 @@ ApplicationWindow {
     font.family: Theme.fontFamily
     minimumHeight: 600
     visible: true
-    title: qsTr("CWY Serial Assistant")
+    title: qsTr("凌波")
 
     property bool showQuickSend: false
 
@@ -78,7 +78,7 @@ ApplicationWindow {
         delegate: MenuBarItem { }
 
         Menu {
-            title: "CWY"
+            title: "凌波"
             MenuItem {
                 text: qsTr("Settings")
                 onTriggered: settingsDialog.open()

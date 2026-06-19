@@ -1,4 +1,4 @@
-# CWY Serial Assistant
+# 凌波
 
 跨平台桌面串口调试工具，基于 Qt 6.11 + QML。
 
@@ -25,7 +25,7 @@
 "C:\Qt\Tools\mingw1310_64\bin\mingw32-make.exe" -C build\Desktop_Qt_6_11_1_MinGW_64_bit-Release -j4
 ```
 
-> **注意**：新增或删除 `.qml` 文件后，务必先重新配置 CMake，否则运行时会出现 `module "CWY.xxx" is not installed` 错误。
+> **注意**：新增或删除 `.qml` 文件后，务必先重新配置 CMake，否则运行时会出现 `module "Ripple.xxx" is not installed` 错误。
 
 ## 部署（生成可直接运行的目录）
 
@@ -33,7 +33,7 @@
 "C:\Qt\Tools\CMake_64\bin\cmake.exe" --install build\Desktop_Qt_6_11_1_MinGW_64_bit-Release --prefix .\deploy\release
 ```
 
-部署完成后，`deploy\release\bin\appCWY.exe` 即为可直接运行的 Release 版本，依赖 DLL、QML 模块、插件等都已复制到 `deploy\release` 下。
+部署完成后，`deploy\release\bin\appRipple.exe` 即为可直接运行的 Release 版本，依赖 DLL、QML 模块、插件等都已复制到 `deploy\release` 下。
 
 ## 打包 QIF 安装程序
 
@@ -46,14 +46,14 @@
 
 脚本会依次执行：
 
-1. 清理 `Installer\packages\com.cwy.cwyapp\data`
+1. 清理 `Installer\packages\com.ripple.rippleapp\data`
 2. 调用 `cmake --install` 把 Release 版本部署到 data 目录
 3. 调用 `binarycreator` 生成离线安装包
 
 生成的安装程序位于项目根目录：
 
 ```
-CWY_SerialAssistant_0.1.0_Installer.exe
+Ripple_0.1.0_Installer.exe
 ```
 
 如果 QIF 安装路径不同，请修改 `Installer\build_installer.bat` 顶部的 `QIF_DIR`。
@@ -63,7 +63,7 @@ CWY_SerialAssistant_0.1.0_Installer.exe
 程序运行日志默认写入：
 
 ```
-C:\Users\<用户名>\AppData\Roaming\CWY\CWY Serial Assistant\cwy.log
+C:\Users\<用户名>\AppData\Roaming\Ripple\凌波\ripple.log
 ```
 
 - Debug 构建时日志同时输出到 Qt Creator 的 **Application Output** 面板。
