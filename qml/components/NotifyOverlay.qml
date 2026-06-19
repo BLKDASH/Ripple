@@ -31,7 +31,7 @@ Item {
                 required property int    duration
 
                 // Auto-width: content-driven, capped at parent width
-                property int _pad: 28  // leftMargin(8) + icon(~14) + spacing(6)
+                property int _pad: 16  // leftMargin(8) + rightMargin(8)
                 property real _contentW: toastLabel.contentWidth + _pad
                 width: Math.min(_contentW, toastColumn.width - 16)
                 height: Math.max(28, toastLabel.implicitHeight + 10)
@@ -50,42 +50,21 @@ Item {
                         default:        return Theme.accent
                     }
                 }
-                readonly property string _icon: {
-                    switch (type) {
-                        case "error":   return "✕"
-                        case "warning": return "⚠"
-                        case "success": return "✓"
-                        default:        return "ℹ"
-                    }
-                }
-
                 color: Qt.rgba(_bg.r, _bg.g, _bg.b, 0.78)
                 border.color: Qt.rgba(_bg.r, _bg.g, _bg.b, 0.3)
                 border.width: 1
 
-                Row {
-                    id: toastRow
+                Label {
+                    id: toastLabel
+                    text: toast.message
+                    color: "white"
+                    font.pixelSize: Theme.fontSize
+                    elide: Text.ElideRight
+                    wrapMode: Text.NoWrap
                     anchors.verticalCenter: parent.verticalCenter
                     anchors.left: parent.left
                     anchors.leftMargin: 8
-                    spacing: 6
-                    Label {
-                        text: toast._icon
-                        color: "white"
-                        font.pixelSize: Theme.fontSize
-                        font.bold: true
-                        anchors.verticalCenter: parent.verticalCenter
-                    }
-                    Label {
-                        id: toastLabel
-                        text: toast.message
-                        color: "white"
-                        font.pixelSize: Theme.fontSize
-                        elide: Text.ElideRight
-                        wrapMode: Text.NoWrap
-                        anchors.verticalCenter: parent.verticalCenter
-                        width: toast.width - toast._pad
-                    }
+                    width: toast.width - toast._pad
                 }
 
                 MouseArea {

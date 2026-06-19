@@ -60,10 +60,14 @@ Dialog {
                      : Qt.rgba(0.18, 0.63, 0.26, 0.08).toString()
         var tipBd    = Theme.darkTheme ? Qt.rgba(0.38, 0.72, 0.28, 0.35).toString()
                      : Qt.rgba(0.18, 0.63, 0.26, 0.25).toString()
+        var tipFg    = Theme.darkTheme ? Qt.rgba(0.55, 0.85, 0.45, 1.0).toString()
+                     : Qt.rgba(0.12, 0.50, 0.18, 1.0).toString()
         var warnBg   = Theme.darkTheme ? Qt.rgba(0.82, 0.60, 0.13, 0.10).toString()
                      : Qt.rgba(0.82, 0.60, 0.13, 0.08).toString()
         var warnBd   = Theme.darkTheme ? Qt.rgba(0.82, 0.60, 0.13, 0.35).toString()
                      : Qt.rgba(0.82, 0.60, 0.13, 0.25).toString()
+        var warnFg   = Theme.darkTheme ? Qt.rgba(0.90, 0.72, 0.25, 1.0).toString()
+                     : Qt.rgba(0.60, 0.42, 0.08, 1.0).toString()
 
         var html = "<html><head><style>"
                  // ── Base ─────────────────────────────────────
@@ -90,9 +94,9 @@ Dialog {
                  + "td { padding:7px 12px; border:1px solid " + hr + "; }"
                  + "th { padding:7px 12px; border:1px solid " + hr + "; background:" + hBg + "; font-weight:600; text-align:left; }"
                  // ── Callout boxes ────────────────────────────
-                 + ".tip { background:" + tipBg + "; border:1px solid " + tipBd + "; border-radius:6px; padding:10px 14px; margin:10px 0; }"
-                 + ".warn { background:" + warnBg + "; border:1px solid " + warnBd + "; border-radius:6px; padding:10px 14px; margin:10px 0; }"
-                 + ".info { background:" + accentBg + "; border:1px solid " + accentBd + "; border-radius:6px; padding:10px 14px; margin:10px 0; }"
+                 + ".tip { color:" + tipFg + "; background:" + tipBg + "; border:1px solid " + tipBd + "; border-radius:6px; padding:10px 14px; margin:10px 0; }"
+                 + ".warn { color:" + warnFg + "; background:" + warnBg + "; border:1px solid " + warnBd + "; border-radius:6px; padding:10px 14px; margin:10px 0; }"
+                 + ".info { color:" + link + "; background:" + accentBg + "; border:1px solid " + accentBd + "; border-radius:6px; padding:10px 14px; margin:10px 0; }"
                  // ── Key-value grid (used for shortcuts) ──────
                  + ".kv { margin:6px 0; }"
                  + ".kv td { padding:8px 14px; border-bottom:1px solid " + hr + "; }"

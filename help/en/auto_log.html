@@ -12,12 +12,13 @@
 <p>Log files are named by date: <code>yyyy-MM-dd.log</code>, e.g. <code>2026-06-19.log</code>. Data from the same day is appended to the same file.</p>
 
 <h2>Log Format</h2>
+<p>Each record is prefixed with a full timestamp: <code>[yyyy-MM-dd hh:mm:ss.zzz]</code>.</p>
 <table>
 <tr><th>Data Type</th><th>Logged As</th></tr>
-<tr><td>Text data</td><td>UTF-8 with <code>[HH:mm:ss.zzz]</code> timestamps</td></tr>
-<tr><td>Binary data</td><td>HEX preview (auto-detected when &gt;5% non-UTF-8 bytes)</td></tr>
+<tr><td>Text data</td><td>UTF-8 original text</td></tr>
+<tr><td>Binary data</td><td>HEX preview (auto-detected when &gt;5% non-UTF-8 bytes), formatted as <code>[Binary data (N bytes): ...]</code></td></tr>
 </table>
 
 <div class="warn">⚠️ If a session spans midnight, data continues writing to the previous day's file. Re-open the port to start a new file.</div>
 
-<p>When auto-log is active, a ring appears on the status bar indicator 📋.</p>
+<p>When auto-log is active, the status bar indicator gains an outer ring to show that recording is in progress.</p>

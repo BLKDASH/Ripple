@@ -12,12 +12,13 @@
 <p>日志文件以日期命名：<code>yyyy-MM-dd.log</code>，例如 <code>2026-06-19.log</code>。同一天的数据追加写入同一文件。</p>
 
 <h2>记录格式</h2>
+<p>每条记录带完整时间戳前缀：<code>[yyyy-MM-dd hh:mm:ss.zzz]</code>。</p>
 <table>
 <tr><th>数据类型</th><th>记录方式</th></tr>
-<tr><td>文本数据</td><td>UTF-8 原文，附带 <code>[HH:mm:ss.zzz]</code> 时间戳</td></tr>
-<tr><td>二进制数据</td><td>HEX 预览（超过 5% 非 UTF-8 字节时自动切换）</td></tr>
+<tr><td>文本数据</td><td>UTF-8 原文</td></tr>
+<tr><td>二进制数据</td><td>HEX 预览（超过 5% 非 UTF-8 字节时自动切换），格式为 <code>[Binary data (N bytes): ...]</code></td></tr>
 </table>
 
 <div class="warn">⚠️ 如果会话跨午夜，数据继续写入前一日文件。重新打开串口即可开始写入新文件。</div>
 
-<p>自动日志激活时，状态栏指示灯上会显示外环 📋。</p>
+<p>自动日志激活时，状态栏的连接指示灯会多一圈外环，表示正在记录。</p>

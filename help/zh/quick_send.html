@@ -1,25 +1,41 @@
 <h1>快捷发送面板</h1>
-<p>快捷发送面板提供 <strong>6 个可配置按钮</strong>，一键发送常用指令，无需重复输入。</p>
+<p>快捷发送面板提供 <strong>15 个可配置按钮</strong>，一键发送常用指令，无需重复输入。</p>
 
 <h2>JSON 格式</h2>
-<p>每个槽位是一个 JSON 对象，包含两个字段：</p>
+<p>每个槽位是一个 JSON 对象，包含三个字段：</p>
 <table>
 <tr><th>字段</th><th>类型</th><th>说明</th></tr>
+<tr><td><code>name</code></td><td>string</td><td>槽位名称（可选），显示在输入框左侧作为标签</td></tr>
 <tr><td><code>command</code></td><td>string</td><td>要发送的内容。HEX 模式下为空格分隔的十六进制字节，如 <code>"01 02 FF"</code></td></tr>
 <tr><td><code>hex</code></td><td>bool</td><td><code>true</code> 以 HEX 字节发送，<code>false</code> 以原始文本发送</td></tr>
 </table>
 
 <h2>模板</h2>
 <pre>[
-  { "command": "AT",      "hex": false },
-  { "command": "AT+GMR",  "hex": false },
-  { "command": "01 02 FF", "hex": true  },
-  { "command": "",        "hex": false },
-  { "command": "",        "hex": false },
-  { "command": "",        "hex": false }
+  { "name": "",  "command": "AT",       "hex": false },
+  { "name": "",  "command": "AT+GMR",   "hex": false },
+  { "name": "",  "command": "01 02 FF", "hex": true  },
+  { "name": "",  "command": "",         "hex": false },
+  { "name": "",  "command": "",         "hex": false },
+  { "name": "",  "command": "",         "hex": false },
+  { "name": "",  "command": "",         "hex": false },
+  { "name": "",  "command": "",         "hex": false },
+  { "name": "",  "command": "",         "hex": false },
+  { "name": "",  "command": "",         "hex": false },
+  { "name": "",  "command": "",         "hex": false },
+  { "name": "",  "command": "",         "hex": false },
+  { "name": "",  "command": "",         "hex": false },
+  { "name": "",  "command": "",         "hex": false },
+  { "name": "",  "command": "",         "hex": false }
 ]</pre>
 
-<h2>导入导出</h2>
-<p>使用面板上的 <strong>Load</strong> / <strong>Save</strong> 按钮，可将配置导出为 <code>.json</code> 文件，方便在不同设备间迁移或备份。</p>
+<h2>工具栏</h2>
+<p>面板右上角提供三个图标按钮：</p>
+<table>
+<tr><th>图标</th><th>功能</th></tr>
+<tr><td>📂</td><td>从 <code>.json</code> 文件加载配置</td></tr>
+<tr><td>💾</td><td>将当前配置保存为 <code>.json</code> 文件</td></tr>
+<tr><td>🗑</td><td>清空所有槽位</td></tr>
+</table>
 
-<div class="tip">💡 建议为常用的 AT 指令、调试命令预设好快捷按钮，减少重复输入。</div>
+<div class="tip">💡 建议为常用的 AT 指令、调试命令预设好快捷按钮，减少重复输入。使用导入导出功能可在不同设备间迁移配置。</div>

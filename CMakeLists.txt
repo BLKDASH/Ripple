@@ -35,25 +35,27 @@ qt_add_qml_module(appRipple
     RESOURCES
         icon/ripple-icon.svg
     QML_FILES
-        Main.qml
-        NotifyOverlay.qml
-        SerialPortPanel.qml
-        ParamCombo.qml
-        ReceivePane.qml
-        SendPane.qml
-        QuickSendGrid.qml
-        QuickSendEditDialog.qml
-        StatusBar.qml
-        SettingsDialog.qml
-        FluentComboBox.qml
-        CustomScrollBar.qml
-        MainPanel.qml
-        HelpDialog.qml
-        Theme.qml
-        NotificationManager.qml
+        qml/Main.qml
+        qml/MainPanel.qml
+        qml/components/NotifyOverlay.qml
+        qml/serial/SerialPortPanel.qml
+        qml/serial/ParamCombo.qml
+        qml/receive/ReceivePane.qml
+        qml/send/SendPane.qml
+        qml/send/QuickSendGrid.qml
+        qml/send/QuickSendEditDialog.qml
+        qml/dialogs/SettingsDialog.qml
+        qml/dialogs/HelpDialog.qml
+        qml/components/CustomScrollBar.qml
+        qml/components/FluentComboBox.qml
+        qml/components/StatusBar.qml
+        qml/singleton/Theme.qml
+        qml/singleton/NotificationManager.qml
 )
 
-set_source_files_properties(Theme.qml NotificationManager.qml
+set_source_files_properties(
+    qml/singleton/Theme.qml
+    qml/singleton/NotificationManager.qml
     PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
 
 qt_add_translations(appRipple

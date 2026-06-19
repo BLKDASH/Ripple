@@ -49,7 +49,8 @@ MainPanel {
                     if (!portCombo.popup.opened) {
                         refreshPorts()
                     }
-                    mouse.accepted = false
+                    // Don't open popup if there are no ports
+                    mouse.accepted = portModel.count === 0
                 }
             }
         }

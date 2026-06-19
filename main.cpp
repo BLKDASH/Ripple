@@ -94,9 +94,9 @@ int main(int argc, char *argv[])
     // property which may not emit the `singleton` keyword in qmldir on all Qt
     // versions.
     const int themeTypeId =
-        qmlRegisterSingletonType(QUrl(QStringLiteral("qrc:/qt/qml/Ripple/Theme.qml")),
+        qmlRegisterSingletonType(QUrl(QStringLiteral("qrc:/qt/qml/Ripple/qml/singleton/Theme.qml")),
                                  "Ripple.Theme", 1, 0, "Theme");
-    qmlRegisterSingletonType(QUrl(QStringLiteral("qrc:/qt/qml/Ripple/NotificationManager.qml")),
+    qmlRegisterSingletonType(QUrl(QStringLiteral("qrc:/qt/qml/Ripple/qml/singleton/NotificationManager.qml")),
                              "Ripple.NotificationManager", 1, 0, "NotificationManager");
 
     Translator translator(&engine);

@@ -36,7 +36,7 @@ if errorlevel 1 (
 )
 
 :: 清理旧数据（保留目录本身）
-echo [1/3] 清理旧安装数据...
+echo 13 清理旧安装数据...
 if exist "%DATA_DIR%" (
     rd /s /q "%DATA_DIR%"
 )
@@ -44,7 +44,7 @@ mkdir "%DATA_DIR%"
 
 :: 使用 CMake install 将主程序及依赖部署到 data 目录
 :: 必须使用绝对路径作为 prefix，否则 Qt 部署脚本生成 qt.conf 会失败
-echo [2/3] 部署应用程序到安装包数据目录...
+echo 23 部署应用程序到安装包数据目录...
 if not exist "%BUILD_DIR%" (
     echo [WARN] 未找到 Release 构建目录：%BUILD_DIR%
     echo        将尝试使用默认 build 目录...
@@ -58,20 +58,20 @@ if errorlevel 1 (
 )
 
 :: 生成安装包
-echo [3/3] 生成安装包 %OUTPUT_NAME%...
-cd /d "%PROJECT_ROOT%"
-binarycreator -c "%INSTALLER_DIR%config\config.xml" ^
-              -p "%INSTALLER_DIR%packages" ^
-              -f ^
-              "%OUTPUT_NAME%"
+:: echo 33 生成安装包 %OUTPUT_NAME%...
+:: cd /d "%PROJECT_ROOT%"
+:: binarycreator -c "%INSTALLER_DIR%config\config.xml" ^
+::               -p "%INSTALLER_DIR%packages" ^
+::               -f ^
+::               "%OUTPUT_NAME%"
 
-if errorlevel 1 (
-    echo [ERROR] 安装包生成失败。
-    exit /b 1
-)
+:: if errorlevel 1 (
+::     echo [ERROR] 安装包生成失败。
+::     exit /b 1
+:: )
 
-echo ========================================
-echo  安装包已生成：%PROJECT_ROOT%\%OUTPUT_NAME%
-echo ========================================
+:: echo ========================================
+:: echo  安装包已生成：%PROJECT_ROOT%\%OUTPUT_NAME%
+:: echo ========================================
 
 endlocal
