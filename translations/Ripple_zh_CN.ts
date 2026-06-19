@@ -115,6 +115,11 @@
     </message>
     <message>
         <location filename="../Main.qml"/>
+        <source>Show quick send window</source>
+        <translation>显示快捷发送窗口</translation>
+    </message>
+    <message>
+        <location filename="../Main.qml"/>
         <source>Clear Input</source>
         <translation>清空输入</translation>
     </message>
@@ -577,6 +582,11 @@
         <location filename="../HelpDialog.qml"/>
         <source>About</source>
         <translation>关于</translation>
+    </message>
+    <message>
+        <location filename="../HelpDialog.qml"/>
+        <source>Topics</source>
+        <translation>目录</translation>
     </message>
     <message>
         <location filename="../HelpDialog.qml"/>

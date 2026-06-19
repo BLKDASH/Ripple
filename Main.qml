@@ -44,8 +44,8 @@ ApplicationWindow {
         // Restore last window size (defaults to 1000×700 if not saved).
         var w = AppSettings.windowWidth
         var h = AppSettings.windowHeight
-        if (w > 0) root.width = w
-        if (h > 0) root.height = h
+        if (w > 0) root.width = Math.max(w, root.minimumWidth)
+        if (h > 0) root.height = Math.max(h, root.minimumHeight)
 
         Theme.darkTheme = AppSettings.darkTheme
         root.showQuickSend = AppSettings.showQuickSend
@@ -187,6 +187,13 @@ ApplicationWindow {
                 checked: sendPane.cyclicSend
                 onTriggered: sendPane.cyclicSend = !sendPane.cyclicSend
             }
+            MenuSeparator {}
+            MenuItem {
+                text: qsTr("Show quick send window")
+                checkable: true
+                checked: root.showQuickSend
+                onTriggered: root.showQuickSend = !root.showQuickSend
+            }
         }
     }
 
@@ -206,42 +213,36 @@ ApplicationWindow {
         anchors.margins: 8
         spacing: 8
 
-        // Left: serial port config panel
+        // Left: serial port config panel (full height)
         SerialPortPanel {
             id: serialPortPanel
             Layout.preferredWidth: 200
             Layout.fillHeight: true
         }
 
-        // Center: receive area
-        ReceivePane {
-            id: receivePane
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            Layout.minimumWidth: 200
-            onClearRequested: { rxCount = 0 }
-        }
-
-        // Right: send area + quick send
+        // Center: receive + send
         ColumnLayout {
-            Layout.preferredWidth: 280
-            Layout.maximumWidth: 280
+            Layout.fillWidth: true
             Layout.fillHeight: true
             spacing: 8
 
+            // Receive area
+            ReceivePane {
+                id: receivePane
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                Layout.minimumHeight: 200
+                onClearRequested: { rxCount = 0 }
+            }
+
+            // Send area
             SendPane {
                 id: sendPane
                 Layout.fillWidth: true
-                Layout.fillHeight: true
-            }
-
-            QuickSendGrid {
-                id: quickSendGrid
-                Layout.fillWidth: true
-                Layout.preferredHeight: 220
-                visible: root.showQuickSend
+                Layout.preferredHeight: 240
             }
         }
+
     }
 
     // ── Bottom status bar ──────────────────────────────────────
@@ -271,6 +272,18 @@ ApplicationWindow {
         onAboutToShow: {
             x = (root.width - width) / 2
             y = (root.height - height) / 2
+        }
+    }
+
+    // ── Quick Send floating window (dynamically created) ───────
+    Loader {
+        id: quickSendLoader
+        active: root.showQuickSend
+        sourceComponent: QuickSendGrid {
+            Component.onCompleted: {
+                height = root.height
+            }
+            onClosedByUser: root.showQuickSend = false
         }
     }
 

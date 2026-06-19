@@ -7,10 +7,26 @@ import Ripple.Serial
 import Ripple.Theme
 import Ripple.NotificationManager
 
-MainPanel {
+Window {
     id: root
+    title: qsTr("Quick Send")
+    width: 420
+    height: 500
+    minimumWidth: 320
+    minimumHeight: 200
+    visible: true
+    flags: Qt.Window
 
-    property int itemCount: 6
+    property int itemCount: 15
+    signal closedByUser()
+
+    onVisibleChanged: {
+        if (!visible)
+            closedByUser()
+    }
+
+    color: Theme.darkTheme ? "#101010" : "#FFFFFF"
+
     ColumnLayout {
         anchors.fill: parent
         anchors.margins: Theme.spacingPanel
@@ -27,19 +43,44 @@ MainPanel {
                 color: Theme.text
             }
             Item { Layout.fillWidth: true }
-            Button {
-                text: qsTr("Load")
-                flat: true
-                font.family: Theme.fontFamily
+            Label {
+                text: "📂"
                 font.pixelSize: Theme.fontSize
-                onClicked: loadDialog.open()
+                color: Theme.text
+                opacity: loadMouse.containsMouse ? 1.0 : 0.6
+                MouseArea {
+                    id: loadMouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: loadDialog.open()
+                }
             }
-            Button {
-                text: qsTr("Save")
-                flat: true
-                font.family: Theme.fontFamily
+            Label {
+                text: "💾"
                 font.pixelSize: Theme.fontSize
-                onClicked: saveDialog.open()
+                color: Theme.text
+                opacity: saveMouse.containsMouse ? 1.0 : 0.6
+                MouseArea {
+                    id: saveMouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: saveDialog.open()
+                }
+            }
+            Label {
+                text: "🗑"
+                font.pixelSize: Theme.fontSize
+                color: Theme.text
+                opacity: clearMouse.containsMouse ? 1.0 : 0.6
+                MouseArea {
+                    id: clearMouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: clearAll()
+                }
             }
         }
 
@@ -50,7 +91,10 @@ MainPanel {
             clip: true
             spacing: 4
             model: quickModel
-            ScrollBar.vertical: CustomScrollBar { orientation: Qt.Vertical }
+            ScrollBar.vertical: CustomScrollBar {
+                orientation: Qt.Vertical
+                policy: ScrollBar.AlwaysOff
+            }
 
             delegate: Rectangle {
                 id: delegateRoot
@@ -76,17 +120,32 @@ MainPanel {
                     id: delegateLayout
                     anchors.fill: parent
                     anchors.margins: 4
+                    anchors.rightMargin: 12
                     spacing: Theme.spacingTight
 
-                    // Row number indicator
-                    Label {
-                        text: index + 1
+                    TextField {
+                        id: nameField
+                        text: model.name || ""
+                        placeholderText: String(index + 1)
+                        placeholderTextColor: Qt.rgba(Theme.text.r, Theme.text.g, Theme.text.b, 0.4)
                         color: Theme.text
-                        opacity: 0.4
                         font.pixelSize: Theme.fontSize
-                        font.family: Theme.monoFontFamily
-                        Layout.preferredWidth: 16
-                        horizontalAlignment: Text.AlignRight
+                        font.family: Theme.fontFamily
+                        Layout.preferredWidth: 40
+                        horizontalAlignment: Text.AlignHCenter
+                        background: Rectangle {
+                            radius: 4
+                            color: nameField.activeFocus ? Theme.inputBg : "transparent"
+                            border.color: nameField.activeFocus ? Theme.accent : "transparent"
+                            border.width: 1
+                        }
+                        onEditingFinished: {
+                            var trimmed = text.trim()
+                            if (trimmed !== model.name) {
+                                quickModel.setProperty(index, "name", trimmed)
+                                saveToSettings()
+                            }
+                        }
                     }
 
                     TextField {
@@ -161,15 +220,20 @@ MainPanel {
     function initDefault() {
         quickModel.clear()
         for (var i = 0; i < root.itemCount; ++i) {
-            quickModel.append({ command: "", hex: false })
+            quickModel.append({ name: "", command: "", hex: false })
         }
+    }
+
+    function clearAll() {
+        initDefault()
+        saveToSettings()
     }
 
     function saveToSettings() {
         var items = []
         for (var i = 0; i < quickModel.count; ++i) {
             var item = quickModel.get(i)
-            items.push({ command: item.command, hex: item.hex })
+            items.push({ name: item.name, command: item.command, hex: item.hex })
         }
         AppSettings.quickSendJson = JSON.stringify(items)
     }
@@ -185,9 +249,13 @@ MainPanel {
             quickModel.clear()
             for (var i = 0; i < root.itemCount; ++i) {
                 if (i < items.length) {
-                    quickModel.append(items[i])
+                    quickModel.append({
+                        name: items[i].name || "",
+                        command: items[i].command || "",
+                        hex: items[i].hex || false
+                    })
                 } else {
-                    quickModel.append({ command: "", hex: false })
+                    quickModel.append({ name: "", command: "", hex: false })
                 }
             }
         } catch (e) {
@@ -209,6 +277,7 @@ MainPanel {
         for (var i = 0; i < quickModel.count; ++i) {
             var item = quickModel.get(i)
             items.push({
+                name: item.name,
                 command: item.command,
                 hex: item.hex
             })
@@ -230,9 +299,13 @@ MainPanel {
             quickModel.clear()
             for (var i = 0; i < root.itemCount; ++i) {
                 if (i < items.length) {
-                    quickModel.append(items[i])
+                    quickModel.append({
+                        name: items[i].name || "",
+                        command: items[i].command || "",
+                        hex: items[i].hex || false
+                    })
                 } else {
-                    quickModel.append({ command: "", hex: false })
+                    quickModel.append({ name: "", command: "", hex: false })
                 }
             }
         } catch (e) {
