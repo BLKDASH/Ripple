@@ -166,6 +166,8 @@ MainPanel {
         SerialPort.portNameChanged.connect(function() {
             portCombo.currentIndex = portCombo.indexOfValue(SerialPort.portName)
         })
+        // Sync baud rate combo selection
+        baudCombo.currentIndex = baudCombo.model.indexOf(String(SerialPort.baudRate))
     }
 
     function refreshPorts() {

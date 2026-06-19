@@ -81,7 +81,10 @@ ApplicationWindow {
             title: "凌波"
             MenuItem {
                 text: qsTr("Settings")
-                onTriggered: settingsDialog.open()
+                onTriggered: {
+                    settingsDialog.loadSettings()
+                    settingsDialog.toggle()
+                }
             }
             MenuItem {
                 text: qsTr("Dark Theme")
@@ -262,16 +265,10 @@ ApplicationWindow {
     property int rxCount: 0
     property int txCount: 0
 
-    // ── Settings dialog ────────────────────────────────────────
+    // ── Settings panel (slides in from left) ──────────────────
     SettingsDialog {
         id: settingsDialog
         appWindow: root
-
-        onAboutToShow: {
-            settingsDialog.loadSettings()
-            x = (root.width - width) / 2
-            y = (root.height - height) / 2
-        }
     }
 
     HelpDialog {
