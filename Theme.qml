@@ -1,5 +1,6 @@
 pragma Singleton
 import QtQuick
+import Ripple.AppSettings
 
 // Centralized theme singleton for Ripple.
 // This replaces the scattered dynamic-scope colour references used by the
@@ -8,8 +9,9 @@ import QtQuick
 QtObject {
     id: root
 
-    // Public toggle. Main.qml persists this value through Settings.
-    property bool darkTheme: false
+    // Public toggle. Reads persisted value on startup so the correct theme
+    // is active before the window becomes visible (no flash of default UI).
+    property bool darkTheme: AppSettings.darkTheme
 
     // Core palette
     readonly property color panelBg:  darkTheme ? "#202020" : "#F3F3F3"
