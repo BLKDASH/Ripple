@@ -16,7 +16,7 @@ ApplicationWindow {
     minimumWidth: 800
     font.family: Theme.fontFamily
     minimumHeight: 600
-    visible: true
+    visible: false
     title: qsTr("Ripple")
 
     property bool showQuickSend: false
@@ -42,14 +42,9 @@ ApplicationWindow {
 
 
     Component.onCompleted: {
-        // Restore last window size (defaults to 1000×700 if not saved).
-        var w = AppSettings.windowWidth
-        var h = AppSettings.windowHeight
-        if (w > 0) root.width = Math.max(w, root.minimumWidth)
-        if (h > 0) root.height = Math.max(h, root.minimumHeight)
+        // Window geometry is now restored in main.cpp before the window becomes
+        // visible, so no size restoration needed here.
 
-        // Theme.darkTheme is now initialized directly from AppSettings in Theme.qml,
-        // so no explicit assignment needed here.
         root.showQuickSend = AppSettings.showQuickSend
 
         SerialPort.errorOccurred.connect(function(msg) {

@@ -122,6 +122,21 @@ int main(int argc, char *argv[])
         Qt::QueuedConnection);
     engine.loadFromModule("Ripple", "Main");
 
+    // Restore persisted window geometry *before* the window becomes visible
+    // so the user never sees the default 1000×700 size flash on screen.
+    const auto roots = engine.rootObjects();
+    if (auto *rootObj = roots.isEmpty() ? nullptr : roots.constFirst()) {
+        const int savedW = appSettings->windowWidth();
+        const int savedH = appSettings->windowHeight();
+        const int minW = rootObj->property("minimumWidth").toInt();
+        const int minH = rootObj->property("minimumHeight").toInt();
+        if (savedW > 0)
+            rootObj->setProperty("width", qMax(savedW, minW));
+        if (savedH > 0)
+            rootObj->setProperty("height", qMax(savedH, minH));
+        rootObj->setProperty("visible", true);
+    }
+
     if (QObject *theme = engine.singletonInstance<QObject *>(themeTypeId)) {
         auto *helper = new ThemeSyncHelper(theme, styleHints, &app);
         QObject::connect(theme, SIGNAL(darkThemeChanged()),
