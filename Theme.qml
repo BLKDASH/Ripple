@@ -34,8 +34,12 @@ QtObject {
     readonly property color toolTipBase:   panelBg
     readonly property color toolTipText:   text
 
-    // Extra helpers used by glass panels / notifications
-    readonly property real glassOpacity: 0.72
+    // Layout constants — unified radius and spacing across all panels
+    readonly property int radiusPanel: 16      // outer panel corners
+    readonly property int radiusInput: 6       // input field corners
+    readonly property int spacingPanel: 12     // panel inner margin
+    readonly property int spacingSection: 10   // gap between logical sections
+    readonly property int spacingTight: 6      // compact inline spacing
 
     // Font — centralized sizes and monospace family so every component
     // picks up the same values. Change here and the whole UI follows.

@@ -1,7 +1,10 @@
 #include "serialportmanager.h"
 #include <QCoreApplication>
+#include <QDate>
 #include <QDebug>
+#include <QDir>
 #include <QFile>
+#include <QFileInfo>
 #include <QTextStream>
 #include <QMetaObject>
 #include <QCollator>
@@ -245,6 +248,36 @@ void SerialPortManager::syncRecordingToWorker()
     } else {
         QMetaObject::invokeMethod(m_worker, &SerialWorker::stopRecording, Qt::QueuedConnection);
     }
+}
+
+bool SerialPortManager::wouldConflictWithAutoLog(const QString &filePath) const
+{
+    if (!m_autoLogEnabled || m_autoLogFolder.isEmpty())
+        return false;
+
+    QString todayLog = QDate::currentDate().toString("yyyy-MM-dd") + QStringLiteral(".log");
+    return QFileInfo(filePath).absoluteFilePath()
+           == QFileInfo(m_autoLogFolder + QStringLiteral("/") + todayLog).absoluteFilePath();
+}
+
+bool SerialPortManager::wouldAutoLogConflict(bool autoLogEnabled, const QString &autoLogFolder) const
+{
+    if (!autoLogEnabled || autoLogFolder.isEmpty() || !m_recordingEnabled || m_recordingPath.isEmpty())
+        return false;
+
+    QString todayLog = QDate::currentDate().toString("yyyy-MM-dd") + QStringLiteral(".log");
+    return QFileInfo(m_recordingPath).absoluteFilePath()
+           == QFileInfo(autoLogFolder + QStringLiteral("/") + todayLog).absoluteFilePath();
+}
+
+bool SerialPortManager::wouldRecordingConflict(const QString &filePath) const
+{
+    if (!m_autoLogEnabled || m_autoLogFolder.isEmpty())
+        return false;
+
+    QString todayLog = QDate::currentDate().toString("yyyy-MM-dd") + QStringLiteral(".log");
+    return QFileInfo(filePath).absoluteFilePath()
+           == QFileInfo(m_autoLogFolder + QStringLiteral("/") + todayLog).absoluteFilePath();
 }
 
 QByteArray SerialPortManager::hexStringToBytes(const QString &hexString)

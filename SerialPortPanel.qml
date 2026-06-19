@@ -5,11 +5,8 @@ import CWY.Serial
 import CWY.Theme
 import CWY.NotificationManager
 
-Rectangle {
+MainPanel {
     id: root
-    color: Theme.panelBg
-    border.color: Theme.border
-    radius: 4
 
     ColumnLayout {
         anchors.fill: parent
@@ -57,7 +54,7 @@ Rectangle {
             }
         }
 
-        // Baud rate
+        // Baud rate — editable combo: pick from list or type any value
         ColumnLayout {
             Layout.fillWidth: true
             spacing: 4
@@ -66,54 +63,22 @@ Rectangle {
                 color: Theme.text
                 font.pixelSize: Theme.fontSize
             }
-            RowLayout {
+            FluentComboBox {
+                id: baudCombo
                 Layout.fillWidth: true
-                spacing: 6
-                FluentComboBox {
-                    id: baudCombo
-                    Layout.fillWidth: true
-                    enabled: !SerialPort.isOpen
-                    model: [1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200, 230400, 460800, 921600, qsTr("Custom")]
-                    popup.y: baudCombo.height + 4
-                    Component.onCompleted: syncBaud()
+                enabled: !SerialPort.isOpen
+                editable: true
+                model: ["1200","2400","4800","9600","19200","38400",
+                        "57600","115200","230400","460800","921600"]
+                editText: String(SerialPort.baudRate)
+                validator: IntValidator { bottom: 1; top: 4000000 }
+                popup.y: baudCombo.height + 4
 
-                    onActivated: {
-                        if (currentIndex === count - 1) {
-                            customBaudField.text = SerialPort.baudRate
-                            customBaudField.forceActiveFocus()
-                            customBaudField.selectAll()
-                        } else {
-                            SerialPort.baudRate = currentValue
-                        }
-                    }
-
-                    function syncBaud() {
-                        var idx = indexOfValue(SerialPort.baudRate)
-                        if (idx !== -1) {
-                            currentIndex = idx
-                        } else {
-                            currentIndex = count - 1
-                        }
-                    }
-                }
-
-                TextField {
-                    id: customBaudField
-                    Layout.preferredWidth: 90
-                    visible: baudCombo.currentIndex === baudCombo.count - 1
-                    enabled: !SerialPort.isOpen
-                    text: SerialPort.baudRate
-                    color: Theme.text
-                    font.family: Theme.monoFontFamily
-                    font.pixelSize: Theme.fontSize
-                    horizontalAlignment: Text.AlignRight
-                    validator: IntValidator { bottom: 1; top: 99999999 }
-                    onEditingFinished: {
-                        var rate = parseInt(text)
-                        if (!isNaN(rate) && rate > 0) {
-                            SerialPort.baudRate = rate
-                        }
-                    }
+                onActivated: (index) => SerialPort.baudRate = parseInt(currentValue)
+                onAccepted: {
+                    var rate = parseInt(editText)
+                    if (!isNaN(rate) && rate > 0)
+                        SerialPort.baudRate = rate
                 }
             }
         }
@@ -187,7 +152,7 @@ Rectangle {
             background: Rectangle {
                 implicitHeight: 32
                 color: SerialPort.isOpen ? Theme.error : Theme.success
-                radius: 4
+                radius: Theme.radiusInput
                 opacity: connectButton.down || !connectButton.enabled ? 0.7 : 1.0
             }
         }
@@ -197,10 +162,6 @@ Rectangle {
 
     Component.onCompleted: {
         refreshPorts()
-        // Keep baud combo in sync with C++ property
-        SerialPort.baudRateChanged.connect(function() {
-            baudCombo.syncBaud()
-        })
         // Sync port selection when refreshed
         SerialPort.portNameChanged.connect(function() {
             portCombo.currentIndex = portCombo.indexOfValue(SerialPort.portName)

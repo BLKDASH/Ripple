@@ -9,7 +9,7 @@ Rectangle {
     height: 28
     color: Theme.panelBg
     border.color: Theme.border
-    radius: 4
+    radius: 0
 
     property int rxCount: 0
     property int txCount: 0

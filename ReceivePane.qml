@@ -6,11 +6,8 @@ import CWY.Receive
 import CWY.Theme
 import CWY.Logger
 
-Rectangle {
+MainPanel {
     id: root
-    color: Theme.panelBg
-    border.color: Theme.border
-    radius: 4
 
     // Font shared by the line delegate and the column-calculation metrics so
     // that selection rectangles align with the rendered text. Column-based
@@ -83,7 +80,7 @@ Rectangle {
             Layout.fillHeight: true
             color: Theme.inputBg
             border.color: Theme.border
-            radius: 4
+            radius: Theme.radiusInput
             clip: true
 
             ListView {
@@ -532,15 +529,29 @@ Rectangle {
             receiveList.maxDelegateWidth = 0
     }
 
-    // Timer: fallback auto-scroll + flash animation
+    // Auto-scroll coalescing timer
     Timer {
         id: uiUpdateTimer
         interval: 80
         repeat: false
-        onTriggered: {
-            newDataFlashAnim.start()
-            receiveList.doAutoScroll()
-        }
+        onTriggered: receiveList.doAutoScroll()
+    }
+
+    // Debounce timer: starts fade-out after data stops arriving
+    Timer {
+        id: glowTimer
+        interval: 200
+        repeat: false
+        onTriggered: fadeOutAnim.start()
+    }
+
+    NumberAnimation {
+        id: fadeOutAnim
+        target: newDataFlash
+        property: "opacity"
+        to: 0
+        duration: 400
+        easing.type: Easing.OutQuad
     }
 
     Connections {
@@ -548,20 +559,17 @@ Rectangle {
         function onAppended(length) {
             receiveList.pendingAutoScroll = true
             uiUpdateTimer.restart()
+
+            // Light effect: instant glow + debounce fade-out
+            fadeOutAnim.stop()
+            newDataFlash.opacity = 0.8
+            glowTimer.restart()
         }
         function onModelAboutToBeReset() {
             receiveList.saveScrollState()
         }
         function onModelReset() {
-            // Defer until the ListView has finished its own model-reset handling,
-            // otherwise the internal reset to contentY=0 will override us.
             Qt.callLater(receiveList.restoreScrollState)
         }
-    }
-
-    SequentialAnimation {
-        id: newDataFlashAnim
-        NumberAnimation { target: newDataFlash; property: "opacity"; to: 0.8; duration: 80 }
-        NumberAnimation { target: newDataFlash; property: "opacity"; to: 0; duration: 400 }
     }
 }

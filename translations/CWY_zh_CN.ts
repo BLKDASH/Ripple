@@ -50,6 +50,11 @@
     </message>
     <message>
         <location filename="../Main.qml"/>
+        <source>Recording file conflicts with the auto-log file</source>
+        <translation>录制文件与自动日志文件冲突</translation>
+    </message>
+    <message>
+        <location filename="../Main.qml"/>
         <source>Load file to send</source>
         <translation>加载文件到发送区</translation>
     </message>
@@ -283,6 +288,21 @@
         <location filename="../SettingsDialog.qml"/>
         <source>Select auto log folder</source>
         <translation>选择自动日志文件夹</translation>
+    </message>
+    <message>
+        <location filename="../SettingsDialog.qml"/>
+        <source>Auto-log file conflicts with the current recording file</source>
+        <translation>自动日志文件与当前录制文件冲突</translation>
+    </message>
+    <message>
+        <location filename="../SettingsDialog.qml"/>
+        <source>OK</source>
+        <translation>确定</translation>
+    </message>
+    <message>
+        <location filename="../SettingsDialog.qml"/>
+        <source>Cancel</source>
+        <translation>取消</translation>
     </message>
 </context>
 <context>

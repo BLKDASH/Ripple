@@ -7,34 +7,38 @@ import CWY.Serial
 import CWY.Theme
 import CWY.NotificationManager
 
-Rectangle {
+MainPanel {
     id: root
-    color: Theme.panelBg
-    border.color: Theme.border
-    radius: 4
 
     property int itemCount: 6
     ColumnLayout {
         anchors.fill: parent
-        anchors.margins: 12
-        spacing: 8
+        anchors.margins: Theme.spacingPanel
+        spacing: Theme.spacingSection
 
         RowLayout {
             Layout.fillWidth: true
+            spacing: Theme.spacingTight
+
             Label {
                 text: qsTr("Quick Send")
                 font.bold: true
+                font.pixelSize: Theme.fontSizeMedium
                 color: Theme.text
             }
             Item { Layout.fillWidth: true }
             Button {
                 text: qsTr("Load")
                 flat: true
+                font.family: Theme.fontFamily
+                font.pixelSize: Theme.fontSize
                 onClicked: loadDialog.open()
             }
             Button {
                 text: qsTr("Save")
                 flat: true
+                font.family: Theme.fontFamily
+                font.pixelSize: Theme.fontSize
                 onClicked: saveDialog.open()
             }
         }
@@ -44,45 +48,89 @@ Rectangle {
             Layout.fillWidth: true
             Layout.fillHeight: true
             clip: true
-            spacing: 6
+            spacing: 4
             model: quickModel
             ScrollBar.vertical: CustomScrollBar { orientation: Qt.Vertical }
 
-            delegate: RowLayout {
+            delegate: Rectangle {
+                id: delegateRoot
                 width: listView.width
-                spacing: 6
+                height: delegateLayout.implicitHeight + 8
+                radius: Theme.radiusInput
+                color: delegateMouse.containsMouse
+                       ? Qt.rgba(Theme.text.r, Theme.text.g, Theme.text.b, 0.06)
+                       : Qt.rgba(Theme.text.r, Theme.text.g, Theme.text.b, 0.02)
+                border.color: Theme.border
+                border.width: 1
 
-                TextField {
-                    Layout.fillWidth: true
-                    text: model.command
-                    placeholderText: qsTr("Command") + " " + (index + 1)
-                    color: Theme.text
-                    font.family: Theme.monoFontFamily
-                    font.pixelSize: Theme.fontSize
-                    onTextChanged: {
-                        // Guard against model refresh loops when delegate is reused.
-                        if (model.command !== text) {
-                            quickModel.setProperty(index, "command", text)
-                            saveToSettings()
-                        }
-                    }
+                Behavior on color { ColorAnimation { duration: 120 } }
+
+                MouseArea {
+                    id: delegateMouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    acceptedButtons: Qt.NoButton
                 }
 
-                CheckBox {
-                    text: qsTr("HEX")
-                    checked: model.hex
-                    onCheckedChanged: {
-                        if (model.hex !== checked) {
-                            quickModel.setProperty(index, "hex", checked)
-                            saveToSettings()
+                RowLayout {
+                    id: delegateLayout
+                    anchors.fill: parent
+                    anchors.margins: 4
+                    spacing: Theme.spacingTight
+
+                    // Row number indicator
+                    Label {
+                        text: index + 1
+                        color: Theme.text
+                        opacity: 0.4
+                        font.pixelSize: Theme.fontSize
+                        font.family: Theme.monoFontFamily
+                        Layout.preferredWidth: 16
+                        horizontalAlignment: Text.AlignRight
+                    }
+
+                    TextField {
+                        Layout.fillWidth: true
+                        text: model.command
+                        placeholderText: qsTr("Command") + " " + (index + 1)
+                        color: Theme.text
+                        font.family: Theme.monoFontFamily
+                        font.pixelSize: Theme.fontSize
+                        background: Rectangle {
+                            radius: 4
+                            color: Theme.inputBg
+                            border.color: parent.activeFocus ? Theme.accent : Theme.border
+                            border.width: 1
+                        }
+                        onTextChanged: {
+                            if (model.command !== text) {
+                                quickModel.setProperty(index, "command", text)
+                                saveToSettings()
+                            }
                         }
                     }
-                }
 
-                Button {
-                    text: qsTr("Send")
-                    enabled: SerialPort.isOpen
-                    onClicked: sendItem(quickModel.get(index))
+                    CheckBox {
+                        text: "HEX"
+                        font.pixelSize: Theme.fontSize
+                        font.family: Theme.fontFamily
+                        checked: model.hex
+                        onCheckedChanged: {
+                            if (model.hex !== checked) {
+                                quickModel.setProperty(index, "hex", checked)
+                                saveToSettings()
+                            }
+                        }
+                    }
+
+                    Button {
+                        text: qsTr("Send")
+                        highlighted: true
+                        enabled: SerialPort.isOpen
+                        font.family: Theme.fontFamily
+                        font.pixelSize: Theme.fontSize
+                        onClicked: sendItem(quickModel.get(index))
+                    }
                 }
             }
         }
@@ -178,7 +226,6 @@ Rectangle {
         try {
             var items = JSON.parse(json)
             quickModel.clear()
-            // Only load up to the configured number of slots.
             for (var i = 0; i < root.itemCount; ++i) {
                 if (i < items.length) {
                     quickModel.append(items[i])

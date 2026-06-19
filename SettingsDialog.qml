@@ -7,12 +7,12 @@ import CWY.Serial
 import CWY.I18n
 import CWY.Receive
 import CWY.Theme
+import CWY.NotificationManager
 
 Dialog {
     id: root
     title: qsTr("Settings")
     font.family: Theme.fontFamily
-    standardButtons: Dialog.Ok | Dialog.Cancel
     modal: true
 
     // Anchor to the overlay so manual geometry in onAboutToShow wins over
@@ -30,8 +30,47 @@ Dialog {
         logPathField.text = AppSettings.autoLogFolder
     }
 
+    function applySettings() {
+        // Auto-log conflict check
+        if (autoLogCheck.checked && SerialPort.wouldAutoLogConflict(autoLogCheck.checked, logPathField.text)) {
+            NotificationManager.error(qsTr("Auto-log file conflicts with the current recording file"))
+            return false
+        }
+
+        Theme.darkTheme = (themeCombo.currentIndex === 0)
+        if (appWindow)
+            appWindow.showQuickSend = showQuickSendCheck.checked
+
+        var lang = languageCombo.currentValue
+        if (lang !== AppSettings.language) {
+            AppSettings.language = lang
+            Translator.setCurrentLanguage(lang)
+        }
+
+        SerialPort.autoLogEnabled = autoLogCheck.checked
+        SerialPort.autoLogFolder = logPathField.text
+        return true
+    }
+
     width: 420
     height: 420
+
+    footer: RowLayout {
+        spacing: 8
+        Item { Layout.fillWidth: true }
+        Button {
+            text: qsTr("Cancel")
+            onClicked: root.reject()
+        }
+        Button {
+            text: qsTr("OK")
+            highlighted: true
+            onClicked: {
+                if (root.applySettings())
+                    root.accept()
+            }
+        }
+    }
 
     Flickable {
         id: flickable
@@ -150,20 +189,5 @@ Dialog {
         id: logFolderDialog
         title: qsTr("Select auto log folder")
         onAccepted: logPathField.text = selectedFolder.toString().replace(/^file:\/\/+/, "")
-    }
-
-    onAccepted: {
-        Theme.darkTheme = (themeCombo.currentIndex === 0)
-        if (appWindow)
-            appWindow.showQuickSend = showQuickSendCheck.checked
-
-        var lang = languageCombo.currentValue
-        if (lang !== AppSettings.language) {
-            AppSettings.language = lang
-            Translator.setCurrentLanguage(lang)
-        }
-
-        SerialPort.autoLogEnabled = autoLogCheck.checked
-        SerialPort.autoLogFolder = logPathField.text
     }
 }

@@ -1,9 +1,12 @@
 #include "appsettings.h"
 
 #include <QCoreApplication>
+#include <QGuiApplication>
 #include <QDir>
 #include <QFileInfo>
+#include <QLocale>
 #include <QStandardPaths>
+#include <QStyleHints>
 
 static const char *GROUP_SERIAL = "Serial";
 static const char *GROUP_UI = "UI";
@@ -48,6 +51,25 @@ AppSettings::AppSettings(QObject *parent)
 AppSettings::~AppSettings()
 {
     sync();
+}
+
+void AppSettings::ensureDefaults()
+{
+    // Language: detect from system locale on first launch.
+    if (!m_settings->contains(QStringLiteral("UI/language"))) {
+        const QString sysLang = QLocale::system().name();   // e.g. "zh_CN", "en_US"
+        const QString lang = sysLang.startsWith(QStringLiteral("zh"), Qt::CaseInsensitive)
+                                 ? QStringLiteral("zh_CN") : QStringLiteral("en");
+        setValue(QLatin1String(GROUP_UI), QStringLiteral("language"), lang);
+        emit languageChanged();
+    }
+
+    // Theme: detect from system color scheme on first launch.
+    if (!m_settings->contains(QStringLiteral("UI/darkTheme"))) {
+        const bool dark = QGuiApplication::styleHints()->colorScheme() == Qt::ColorScheme::Dark;
+        setValue(QLatin1String(GROUP_UI), QStringLiteral("darkTheme"), dark);
+        emit darkThemeChanged();
+    }
 }
 
 QString AppSettings::configPath() const

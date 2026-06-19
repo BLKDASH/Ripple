@@ -79,7 +79,7 @@ QSerialPort::readyRead
 - **中间（自适应）：** `ReceivePane.qml` — `ListView` 绑定 `ReceiveModel`，自定义文字选择（叠加矩形方案，而非 TextArea），HEX/文本/时间戳切换，带锁定检测的自动滚动
 - **右侧（280px）：** `SendPane.qml`（文本/HEX 发送，CR/LF/循环发送选项）+ `QuickSendGrid.qml`（可配置快捷发送按钮）
 
-自定义组件：`GlassPanel.qml`、`CustomScrollBar.qml`、`ParamCombo.qml`、`QuickSendEditDialog.qml`。
+自定义组件：`MainPanel.qml`、`CustomScrollBar.qml`、`ParamCombo.qml`、`QuickSendEditDialog.qml`。
 
 主题与通知通过两个 QML Singleton 集中管理：
 - `Theme.qml` — 明暗色板、窗口调色板映射；所有面板/控件统一从这里取色，不再依赖动态作用域。

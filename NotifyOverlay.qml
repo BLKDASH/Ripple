@@ -15,9 +15,9 @@ Item {
         id: toastColumn
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
-        anchors.topMargin: 12
-        spacing: 6
-        width: Math.min(520, parent.width - 24)
+        anchors.topMargin: 8
+        spacing: 4
+        width: parent.width
 
         Repeater {
             model: NotificationManager.model
@@ -30,12 +30,17 @@ Item {
                 required property string type
                 required property int    duration
 
-                width: toastColumn.width
-                height: Math.max(40, toastLabel.implicitHeight + 22)
-                radius: 6
+                // Auto-width: content-driven, capped at parent width
+                property int _pad: 28  // leftMargin(8) + icon(~14) + spacing(6)
+                property real _contentW: toastLabel.contentWidth + _pad
+                width: Math.min(_contentW, toastColumn.width - 16)
+                height: Math.max(28, toastLabel.implicitHeight + 10)
+                radius: 5
                 opacity: 0
-                transform: Translate { id: slideShift; y: -10 }
+                transform: Translate { id: slideShift; y: -8 }
                 property bool _ready: false
+
+                anchors.horizontalCenter: parent.horizontalCenter
 
                 readonly property color _bg: {
                     switch (type) {
@@ -54,19 +59,20 @@ Item {
                     }
                 }
 
-                color: _bg
-                border.color: Qt.darker(_bg, 1.15)
+                color: Qt.rgba(_bg.r, _bg.g, _bg.b, 0.78)
+                border.color: Qt.rgba(_bg.r, _bg.g, _bg.b, 0.3)
                 border.width: 1
 
                 Row {
-                    anchors.fill: parent
-                    anchors.leftMargin: 12
-                    anchors.rightMargin: 12
-                    spacing: 10
+                    id: toastRow
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.left: parent.left
+                    anchors.leftMargin: 8
+                    spacing: 6
                     Label {
                         text: toast._icon
                         color: "white"
-                        font.pixelSize: Theme.fontSizeLarge
+                        font.pixelSize: Theme.fontSize
                         font.bold: true
                         anchors.verticalCenter: parent.verticalCenter
                     }
@@ -74,25 +80,18 @@ Item {
                         id: toastLabel
                         text: toast.message
                         color: "white"
-                        font.pixelSize: Theme.fontSizeMedium
-                        wrapMode: Text.Wrap
+                        font.pixelSize: Theme.fontSize
+                        elide: Text.ElideRight
+                        wrapMode: Text.NoWrap
                         anchors.verticalCenter: parent.verticalCenter
-                        width: parent.width - 50
+                        width: toast.width - toast._pad
                     }
                 }
 
                 MouseArea {
-                    anchors { top: parent.top; right: parent.right; bottom: parent.bottom }
-                    width: 36
+                    anchors.fill: parent
                     cursorShape: Qt.PointingHandCursor
                     onClicked: toast._dismiss()
-                    Label {
-                        anchors.centerIn: parent
-                        text: "✕"
-                        color: "white"
-                        font.pixelSize: Theme.fontSizeMedium
-                        opacity: 0.7
-                    }
                 }
 
                 function _dismiss() {
@@ -110,7 +109,7 @@ Item {
                 ParallelAnimation {
                     id: fadeOut
                     NumberAnimation { target: toast; property: "opacity"; to: 0.0; duration: 180; easing.type: Easing.InCubic }
-                    NumberAnimation { target: slideShift; property: "y"; to: -10; duration: 180; easing.type: Easing.InCubic }
+                    NumberAnimation { target: slideShift; property: "y"; to: -8; duration: 180; easing.type: Easing.InCubic }
                     onFinished: NotificationManager.remove(toast.uid)
                 }
 

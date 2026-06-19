@@ -1,7 +1,17 @@
 <h1>Keyboard Shortcuts</h1>
-<hr>
-<table>
-<tr><td><code>Ctrl+Enter</code></td><td>Send data from the send pane</td></tr>
-<tr><td><code>Ctrl+O</code></td><td>Open a file into the send pane (text mode)</td></tr>
-<tr><td><code>Ctrl+Shift+O</code></td><td>Open a file into the send pane (hex mode)</td></tr>
+<p>The following shortcuts are available to speed up your workflow.</p>
+
+<h2>Send</h2>
+<table class="kv">
+<tr><td>Ctrl + Enter</td><td>Send data from the send pane</td></tr>
 </table>
+
+<h2>File Loading</h2>
+<p>Use the menu <strong>Send Area → Load to Send</strong> to load a file into the send pane. The mode is selected automatically based on file type:</p>
+<table>
+<tr><th>File Type</th><th>Loading Mode</th></tr>
+<tr><td><code>.bin</code> and binary files</td><td>Loaded as HEX automatically</td></tr>
+<tr><td>Text files</td><td>Loaded as text</td></tr>
+</table>
+
+<div class="info">💡 In HEX mode, file contents are automatically converted to space-separated hex byte sequences.</div>

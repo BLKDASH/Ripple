@@ -62,6 +62,8 @@ public:
     Q_INVOKABLE QString readFileAsHex(const QString &filePath);
     Q_INVOKABLE bool writeFile(const QString &filePath, const QString &content);
     Q_INVOKABLE static QString applicationDirPath();
+    Q_INVOKABLE bool wouldAutoLogConflict(bool autoLogEnabled, const QString &autoLogFolder) const;
+    Q_INVOKABLE bool wouldRecordingConflict(const QString &filePath) const;
 
 signals:
     void isOpenChanged();
@@ -83,6 +85,7 @@ signals:
 private:
     void syncAutoLogToWorker();
     void syncRecordingToWorker();
+    bool wouldConflictWithAutoLog(const QString &filePath) const;
 
     QThread *m_workerThread = nullptr;
     SerialWorker *m_worker = nullptr;

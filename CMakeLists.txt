@@ -41,7 +41,7 @@ qt_add_qml_module(appCWY
         SettingsDialog.qml
         FluentComboBox.qml
         CustomScrollBar.qml
-        GlassPanel.qml
+        MainPanel.qml
         HelpDialog.qml
         Theme.qml
         NotificationManager.qml

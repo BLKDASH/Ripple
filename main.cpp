@@ -46,6 +46,7 @@ int main(int argc, char *argv[])
     // restore persisted serial defaults during startup.
     Logger *logger = new Logger(&app);
     AppSettings *appSettings = new AppSettings(&app);
+    appSettings->ensureDefaults();  // detect system language & theme on first launch
     SerialPortManager *serialManager = new SerialPortManager(&app);
     ReceiveModel *receiveModel = new ReceiveModel(&app);
 
@@ -97,6 +98,7 @@ int main(int argc, char *argv[])
                              "CWY.NotificationManager", 1, 0, "NotificationManager");
 
     Translator translator(&engine);
+    translator.setCurrentLanguage(appSettings->language());  // load persisted language on startup
     qmlRegisterSingletonType<Translator>("CWY.I18n", 1, 0, "Translator",
         [&translator](QQmlEngine *qmlEngine, QJSEngine *scriptEngine) -> QObject * {
             Q_UNUSED(qmlEngine)

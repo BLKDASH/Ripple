@@ -6,11 +6,8 @@ import CWY.Serial
 import CWY.Theme
 import CWY.NotificationManager
 
-Rectangle {
+MainPanel {
     id: root
-    color: Theme.panelBg
-    border.color: Theme.border
-    radius: 4
 
     property bool hexMode: false
     property bool appendCr: false
@@ -72,12 +69,13 @@ Rectangle {
 
     ColumnLayout {
         anchors.fill: parent
-        anchors.margins: 12
-        spacing: 12
+        anchors.margins: Theme.spacingPanel
+        spacing: Theme.spacingSection
 
         Label {
             text: qsTr("Send")
             font.bold: true
+            font.pixelSize: Theme.fontSizeMedium
             color: Theme.text
         }
 
@@ -87,13 +85,26 @@ Rectangle {
             Layout.fillHeight: true
             color: Theme.inputBg
             border.color: sendInput.validInput ? Theme.border : Theme.error
-            radius: 4
+            radius: Theme.radiusInput
             clip: true
+
+            // Placeholder
+            Label {
+                anchors.left: parent.left
+                anchors.top: parent.top
+                anchors.margins: 8
+                text: qsTr("Enter data to send...")
+                color: Theme.text
+                opacity: 0.35
+                font.family: Theme.monoFontFamily
+                font.pixelSize: Theme.fontSizeMedium
+                visible: sendInput.text.length === 0 && !sendInput.activeFocus
+            }
 
             Flickable {
                 id: sendFlickable
                 anchors.fill: parent
-                anchors.margins: 4
+                anchors.margins: 6
                 contentWidth: sendInput.width
                 contentHeight: sendInput.height
                 flickableDirection: Flickable.VerticalFlick
@@ -140,8 +151,8 @@ Rectangle {
         GridLayout {
             Layout.fillWidth: true
             columns: 2
-            rowSpacing: 4
-            columnSpacing: 12
+            rowSpacing: 2
+            columnSpacing: Theme.spacingPanel
 
             CheckBox {
                 text: qsTr("HEX")
@@ -165,36 +176,49 @@ Rectangle {
             }
         }
 
-        // Cyclic interval
+        // Cyclic interval — only visible when cyclic mode is on
         RowLayout {
             Layout.fillWidth: true
-            spacing: 6
-            enabled: root.cyclicSend
-            opacity: root.cyclicSend ? 1.0 : 0.5
+            spacing: Theme.spacingTight
+            visible: root.cyclicSend
 
             Label {
                 text: qsTr("Interval (ms)")
                 color: Theme.text
-                font.pixelSize: Theme.fontSize
+                font.pixelSize: Theme.fontSizeMedium
+                font.family: Theme.fontFamily
             }
-            SpinBox {
-                id: intervalSpin
+            TextField {
+                id: intervalField
                 Layout.fillWidth: true
-                from: 10
-                to: 60000
-                value: root.cyclicInterval
-                onValueModified: root.cyclicInterval = value
+                text: String(root.cyclicInterval)
+                font.family: Theme.monoFontFamily
+                font.pixelSize: Theme.fontSizeMedium
+                horizontalAlignment: Text.AlignRight
+                validator: IntValidator { bottom: 10; top: 60000 }
+                background: Rectangle {
+                    radius: 4
+                    color: Theme.inputBg
+                    border.color: parent.activeFocus ? Theme.accent : Theme.border
+                    border.width: 1
+                }
+                onEditingFinished: {
+                    var v = parseInt(text)
+                    if (!isNaN(v) && v >= 10 && v <= 60000)
+                        root.cyclicInterval = v
+                    else
+                        text = String(root.cyclicInterval)
+                }
             }
         }
 
         Button {
-            text: qsTr("Send (Ctrl+Enter)")
+            text: qsTr("Send")
             highlighted: true
             Layout.fillWidth: true
+            font.family: Theme.fontFamily
             onClicked: root.send()
         }
-
-        Item { Layout.fillHeight: true }
     }
 
     Timer {

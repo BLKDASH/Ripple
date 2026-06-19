@@ -294,6 +294,10 @@ ApplicationWindow {
         nameFilters: ["Log files (*.log)", "Text files (*.txt)", "Binary files (*.bin)", "All files (*)"]
         onAccepted: {
             var path = selectedFile.toString().replace(/^file:\/\/+/, "")
+            if (SerialPort.wouldRecordingConflict(path)) {
+                NotificationManager.error(qsTr("Recording file conflicts with the auto-log file"))
+                return
+            }
             SerialPort.startRecording(path)
         }
     }

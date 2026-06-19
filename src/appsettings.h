@@ -40,6 +40,9 @@ public:
     explicit AppSettings(QObject *parent = nullptr);
     ~AppSettings() override;
 
+    /// On first launch (no persisted value), detect system language & theme.
+    void ensureDefaults();
+
     QString configPath() const;
     Q_INVOKABLE void sync();
 

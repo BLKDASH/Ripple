@@ -1,22 +1,25 @@
 <h1>Quick Send Grid</h1>
-<hr>
 <p>The quick-send panel provides <strong>6 configurable buttons</strong> that let you fire frequently-used commands with a single click.</p>
-<hr>
+
 <h2>JSON Format</h2>
 <p>Each slot is a JSON object with two fields:</p>
-<ul>
-<li><code>command</code> (string) — the payload to send. In HEX mode this should be space-separated hex bytes, e.g. <code>"01 02 FF"</code>.</li>
-<li><code>hex</code> (bool) — <code>true</code> to send the command as hex bytes, <code>false</code> to send it as raw text.</li>
-</ul>
-<hr>
-<h2>Template (6 slots)</h2>
+<table>
+<tr><th>Field</th><th>Type</th><th>Description</th></tr>
+<tr><td><code>command</code></td><td>string</td><td>The payload to send. In HEX mode, use space-separated hex bytes, e.g. <code>"01 02 FF"</code></td></tr>
+<tr><td><code>hex</code></td><td>bool</td><td><code>true</code> to send as hex bytes, <code>false</code> to send as raw text</td></tr>
+</table>
+
+<h2>Template</h2>
 <pre>[
   { "command": "AT",      "hex": false },
   { "command": "AT+GMR",  "hex": false },
-  { "command": "",        "hex": false },
+  { "command": "01 02 FF", "hex": true  },
   { "command": "",        "hex": false },
   { "command": "",        "hex": false },
   { "command": "",        "hex": false }
 ]</pre>
-<hr>
-<p>Use <strong>Load</strong> / <strong>Save</strong> to import or export the grid as a <code>.json</code> file.</p>
+
+<h2>Import / Export</h2>
+<p>Use the <strong>Load</strong> / <strong>Save</strong> buttons to export your configuration as a <code>.json</code> file — handy for migrating between machines or backing up your presets.</p>
+
+<div class="tip">💡 Pre-configure buttons for your most common AT commands or debug sequences to speed up your workflow.</div>
