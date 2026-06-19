@@ -16,6 +16,7 @@ Window {
     minimumHeight: 200
     visible: true
     flags: Qt.Window
+    color: Theme.panelBg
 
     property int itemCount: 15
     signal closedByUser()
@@ -25,7 +26,14 @@ Window {
             closedByUser()
     }
 
-    color: Theme.darkTheme ? "#101010" : "#FFFFFF"
+    // Panel border
+    Rectangle {
+        anchors.fill: parent
+        color: "transparent"
+        radius: Theme.radiusPanel
+        border.color: Theme.border
+        border.width: 1
+    }
 
     ColumnLayout {
         anchors.fill: parent
@@ -40,6 +48,7 @@ Window {
                 text: qsTr("Quick Send")
                 font.bold: true
                 font.pixelSize: Theme.fontSizeMedium
+                font.family: Theme.fontFamily
                 color: Theme.text
             }
             Item { Layout.fillWidth: true }
