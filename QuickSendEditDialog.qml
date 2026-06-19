@@ -53,15 +53,17 @@ Dialog {
                 id: hexCheck
                 text: qsTr("HEX")
                 checked: root.item ? root.item.hex : false
-                indicator.width: 16
-                indicator.height: 16
+                indicator.width: 16; indicator.height: 16
+                font.family: Theme.fontFamily
+                font.pixelSize: Theme.fontSize
             }
             CheckBox {
                 id: lfCheck
                 text: qsTr("Append \\n")
                 checked: root.item ? root.item.appendLf : false
-                indicator.width: 16
-                indicator.height: 16
+                indicator.width: 16; indicator.height: 16
+                font.family: Theme.fontFamily
+                font.pixelSize: Theme.fontSize
             }
         }
     }

@@ -10,8 +10,8 @@ MainPanel {
 
     ColumnLayout {
         anchors.fill: parent
-        anchors.margins: 12
-        spacing: 12
+        anchors.margins: Theme.spacingPanel
+        spacing: Theme.spacingSection
 
         Label {
             text: qsTr("Serial Port")

@@ -4,7 +4,7 @@
     <Name>凌波</Name>
 
     <!-- 安装包版本号，与 CMakeLists.txt 中的 project() 版本保持一致 -->
-    <Version>0.1.0</Version>
+    <Version>1.0.0</Version>
 
     <!-- 安装程序窗口标题 -->
     <Title>凌波</Title>

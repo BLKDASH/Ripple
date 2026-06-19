@@ -72,11 +72,66 @@ MainPanel {
         anchors.margins: Theme.spacingPanel
         spacing: Theme.spacingSection
 
-        Label {
-            text: qsTr("Send")
-            font.bold: true
-            font.pixelSize: Theme.fontSizeMedium
-            color: Theme.text
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: Theme.spacingTight
+
+            Label {
+                text: qsTr("Send")
+                font.bold: true
+                font.pixelSize: Theme.fontSizeMedium
+                color: Theme.text
+            }
+
+            Item { Layout.fillWidth: true }
+
+            // Summary of active options
+            Label {
+                text: {
+                    var parts = []
+                    if (root.hexMode) parts.push("HEX")
+                    if (root.appendCr) parts.push("\\r")
+                    if (root.appendLf) parts.push("\\n")
+                    if (root.cyclicSend) parts.push(qsTr("Cyclic"))
+                    return parts.join(" ")
+                }
+                visible: text.length > 0
+                color: Theme.text
+                opacity: 0.5
+                font.pixelSize: Theme.fontSize
+                font.family: Theme.fontFamily
+                elide: Text.ElideRight
+            }
+
+            // Hover target
+            Rectangle {
+                id: moreBtn
+                width: 28; height: 28
+                radius: Theme.radiusInput
+                color: moreArea.containsMouse ? Qt.rgba(Theme.text.r, Theme.text.g, Theme.text.b, 0.08) : "transparent"
+
+                Label {
+                    anchors.centerIn: parent
+                    text: "🔧"
+                    font.pixelSize: 14
+                    color: Theme.text
+                }
+
+                MouseArea {
+                    id: moreArea
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onContainsMouseChanged: {
+                        if (containsMouse) {
+                            closeTimer.stop()
+                            optionsPopup.open()
+                        } else {
+                            closeTimer.restart()
+                        }
+                    }
+                }
+            }
         }
 
         // Send input with custom scrollbar
@@ -147,40 +202,80 @@ MainPanel {
             }
         }
 
-        // Options
-        GridLayout {
-            Layout.fillWidth: true
-            columns: 2
-            rowSpacing: 2
-            columnSpacing: Theme.spacingPanel
+        Popup {
+            id: optionsPopup
+            parent: moreBtn
+            x: moreBtn.width - width
+            y: moreBtn.height + 4
+            closePolicy: Popup.NoAutoClose
+            padding: 8
 
-            CheckBox {
-                text: qsTr("HEX")
-                checked: root.hexMode
-                onCheckedChanged: root.hexMode = checked
-                indicator.width: 16
-                indicator.height: 16
+            background: Rectangle {
+                color: Theme.panelBg
+                border.color: Theme.border
+                border.width: 1
+                radius: Theme.radiusInput
             }
-            CheckBox {
-                text: qsTr("Append \\r")
-                checked: root.appendCr
-                onCheckedChanged: root.appendCr = checked
-                indicator.width: 16
-                indicator.height: 16
+
+            contentItem: Item {
+                implicitWidth: optionsLayout.implicitWidth
+                implicitHeight: optionsLayout.implicitHeight
+
+                ColumnLayout {
+                    id: optionsLayout
+                    spacing: 4
+
+                    CheckBox {
+                        text: qsTr("HEX")
+                        checked: root.hexMode
+                        onCheckedChanged: root.hexMode = checked
+                        indicator.width: 16; indicator.height: 16
+                        font.family: Theme.fontFamily
+                        font.pixelSize: Theme.fontSize
+                    }
+                    CheckBox {
+                        text: qsTr("Append \\r")
+                        checked: root.appendCr
+                        onCheckedChanged: root.appendCr = checked
+                        indicator.width: 16; indicator.height: 16
+                        font.family: Theme.fontFamily
+                        font.pixelSize: Theme.fontSize
+                    }
+                    CheckBox {
+                        text: qsTr("Append \\n")
+                        checked: root.appendLf
+                        onCheckedChanged: root.appendLf = checked
+                        indicator.width: 16; indicator.height: 16
+                        font.family: Theme.fontFamily
+                        font.pixelSize: Theme.fontSize
+                    }
+                    CheckBox {
+                        text: qsTr("Cyclic")
+                        checked: root.cyclicSend
+                        onCheckedChanged: root.cyclicSend = checked
+                        indicator.width: 16; indicator.height: 16
+                        font.family: Theme.fontFamily
+                        font.pixelSize: Theme.fontSize
+                    }
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    acceptedButtons: Qt.NoButton
+                    onContainsMouseChanged: {
+                        if (containsMouse)
+                            closeTimer.stop()
+                        else
+                            closeTimer.restart()
+                    }
+                }
             }
-            CheckBox {
-                text: qsTr("Append \\n")
-                checked: root.appendLf
-                onCheckedChanged: root.appendLf = checked
-                indicator.width: 16
-                indicator.height: 16
-            }
-            CheckBox {
-                text: qsTr("Cyclic")
-                checked: root.cyclicSend
-                onCheckedChanged: root.cyclicSend = checked
-                indicator.width: 16
-                indicator.height: 16
+
+            Timer {
+                id: closeTimer
+                interval: 200
+                onTriggered: optionsPopup.close()
             }
         }
 

@@ -30,7 +30,7 @@ Window {
     Rectangle {
         anchors.fill: parent
         color: "transparent"
-        radius: Theme.radiusPanel
+        radius: 8
         border.color: Theme.border
         border.width: 1
     }

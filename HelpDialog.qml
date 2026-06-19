@@ -15,6 +15,7 @@ Dialog {
     height: 520
 
     parent: Overlay.overlay
+    anchors.centerIn: parent
 
     // ── Language resolution ──────────────────────────────────────
     property string langDir: AppSettings.language.startsWith("zh") ? "zh" : "en"
@@ -139,7 +140,7 @@ Dialog {
 
                     Label {
                         anchors.centerIn: parent
-                        text: "📖  " + qsTr("Topics")
+                        text: qsTr("Topics")
                         color: Theme.text
                         font.family: Theme.fontFamily
                         font.pixelSize: Theme.fontSize
@@ -193,6 +194,8 @@ Dialog {
                             Label {
                                 text: modelData.icon
                                 font.pixelSize: 14
+                                Layout.preferredWidth: 20
+                                horizontalAlignment: Text.AlignHCenter
                             }
                             Label {
                                 text: modelData.title

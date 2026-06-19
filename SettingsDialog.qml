@@ -30,7 +30,6 @@ Item {
     function loadSettings() {
         selectedLanguage = AppSettings.language
         themeCombo.currentIndex = Theme.darkTheme ? 0 : 1
-        showQuickSendCheck.checked = appWindow ? appWindow.showQuickSend : false
         autoLogCheck.checked = AppSettings.autoLogEnabled
         logPathField.text = AppSettings.autoLogFolder
     }
@@ -41,8 +40,6 @@ Item {
             return false
         }
         Theme.darkTheme = (themeCombo.currentIndex === 0)
-        if (appWindow)
-            appWindow.showQuickSend = showQuickSendCheck.checked
         var lang = languageCombo.currentValue
         if (lang !== AppSettings.language) {
             AppSettings.language = lang
@@ -183,28 +180,6 @@ Item {
                                     { text: "简体中文", code: "zh_CN" }
                                 ]
                                 currentIndex: indexOfValue(root.selectedLanguage)
-                            }
-                        }
-                    }
-
-                    GroupBox {
-                        Layout.fillWidth: true
-                        title: qsTr("Receive")
-                        label: Label {
-                            text: parent.title
-                            color: Theme.text
-                            font.bold: true
-                            font.family: Theme.fontFamily
-                        }
-                        ColumnLayout {
-                            width: parent.width
-                            spacing: 8
-                            CheckBox {
-                                id: showQuickSendCheck
-                                text: qsTr("Show quick send panel")
-                                checked: appWindow ? appWindow.showQuickSend : false
-                                indicator.width: 16; indicator.height: 16
-                                font.family: Theme.fontFamily
                             }
                         }
                     }

@@ -10,7 +10,7 @@
     <Description>凌波主程序及运行依赖。</Description>
 
     <!-- 包版本，与 config.xml 保持一致 -->
-    <Version>0.1.0</Version>
+    <Version>1.0.0</Version>
 
     <!-- 发布日期 -->
     <ReleaseDate>2026-06-18</ReleaseDate>

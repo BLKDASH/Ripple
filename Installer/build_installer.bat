@@ -21,7 +21,7 @@ if exist "%CMAKE_DIR%" (
 )
 
 :: 安装包版本号（与 CMakeLists.txt / config.xml / package.xml 保持一致）
-set "VERSION=0.1.0"
+set "VERSION=1.0.0"
 set "OUTPUT_NAME=Ripple_%VERSION%_Installer.exe"
 
 echo ========================================

@@ -37,8 +37,8 @@ MainPanel {
 
     ColumnLayout {
         anchors.fill: parent
-        anchors.margins: 12
-        spacing: 8
+        anchors.margins: Theme.spacingPanel
+        spacing: Theme.spacingSection
 
         // ── Toolbar ──────────────────────────────────────────
         Flickable {
