@@ -148,18 +148,13 @@
     </message>
     <message>
         <location filename="../SerialPortPanel.qml"/>
-        <source>串口列表已刷新</source>
+        <source>Port list refreshed</source>
         <translation>串口列表已刷新</translation>
     </message>
     <message>
         <location filename="../SerialPortPanel.qml"/>
         <source>Baud Rate</source>
         <translation>波特率</translation>
-    </message>
-    <message>
-        <location filename="../SerialPortPanel.qml"/>
-        <source>Custom</source>
-        <translation>自定义</translation>
     </message>
     <message>
         <location filename="../SerialPortPanel.qml"/>
@@ -261,16 +256,6 @@
     </message>
     <message>
         <location filename="../SettingsDialog.qml"/>
-        <source>Receive</source>
-        <translation>接收</translation>
-    </message>
-    <message>
-        <location filename="../SettingsDialog.qml"/>
-        <source>Show quick send panel</source>
-        <translation>显示快捷发送面板</translation>
-    </message>
-    <message>
-        <location filename="../SettingsDialog.qml"/>
         <source>Auto Log</source>
         <translation>自动日志</translation>
     </message>
@@ -319,18 +304,8 @@
     </message>
     <message>
         <location filename="../ReceivePane.qml"/>
-        <source>Text</source>
-        <translation>文本</translation>
-    </message>
-    <message>
-        <location filename="../ReceivePane.qml"/>
         <source>HEX</source>
         <translation>十六进制</translation>
-    </message>
-    <message>
-        <location filename="../ReceivePane.qml"/>
-        <source>TS</source>
-        <translation>时间戳</translation>
     </message>
     <message>
         <location filename="../ReceivePane.qml"/>
@@ -400,11 +375,6 @@
         <source>Interval (ms)</source>
         <translation>间隔（毫秒）</translation>
     </message>
-    <message>
-        <location filename="../SendPane.qml"/>
-        <source>Send (Ctrl+Enter)</source>
-        <translation>发送（Ctrl+Enter）</translation>
-    </message>
 </context>
 <context>
     <name>QuickSendGrid</name>
@@ -412,16 +382,6 @@
         <location filename="../QuickSendGrid.qml"/>
         <source>Quick Send</source>
         <translation>快捷发送</translation>
-    </message>
-    <message>
-        <location filename="../QuickSendGrid.qml"/>
-        <source>Load</source>
-        <translation>加载</translation>
-    </message>
-    <message>
-        <location filename="../QuickSendGrid.qml"/>
-        <source>Save</source>
-        <translation>保存</translation>
     </message>
     <message>
         <location filename="../QuickSendGrid.qml"/>

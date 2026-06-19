@@ -81,8 +81,8 @@ Dialog {
                  // ── Paragraphs & spacing ─────────────────────
                  + "p { margin:4px 0 8px 0; }"
                  // ── Code ─────────────────────────────────────
-                 + "code { font-family:'" + mono + "'; font-size:" + (Theme.fontSize - 1) + "px; color:" + codeFg + "; background:" + codeBg + "; padding:1px 5px; border-radius:3px; }"
-                 + "pre { font-family:'" + mono + "'; font-size:" + (Theme.fontSize - 1) + "px; color:" + codeFg + "; background:" + codeBg + "; padding:12px 14px; border-radius:6px; margin:8px 0 12px 0; white-space:pre-wrap; border-left:3px solid " + Theme.accent + "; }"
+                 + "code { font-family:'" + mono + "'; font-size:" + Theme.fontSize + "px; color:" + codeFg + "; background:" + codeBg + "; padding:1px 5px; border-radius:3px; }"
+                 + "pre { font-family:'" + mono + "'; font-size:" + Theme.fontSize + "px; color:" + codeFg + "; background:" + codeBg + "; padding:12px 14px; border-radius:6px; margin:8px 0 12px 0; white-space:pre-wrap; border-left:3px solid " + Theme.accent + "; }"
                  + "pre code { background:transparent; padding:0; }"
                  // ── Horizontal rule ──────────────────────────
                  + "hr { border:none; border-top:1px solid " + hr + "; margin:16px 0; }"
@@ -100,7 +100,7 @@ Dialog {
                  // ── Key-value grid (used for shortcuts) ──────
                  + ".kv { margin:6px 0; }"
                  + ".kv td { padding:8px 14px; border-bottom:1px solid " + hr + "; }"
-                 + ".kv td:first-child { font-family:'" + mono + "'; font-size:" + (Theme.fontSize - 1) + "px; color:" + Theme.accent + "; white-space:nowrap; width:1%; }"
+                 + ".kv td:first-child { font-family:'" + mono + "'; font-size:" + Theme.fontSize + "px; color:" + Theme.accent + "; white-space:nowrap; width:1%; }"
                  + "</style></head><body>" + raw + "</body></html>"
 
         contentCache[page] = html

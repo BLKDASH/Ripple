@@ -163,7 +163,7 @@ Window {
                         placeholderText: qsTr("Command") + " " + (index + 1)
                         color: Theme.text
                         font.family: Theme.monoFontFamily
-                        font.pixelSize: Theme.fontSize
+                        font.pixelSize: Theme.fontSizeCode
                         background: Rectangle {
                             radius: 4
                             color: Theme.inputBg

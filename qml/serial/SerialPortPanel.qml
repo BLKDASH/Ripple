@@ -188,7 +188,7 @@ MainPanel {
         }
         portCombo.currentIndex = selectedIndex >= 0 ? selectedIndex : 0
         updatePopupWidth()
-        NotificationManager.info(qsTr("串口列表已刷新"))
+        NotificationManager.info(qsTr("Port list refreshed"))
     }
 
     function updatePopupWidth() {

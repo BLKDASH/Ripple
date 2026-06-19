@@ -49,5 +49,6 @@ QtObject {
     readonly property string monoFontFamily: "Consolas"
     readonly property int fontSize: 12
     readonly property int fontSizeMedium: 13
+    readonly property int fontSizeCode: 14
     readonly property int fontSizeLarge: 16
 }

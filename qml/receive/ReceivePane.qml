@@ -12,7 +12,7 @@ MainPanel {
     // Font shared by the line delegate and the column-calculation metrics so
     // that selection rectangles align with the rendered text. Column-based
     // selection still assumes a monospace font.
-    property font displayFont: Qt.font({ family: Theme.monoFontFamily, pixelSize: Theme.fontSizeMedium })
+    property font displayFont: Qt.font({ family: Theme.monoFontFamily, pixelSize: Theme.fontSizeCode })
 
     signal saveRequested()
     signal clearRequested()

@@ -29,6 +29,7 @@ Item {
 
     function loadSettings() {
         selectedLanguage = AppSettings.language
+        languageCombo.currentIndex = languageCombo.indexOfValue(selectedLanguage)
         themeCombo.currentIndex = Theme.darkTheme ? 0 : 1
         autoLogCheck.checked = AppSettings.autoLogEnabled
         logPathField.text = AppSettings.autoLogFolder
@@ -179,7 +180,7 @@ Item {
                                     { text: "English", code: "en" },
                                     { text: "简体中文", code: "zh_CN" }
                                 ]
-                                currentIndex: indexOfValue(root.selectedLanguage)
+                                currentIndex: 0
                             }
                         }
                     }

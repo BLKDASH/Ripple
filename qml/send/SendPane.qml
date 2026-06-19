@@ -143,19 +143,6 @@ MainPanel {
             radius: Theme.radiusInput
             clip: true
 
-            // Placeholder
-            Label {
-                anchors.left: parent.left
-                anchors.top: parent.top
-                anchors.margins: 8
-                text: qsTr("Enter data to send...")
-                color: Theme.text
-                opacity: 0.35
-                font.family: Theme.monoFontFamily
-                font.pixelSize: Theme.fontSizeMedium
-                visible: sendInput.text.length === 0 && !sendInput.activeFocus
-            }
-
             Flickable {
                 id: sendFlickable
                 anchors.fill: parent
@@ -173,7 +160,7 @@ MainPanel {
                     color: Theme.text
                     wrapMode: Text.Wrap
                     font.family: Theme.monoFontFamily
-                    font.pixelSize: Theme.fontSizeMedium
+                    font.pixelSize: Theme.fontSizeCode
                     textFormat: Text.PlainText
                     property bool validInput: true
 
@@ -279,21 +266,22 @@ MainPanel {
             }
         }
 
-        // Cyclic interval — only visible when cyclic mode is on
+        // Send button + cyclic interval on the same row
         RowLayout {
             Layout.fillWidth: true
             spacing: Theme.spacingTight
-            visible: root.cyclicSend
 
             Label {
                 text: qsTr("Interval (ms)")
                 color: Theme.text
                 font.pixelSize: Theme.fontSizeMedium
                 font.family: Theme.fontFamily
+                visible: root.cyclicSend
             }
             TextField {
                 id: intervalField
-                Layout.fillWidth: true
+                Layout.preferredWidth: 80
+                visible: root.cyclicSend
                 text: String(root.cyclicInterval)
                 font.family: Theme.monoFontFamily
                 font.pixelSize: Theme.fontSizeMedium
@@ -313,14 +301,14 @@ MainPanel {
                         text = String(root.cyclicInterval)
                 }
             }
-        }
 
-        Button {
-            text: qsTr("Send")
-            highlighted: true
-            Layout.fillWidth: true
-            font.family: Theme.fontFamily
-            onClicked: root.send()
+            Button {
+                text: qsTr("Send")
+                highlighted: true
+                Layout.fillWidth: true
+                font.family: Theme.fontFamily
+                onClicked: root.send()
+            }
         }
     }
 

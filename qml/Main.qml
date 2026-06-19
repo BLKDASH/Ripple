@@ -40,38 +40,6 @@ ApplicationWindow {
         }
     }
 
-    // Startup mask — covers the window while settings are applied, then fades out.
-    Rectangle {
-        id: startupMask
-        anchors.fill: parent
-        z: 10000
-        color: Theme.darkTheme ? "#101010" : "#FFFFFF"
-        opacity: 1
-        visible: opacity > 0
-
-        Behavior on opacity { NumberAnimation { duration: 1000; easing.type: Easing.OutCubic } }
-
-        Image {
-            id: splashIcon
-            anchors.centerIn: parent
-            source: "qrc:/qt/qml/Ripple/ripple-icon.svg"
-            sourceSize.width: 128
-            sourceSize.height: 128
-            opacity: 0
-            scale: 0.8
-
-            NumberAnimation on opacity {
-                from: 0; to: 1
-                duration: 300
-                easing.type: Easing.OutCubic
-            }
-            NumberAnimation on scale {
-                from: 0.8; to: 1
-                duration: 300
-                easing.type: Easing.OutCubic
-            }
-        }
-    }
 
     Component.onCompleted: {
         // Restore last window size (defaults to 1000×700 if not saved).
@@ -92,8 +60,7 @@ ApplicationWindow {
         SerialPort.autoLogEnabled = AppSettings.autoLogEnabled
         SerialPort.autoLogFolder = AppSettings.autoLogFolder
 
-        // All settings applied — reveal the UI.
-        startupMask.opacity = 0
+        // All settings applied.
     }
 
     onWidthChanged: {
