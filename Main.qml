@@ -59,8 +59,14 @@ ApplicationWindow {
         SerialPort.autoLogFolder = AppSettings.autoLogFolder
     }
 
-    onWidthChanged: saveGeometryTimer.restart()
-    onHeightChanged: saveGeometryTimer.restart()
+    onWidthChanged: {
+        saveGeometryTimer.restart()
+        if (qsDocked && quickSendLoader.item) quickSendLoader.item.x = x + width + qsOffsetX
+    }
+    onHeightChanged: {
+        saveGeometryTimer.restart()
+        if (qsDocked && quickSendLoader.item) quickSendLoader.item.height = height
+    }
 
     Connections {
         target: Theme
@@ -276,14 +282,51 @@ ApplicationWindow {
     }
 
     // ── Quick Send floating window (dynamically created) ───────
+    property bool qsDocked: false
+    property real qsOffsetX: 5
+    property real qsOffsetY: 0
+
+    // Follow main window when docked
+    onXChanged: { if (qsDocked && quickSendLoader.item) quickSendLoader.item.x = x + width + qsOffsetX }
+    onYChanged: { if (qsDocked && quickSendLoader.item) quickSendLoader.item.y = y + qsOffsetY }
+
+    Timer {
+        id: qsDockCheckTimer
+        interval: 200
+        repeat: false
+        onTriggered: {
+            if (!quickSendLoader.item) return
+            var win = quickSendLoader.item
+            var expectedX = root.x + root.width + qsOffsetX
+            var expectedY = root.y + qsOffsetY
+            var dist = Math.abs(win.x - expectedX) + Math.abs(win.y - expectedY)
+            if (dist < 30) {
+                // Snap to dock position
+                qsDocked = true
+                win.x = expectedX
+                win.y = expectedY
+            } else {
+                qsDocked = false
+            }
+        }
+    }
+
     Loader {
         id: quickSendLoader
         active: root.showQuickSend
         sourceComponent: QuickSendGrid {
             Component.onCompleted: {
                 height = root.height
+                x = root.x + root.width + 5
+                y = root.y
+                qsDocked = true
             }
-            onClosedByUser: root.showQuickSend = false
+            onXChanged: qsDockCheckTimer.restart()
+            onYChanged: qsDockCheckTimer.restart()
+            onClosedByUser: {
+                qsDocked = false
+                root.showQuickSend = false
+            }
         }
     }
 
