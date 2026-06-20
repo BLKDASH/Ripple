@@ -138,10 +138,6 @@ C:\Users\<用户名>\AppData\Roaming\Ripple\凌波\ripple.log
 
 ## 协议
 
-Copyright (C) 2026 Ripple. All rights reserved.
+本项目采用 [MIT License](LICENSE) 开源。
 
-本软件仅供个人学习与非商业用途。未经授权不得用于商业分发。
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+本软件使用 Qt 开源版本并以动态链接方式调用其库。Qt 库受其自身的 LGPL/GPL 许可条款约束，详见 Qt 官方授权说明。
