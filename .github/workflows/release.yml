@@ -63,7 +63,7 @@ jobs:
         shell: cmd
         run: |
           cmake --install build\Desktop_Qt_6_11_1_MinGW_64_bit-Release ^
-            --prefix .\Installer\packages\com.ripple.rippleapp\data
+            --prefix "${{ github.workspace }}\Installer\packages\com.ripple.rippleapp\data"
 
       - name: Build installer
         shell: cmd
