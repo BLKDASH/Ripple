@@ -35,7 +35,7 @@ jobs:
           version: '6.11.1'
           host: 'windows'
           target: 'desktop'
-          arch: 'win64_mingw1310'
+          arch: 'win64_mingw'
           tools: 'tools_mingw1310'
           modules: 'qtserialport'
           cache: true
