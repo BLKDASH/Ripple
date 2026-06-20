@@ -36,6 +36,10 @@ Item {
     }
 
     function applySettings() {
+        if (autoLogCheck.checked && logPathField.text.trim() === "") {
+            NotificationManager.error(qsTr("Please select a folder for auto log"))
+            return false
+        }
         if (autoLogCheck.checked && SerialPort.wouldAutoLogConflict(autoLogCheck.checked, logPathField.text)) {
             NotificationManager.error(qsTr("Auto-log file conflicts with the current recording file"))
             return false

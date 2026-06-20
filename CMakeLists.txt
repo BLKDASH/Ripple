@@ -79,21 +79,11 @@ install(DIRECTORY ${CMAKE_SOURCE_DIR}/help/
     DESTINATION ${CMAKE_INSTALL_BINDIR}/help
 )
 
-set(RIPPLE_RELEASE_DATE "2026-06-18" CACHE STRING "Release date shown in the installer package.xml")
-
-# Generate installer metadata from templates so the version number only has to
-# be updated in project() above.
+# Generate the Inno Setup deployment script from template so the version number
+# only has to be updated in project() above.
 configure_file(
-    ${CMAKE_SOURCE_DIR}/Installer/config/config.xml.in
-    ${CMAKE_SOURCE_DIR}/Installer/config/config.xml
-    @ONLY)
-configure_file(
-    ${CMAKE_SOURCE_DIR}/Installer/packages/com.ripple.rippleapp/meta/package.xml.in
-    ${CMAKE_SOURCE_DIR}/Installer/packages/com.ripple.rippleapp/meta/package.xml
-    @ONLY)
-configure_file(
-    ${CMAKE_SOURCE_DIR}/Installer/build_installer.bat.in
-    ${CMAKE_SOURCE_DIR}/Installer/build_installer.bat
+    ${CMAKE_SOURCE_DIR}/Installer/deploy.bat.in
+    ${CMAKE_SOURCE_DIR}/Installer/deploy.bat
     @ONLY)
 
 set_target_properties(appRipple PROPERTIES

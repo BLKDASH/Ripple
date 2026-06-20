@@ -5,7 +5,7 @@
 #define MyAppName "凌波"
 #define MyAppVersion "1.0.0"
 #define MyAppPublisher "BLKDASH"
-#define MyAppURL "com.ripple.appripple"
+#define MyAppURL "com.ripple.rippleapp"
 #define MyAppExeName "appRipple.exe"
 
 [Setup]

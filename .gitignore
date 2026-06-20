@@ -1,89 +1,24 @@
-# This file is used to ignore files which are generated
+# Generated files and directories
 # ----------------------------------------------------------------------------
 
-*~
-*.autosave
-*.a
-*.core
-*.moc
-*.o
-*.obj
-*.orig
-*.rej
-*.so
-*.so.*
-*_pch.h.cpp
-*_resource.rc
-*.qm
-.#*
-*.*#
-core
-!core/
-tags
-.DS_Store
-.directory
-*.debug
-Makefile*
-*.prl
-*.app
-moc_*.cpp
-ui_*.h
-qrc_*.cpp
-Thumbs.db
-*.res
-*.rc
-/.qmake.cache
-/.qmake.stash
-**/.qmlls.ini
+# CMake build directories
+/build*/
 
-# qtcreator generated files
-*.pro.user*
-*.qbs.user*
+# Deployment directory
+/deploy/
+
+# Installer generated artifacts
+/Installer/*.exe
+/Installer/packages/com.ripple.rippleapp/data/*
+!/Installer/packages/com.ripple.rippleapp/data/.gitkeep
+
+# Qt Creator
+/.qtcreator/
 CMakeLists.txt.user*
 
-# xemacs temporary files
-*.flc
+# Qt QML Language Server
+**/.qmlls.ini
 
-# Vim temporary files
-.*.swp
+# Editor files
 
-# Visual Studio generated files
-*.ib_pdb_index
-*.idb
-*.ilk
-*.pdb
-*.sln
-*.suo
-*.vcproj
-*vcproj.*.*.user
-*.ncb
-*.sdf
-*.opensdf
-*.vcxproj
-*vcxproj.*
-
-# MinGW generated files
-*.Debug
-*.Release
-
-# Python byte code
-*.pyc
-
-# Binaries
-# --------
-*.dll
-*.exe
-
-# Directories with generated files
-.moc/
-.obj/
-.pch/
-.rcc/
-.uic/
-/build*/
-/.qtcreator/
-
-# Deployment artifacts (should be produced by build/install scripts)
-/deploy/release.zip
-/Installer/packages/com.cwy.cwyapp/data/
-!/Installer/packages/com.cwy.cwyapp/data/.gitkeep
+.DS_Store

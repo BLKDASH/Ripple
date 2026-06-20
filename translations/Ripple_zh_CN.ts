@@ -281,6 +281,11 @@
     </message>
     <message>
         <location filename="../SettingsDialog.qml"/>
+        <source>Please select a folder for auto log</source>
+        <translation>请选择自动日志保存路径</translation>
+    </message>
+    <message>
+        <location filename="../SettingsDialog.qml"/>
         <source>Auto-log file conflicts with the current recording file</source>
         <translation>自动日志文件与当前录制文件冲突</translation>
     </message>

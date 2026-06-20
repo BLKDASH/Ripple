@@ -1,6 +1,7 @@
 # CLAUDE.md
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
 ## 写在最前
 
 注意，Qt框架的所有文档在C:\Qt\Docs
@@ -95,4 +96,4 @@ QSerialPort::readyRead
 
 ### 安装包
 
-基于 Qt Installer Framework (QIF)。`Installer/build_installer.bat` 一键完成全流程：先运行 `cmake --install` 填充 `data/`，再调用 `binarycreator` 打包。通过 `controlscript.qs` 支持原地升级——自动确认覆盖提示，并运行旧版维护工具执行卸载。
+基于 Inno Setup。先运行 `Installer/deploy.bat` 将构建产物部署到 `Installer/packages/com.ripple.rippleapp/data/`，再在 Inno Setup 中编译 `Installer/innoSetup.iss` 生成安装程序。
