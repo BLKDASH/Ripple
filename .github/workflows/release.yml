@@ -1,0 +1,77 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  build-and-release:
+    runs-on: windows-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Extract version from tag
+        id: version
+        shell: bash
+        run: |
+          VERSION="${GITHUB_REF#refs/tags/v}"
+          echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Version: $VERSION"
+
+      - name: Update version in CMakeLists.txt
+        shell: bash
+        run: |
+          sed -i "s/project(Ripple VERSION [0-9.]* /project(Ripple VERSION ${{ steps.version.outputs.VERSION }} /" CMakeLists.txt
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.11.1'
+          host: 'windows'
+          target: 'desktop'
+          arch: 'win64_mingw1310'
+          tools: 'tools_mingw1310'
+          modules: 'qtserialport'
+          cache: true
+
+      - name: Install Inno Setup
+        run: |
+          choco install innosetup --no-progress
+          echo "C:\Program Files (x86)\Inno Setup 6" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
+      - name: Configure CMake
+        shell: cmd
+        run: |
+          cmake -G "MinGW Makefiles" ^
+            -B build\Desktop_Qt_6_11_1_MinGW_64_bit-Release ^
+            -S . ^
+            -DCMAKE_BUILD_TYPE=Release ^
+            -DCMAKE_PREFIX_PATH="%Qt6_DIR%"
+
+      - name: Build
+        shell: cmd
+        run: |
+          cmake --build build\Desktop_Qt_6_11_1_MinGW_64_bit-Release --parallel
+
+      - name: Deploy application
+        shell: cmd
+        run: |
+          cmake --install build\Desktop_Qt_6_11_1_MinGW_64_bit-Release ^
+            --prefix .\Installer\packages\com.ripple.rippleapp\data
+
+      - name: Build installer
+        shell: cmd
+        run: |
+          iscc Installer\innoSetup.iss
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: Installer\Ripple_*_Installer.exe
+          name: "凌波 ${{ steps.version.outputs.VERSION }}"
+          generate_release_notes: false

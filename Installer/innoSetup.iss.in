@@ -1,0 +1,48 @@
+; 凌波安装包脚本（由 CMake configure_file 从 innoSetup.iss.in 生成）
+
+#define MyAppName "凌波"
+#define MyAppVersion "@PROJECT_VERSION@"
+#define MyAppPublisher "BLKDASH"
+#define MyAppURL "com.ripple.appripple"
+#define MyAppExeName "appRipple.exe"
+
+[Setup]
+AppId={{F89F2371-E502-41A0-989F-1020E862A7C5}
+AppName={#MyAppName}
+AppVersion={#MyAppVersion}
+AppPublisher={#MyAppPublisher}
+AppPublisherURL={#MyAppURL}
+AppSupportURL={#MyAppURL}
+AppUpdatesURL={#MyAppURL}
+DefaultDirName={autopf}\Ripple
+UninstallDisplayIcon={app}\{#MyAppExeName}
+ArchitecturesAllowed=x64compatible
+ArchitecturesInstallIn64BitMode=x64compatible
+DisableProgramGroupPage=yes
+PrivilegesRequired=lowest
+PrivilegesRequiredOverridesAllowed=commandline
+OutputDir={#SourcePath}
+OutputBaseFilename=Ripple_{#MyAppVersion}_Installer
+SetupIconFile={#SourcePath}\config\installer-icon.ico
+SolidCompression=yes
+WizardStyle=modern dynamic windows11
+
+[Languages]
+Name: "english"; MessagesFile: "compiler:Default.isl"
+
+[Tasks]
+Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
+
+[Files]
+Source: "{#SourcePath}\packages\com.ripple.rippleapp\data\bin\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#SourcePath}\packages\com.ripple.rippleapp\data\bin\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "{#SourcePath}\packages\com.ripple.rippleapp\data\plugins\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "{#SourcePath}\packages\com.ripple.rippleapp\data\qml\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "{#SourcePath}\packages\com.ripple.rippleapp\data\translations\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+
+[Icons]
+Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
+Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
+
+[Run]
+Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent

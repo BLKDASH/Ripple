@@ -12,6 +12,10 @@
 /Installer/packages/com.ripple.rippleapp/data/*
 !/Installer/packages/com.ripple.rippleapp/data/.gitkeep
 
+# Files generated from CMake templates
+/Installer/deploy.bat
+/Installer/innoSetup.iss
+
 # Qt Creator
 /.qtcreator/
 CMakeLists.txt.user*

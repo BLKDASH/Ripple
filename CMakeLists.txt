@@ -85,6 +85,10 @@ configure_file(
     ${CMAKE_SOURCE_DIR}/Installer/deploy.bat.in
     ${CMAKE_SOURCE_DIR}/Installer/deploy.bat
     @ONLY)
+configure_file(
+    ${CMAKE_SOURCE_DIR}/Installer/innoSetup.iss.in
+    ${CMAKE_SOURCE_DIR}/Installer/innoSetup.iss
+    @ONLY)
 
 set_target_properties(appRipple PROPERTIES
     MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
