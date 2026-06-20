@@ -92,6 +92,50 @@ Installer\deploy.bat
 Installer\Ripple_<版本号>_Installer.exe
 ```
 
+## 自动构建与发布
+
+本项目已配置 GitHub Actions（`.github/workflows/release.yml`），实现推送 tag 后自动构建并发布 Release。
+
+### 发布新版本
+
+```bash
+git tag -a v1.0.1 -m "Release 1.0.1"
+git push origin v1.0.1
+```
+
+推送 tag 后：
+
+1. GitHub Actions 自动触发
+2. CI 从 tag 中提取版本号（例如 `1.0.1`）
+3. 自动更新 `CMakeLists.txt` 中的 `project(Ripple VERSION ...)`
+4. CMake `configure_file` 自动生成 `Installer/innoSetup.iss`，版本号同步注入
+5. 构建 → 部署 → Inno Setup 打包 → 创建 GitHub Release
+6. 你只需在 Release 页面手动填写 Release Notes
+
+### 版本号来源
+
+- **唯一来源：git tag**（`v*.*.*`）
+- `CMakeLists.txt` 和 `Installer/innoSetup.iss` 中的版本号由 CI 自动同步
+- 安装包文件名为 `Ripple_1.0.1_Installer.exe`
+
+### 本地保持同步（推荐）
+
+CI 里的修改不会写回仓库。如果你希望仓库里的版本号也保持一致，推送 tag 前手动改一下 `CMakeLists.txt`：
+
+```cmake
+project(Ripple VERSION 1.0.1 LANGUAGES CXX)
+```
+
+然后提交、推送、再打 tag：
+
+```bash
+git add CMakeLists.txt
+git commit -m "chore: bump version to 1.0.1"
+git push origin master
+git tag -a v1.0.1 -m "Release 1.0.1"
+git push origin v1.0.1
+```
+
 ## 项目结构
 
 ```
