@@ -6,7 +6,7 @@
 
 | 文件 | 用途 |
 |---|---|
-| `ripple-icon.svg` | 源矢量图标（256×256，深蓝渐变背景 + 波浪动画） |
+| `ripple-icon.svg` | 源矢量图标（256×256，浅色背景 + 蓝/红/黄三条波浪动画） |
 | `ripple-icon.ico` | Windows 图标文件（6 个尺寸：16/32/48/64/128/256） |
 | `app.rc` | Windows 资源文件，将 `.ico` 嵌入到编译后的 `.exe` |
 
@@ -15,7 +15,7 @@
 项目没有使用 ImageMagick 等外部工具，而是通过 **Chrome Headless + Python PIL** 的方式从 SVG 渲染生成：
 
 1. 用 Chrome Headless 模式以白色背景逐尺寸截图（16/32/48/64/128/256）
-2. 用 PIL 根据 SVG 中圆角矩形的几何参数（`x=15, y=15, w=226, h=226, rx=56, ry=56`）创建 4 倍超采样的蒙版，保证边缘平滑
+2. 用 PIL 根据 SVG 中圆角矩形的几何参数创建 4 倍超采样的蒙版，保证边缘平滑
 3. 将蒙版应用到截图上，圆角外区域变为透明
 4. 将所有尺寸合并保存为 `.ico` 文件
 
@@ -67,9 +67,11 @@ images[-1].save(out, format='ICO', sizes=[(s,s) for s in SIZES[:len(images)]], a
 with open('icon/ripple-icon.ico', 'wb') as f: f.write(out.getvalue())
 ```
 
-## 如何嵌入到项目
+## 图标在项目中的使用
 
-### 1. Windows exe 图标（资源管理器中显示）
+以下配置已经集成到项目中，不需要手动添加：
+
+### Windows exe 图标
 
 `app.rc` 内容：
 
@@ -77,44 +79,21 @@ with open('icon/ripple-icon.ico', 'wb') as f: f.write(out.getvalue())
 IDI_ICON1 ICON "ripple-icon.ico"
 ```
 
-在 `CMakeLists.txt` 的 `qt_add_executable` 中添加此文件：
+`CMakeLists.txt` 中已将 `icon/app.rc` 加入 `qt_add_executable`，Qt/MinGW 工具链会自动调用 `windres` 编译并链接到 exe。
 
-```cmake
-qt_add_executable(appRipple
-    main.cpp
-    icon/app.rc    # ← 添加这一行
-    ...
-)
-```
+### 运行时窗口图标
 
-Qt/MinGW 工具链会自动调用 `windres` 编译 `.rc` 并链接到 exe。
-
-### 2. 运行时窗口图标（标题栏 / 任务栏）
-
-**CMakeLists.txt** — 将 SVG 加入 Qt 资源系统：
-
-```cmake
-set_source_files_properties(icon/ripple-icon.svg
-    PROPERTIES QT_RESOURCE_ALIAS "ripple-icon.svg")
-
-qt_add_qml_module(appRipple
-    URI Ripple
-    RESOURCES
-        icon/ripple-icon.svg   # ← 添加这一行
-    ...
-)
-```
-
-**main.cpp** — 设置运行时窗口图标（标题栏 / 任务栏）：
+`main.cpp` 中已设置：
 
 ```cpp
-#include <QIcon>
-// ...
 app.setWindowIcon(QIcon(QStringLiteral(":/qt/qml/Ripple/ripple-icon.svg")));
 ```
 
+SVG 通过 `qt_add_qml_module` 的 `RESOURCES` 注册到 Qt 资源系统。
+
 ## 更新图标流程
 
-1. 修改 `ripple-icon.svg`
-2. 运行上方 Python 脚本重新生成 `ripple-icon.ico`
-3. 在 Qt Creator 中重新构建项目（CMake 会自动重新编译 `.rc` 和资源文件）
+1. 修改 `icon/ripple-icon.svg`
+2. 运行上方 Python 脚本重新生成 `icon/ripple-icon.ico`
+3. 重新构建项目（CMake 会自动重新编译 `.rc` 和资源文件）
+4. 如需同时更新安装包图标，请将新的 `.ico` 复制到 `Installer/config/installer-icon.ico`
