@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(Ripple VERSION 1.0.0 LANGUAGES CXX)
+project(Ripple VERSION 1.0.1 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -69,7 +69,7 @@ install(FILES ${QM_FILES}
     DESTINATION ${CMAKE_INSTALL_BINDIR}/translations
 )
 
-# Copy help markdown files next to the executable for runtime loading.
+# Copy help HTML files next to the executable for runtime loading.
 add_custom_command(TARGET appRipple POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
     ${CMAKE_SOURCE_DIR}/help $<TARGET_FILE_DIR:appRipple>/help
